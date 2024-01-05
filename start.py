@@ -4,11 +4,11 @@ import os
 import pymysql
 # import paramiko
 
-# transmitter_name = sys.argv[1]
-# type = sys.argv[2]
+transmitter_name = sys.argv[1]
+type = sys.argv[2]
 
-transmitter_name = 'dws'
-type = '247'
+# transmitter_name = 'dws'
+# type = '247'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
 t_robot_e = 'robot/Transmitter'+transmitter_name+type+'.robot'
@@ -21,8 +21,8 @@ passwd = "dockersit123"
 host = "192.168.181.52"
 db = "test_automation"
 pathrobot = 'C:/Python310/Scripts/pybot.bat'
-dirresult = 'result/'+transmitter_name+'/'+t_uniq
-
+# dirresult = 'result/'+transmitter_name+'/'+t_uniq
+dirresult = 'result/'
 
 
 def GetTestcase():

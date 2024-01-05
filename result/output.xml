@@ -1,0 +1,903 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 5.0.1 (Python 3.7.9 on win32)" generated="20230815 20:14:20.610" rpa="false" schemaversion="3">
+<suite id="s1" name="TransmitterJns247" source="D:\work\Automation\RobotFramework\JNS\TransmitterV3\robot\TransmitterJns247.robot">
+<test id="s1-t1" name="TC001-sender id on DB, No key match" line="6">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-001]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.095" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.093" endtime="20230815 20:14:22.095"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.095" endtime="20230815 20:14:22.095"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.092" endtime="20230815 20:14:22.097"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.092" endtime="20230815 20:14:22.097">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t2" name="TC002-sender id on DB, No key match" line="10">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-002]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.099" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.099" endtime="20230815 20:14:22.100"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.100" endtime="20230815 20:14:22.100"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.098" endtime="20230815 20:14:22.100"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.098" endtime="20230815 20:14:22.101">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t3" name="TC003-sender id on json , key match" line="14">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-003]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.103" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.103" endtime="20230815 20:14:22.103"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.104" endtime="20230815 20:14:22.104"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.103" endtime="20230815 20:14:22.104"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.101" endtime="20230815 20:14:22.105">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t4" name="TC004-sender id on DB , Senderids" line="18">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-004]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.108" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.107" endtime="20230815 20:14:22.108"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.108" endtime="20230815 20:14:22.108"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.107" endtime="20230815 20:14:22.109"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.106" endtime="20230815 20:14:22.110">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t5" name="TC005-sender id on DB , witout Param senderids" line="22">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-005]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.115" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.114" endtime="20230815 20:14:22.116"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.117" endtime="20230815 20:14:22.117"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.113" endtime="20230815 20:14:22.117"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.111" endtime="20230815 20:14:22.118">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t6" name="TC006-sender id on DB , Format Senderids Json BAD" line="26">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-006]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.122" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.121" endtime="20230815 20:14:22.122"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.122" endtime="20230815 20:14:22.122"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.121" endtime="20230815 20:14:22.123"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.120" endtime="20230815 20:14:22.123">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t7" name="TC007-sender id on json ,But Expired" line="30">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-007]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.127" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.127" endtime="20230815 20:14:22.128"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.128" endtime="20230815 20:14:22.128"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.126" endtime="20230815 20:14:22.128"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.126" endtime="20230815 20:14:22.129">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t8" name="TC008-sender id on json , No expired" line="34">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-008]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.133" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.133" endtime="20230815 20:14:22.134"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.134" endtime="20230815 20:14:22.134"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.133" endtime="20230815 20:14:22.134"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.132" endtime="20230815 20:14:22.136">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t9" name="TC009-sender id on DB No key match And Expired" line="38">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-009]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.141" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.139" endtime="20230815 20:14:22.141"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.141" endtime="20230815 20:14:22.141"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.139" endtime="20230815 20:14:22.142"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.137" endtime="20230815 20:14:22.143">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t10" name="TC010-sender id on DB, Set without parameter Senderid" line="42">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-010]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.148" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.147" endtime="20230815 20:14:22.149"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.150" endtime="20230815 20:14:22.150"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.147" endtime="20230815 20:14:22.150"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.146" endtime="20230815 20:14:22.151">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t11" name="TC011-sender id on DB, No key match with originMQ Name" line="46">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-011]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.156" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.155" endtime="20230815 20:14:22.156"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.156" endtime="20230815 20:14:22.156"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.155" endtime="20230815 20:14:22.157"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.153" endtime="20230815 20:14:22.158">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t12" name="TC012-sender id on json , key match with originMQ Name tsel 818" line="50">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-012]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.162" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.161" endtime="20230815 20:14:22.162"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.163" endtime="20230815 20:14:22.163"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.161" endtime="20230815 20:14:22.163"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.160" endtime="20230815 20:14:22.165">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t13" name="TC013-sender id on json , key match with originMQ Name tsel 623" line="54">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-013]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.171" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.170" endtime="20230815 20:14:22.171"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.172" endtime="20230815 20:14:22.172"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.170" endtime="20230815 20:14:22.173"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.169" endtime="20230815 20:14:22.174">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t14" name="TC014-sender id on json , key match with originMQ Name Channel lain 247" line="58">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-014]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.177" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.177" endtime="20230815 20:14:22.178"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.178" endtime="20230815 20:14:22.178"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.176" endtime="20230815 20:14:22.179"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.175" endtime="20230815 20:14:22.179">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t15" name="TC015-sender id on json ,But Expired with originMQ Name" line="62">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-015]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.185" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.185" endtime="20230815 20:14:22.186"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.186" endtime="20230815 20:14:22.186"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.184" endtime="20230815 20:14:22.187"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.182" endtime="20230815 20:14:22.187">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t16" name="TC016-sender id on json , No expired with originMQ Name" line="66">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-016]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.191" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.190" endtime="20230815 20:14:22.191"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.191" endtime="20230815 20:14:22.192"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.190" endtime="20230815 20:14:22.192"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.189" endtime="20230815 20:14:22.193">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t17" name="TC017-sender id on DB , witout Param senderids with originMQ Name" line="70">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-017]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.198" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.196" endtime="20230815 20:14:22.198"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.198" endtime="20230815 20:14:22.199"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.195" endtime="20230815 20:14:22.199"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.194" endtime="20230815 20:14:22.200">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t18" name="TC018-1 key match username kosong" line="74">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-018]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.204" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.204" endtime="20230815 20:14:22.205"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.205" endtime="20230815 20:14:22.205"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.204" endtime="20230815 20:14:22.206"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.203" endtime="20230815 20:14:22.206">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t19" name="TC019-1 key match Pass Kosong" line="78">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-019]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.210" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.210" endtime="20230815 20:14:22.211"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.211" endtime="20230815 20:14:22.212"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.209" endtime="20230815 20:14:22.212"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.208" endtime="20230815 20:14:22.214">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t20" name="TC020-1 key match user Pass Kosong" line="82">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-020]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.220" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.219" endtime="20230815 20:14:22.220"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.221" endtime="20230815 20:14:22.222"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.219" endtime="20230815 20:14:22.222"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.218" endtime="20230815 20:14:22.223">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t21" name="TC021-1 key match Sender Kosong" line="86">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-021]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.227" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.226" endtime="20230815 20:14:22.227"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.227" endtime="20230815 20:14:22.228"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.225" endtime="20230815 20:14:22.228"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.225" endtime="20230815 20:14:22.229">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t22" name="TC022-1 key sendrids user Pass Kosong &amp; in queue user Pass Kosong" line="90">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-022]</arg>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<msg timestamp="20230815 20:14:22.236" level="FAIL">NameError: name 'ims_urlchangerespon' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.235" endtime="20230815 20:14:22.236"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.237" endtime="20230815 20:14:22.237"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.235" endtime="20230815 20:14:22.238"/>
+</kw>
+<tag>Transmnitter 247</tag>
+<status status="FAIL" starttime="20230815 20:14:22.233" endtime="20230815 20:14:22.239">NameError: name 'ims_urlchangerespon' is not defined</status>
+</test>
+<test id="s1-t23" name="TC023-Put 10 Queue Transmitter 247 For CHeck Sleep Mode" line="94">
+<kw name="Transmitter Sleep Mode" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-001]</arg>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect Sleep Mode</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect Sleep Mode</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct Sleep Mode</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Transmitter Direct Sleep Mode" library="keyword">
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<kw name="Preparation Data and Dummy Sleep" library="keyword">
+<var>${sleep}</var>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>1</arg>
+<kw name="Set Variable Test Case" library="Transmitter">
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<msg timestamp="20230815 20:14:22.328" level="INFO">expected_result = 
+quintrxid = autotrxid
+quinmessageid = automessageid
+quinmsisdn = 6281802000319
+quinmessage = Test Optional Parameter Tanpa uploadby
+quinbatchname = testing
+quinclientid = 1
+quindivisionid = 1091
+quinsenderid = QueueSenderID
+quinuid = QueueUID
+quinpwd = QueuePWD
+quincpName = Queuecpname
+quinuploadby = 
+quinapproveby = 
+quindateupload = 2018-07-18 15:45:46
+quindateapprove = 2018-07-18 15:45:46
+quindateinqueue = 
+quinservicetype = HTTPALERT
+quinproviderid = 1
+quinbillable = 1
+quinjatismessageid = 
+quinuploadtype = 
+quinsmspartition = 1
+quinexpiry = 
+quinsender = MCC
+quinchannel_mq_name = jns6.1-queuedummy-tx
+quinpriority = 4
+quinadddata1 = 
+quinadddata2 = 
+quinadddata3 = 
+quinchargecode = 2f1d1412ce4202
+quinsenderids = {"sender":"MCC","maskCodeSettings":[{"key":"INFOBIP-IM3","data":{"username":"","password":"","cpName":"","channelIsDirect":0,"senderID":"MCC"}},{"key":"INFOBIP","data":{"username":"","password":"","cpName":"","channelIsDirect":0,"senderID":"MCC"}},{"key":"JTR","data":{"username":"","password":"","cpName":"","channelIsDirect":17,"senderID":"MCC"}},{"key":"JTR-PREMIUM","data":{"username":"","password":"","cpName":"","channelIsDirect":19,"senderID":"MATAHARI"}},{"key":"JTR-ENTR","data":{"username":"cfjntr03","password":"","cpName":"","channelIsDirect":21,"senderID":"MCC"}},{"key":"ISAT-IKLANSTORE-2","data":{"username":"usernamejson","password":"passwordjson","cpName":"cpnamejson","channelIsDirect":1,"senderID":"senderJSON"}},{"key":"SMARTFREN","data":{"username":"jatismatahari","password":"","cpName":"","channelIsDirect":1,"senderID":"3021195"}},{"key":"SISKOM","data":{"username":"","password":"","cpName":"","channelIsDirect":3,"senderID":"MCC"}},{"key":"SISKOMPREMIUM","data":{"username":"","password":"","cpName":"","channelIsDirect":14,"senderID":"MCC"}},{"key":"THREE","data":{"username":"jat99123mtbulk2","password":"","cpName":"","channelIsDirect":1,"senderID":"MATAHARI"}},{"key":"TSELXYZ","data":{"username":"tselxyz","password":"tselxyz","cpName":"tselxyz","channelIsDirect":1,"senderID":"jatismatahari"}},{"key":"BUANA","data":{"username":"","password":"","cpName":"","channelIsDirect":26,"senderID":"MATAHARI"}},{"key":"XL","data":{"username":"","password":"","cpName":"","channelIsDirect":1,"senderID":"395787"}}]}</msg>
+<msg timestamp="20230815 20:14:22.330" level="FAIL">NameError: name 'provider' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.243" endtime="20230815 20:14:22.330"/>
+</kw>
+<kw name="Change Dummy Respone Sleep Mode" library="Transmitter">
+<var>${sleep}</var>
+<status status="NOT RUN" starttime="20230815 20:14:22.333" endtime="20230815 20:14:22.333"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.242" endtime="20230815 20:14:22.335"/>
+</kw>
+<for flavor="IN RANGE">
+<var>${i}</var>
+<value>10</value>
+<iter>
+<var name="${i}"/>
+<kw name="Run Proccess Send Queue" library="keyword">
+<arg>sleepmode</arg>
+<status status="NOT RUN" starttime="20230815 20:14:22.336" endtime="20230815 20:14:22.336"/>
+</kw>
+<kw name="Exit For Loop If" library="BuiltIn">
+<arg>${i} == 10</arg>
+<doc>Stops executing the enclosing FOR loop if the ``condition`` is true.</doc>
+<status status="NOT RUN" starttime="20230815 20:14:22.337" endtime="20230815 20:14:22.337"/>
+</kw>
+<status status="NOT RUN" starttime="20230815 20:14:22.336" endtime="20230815 20:14:22.337"/>
+</iter>
+<status status="NOT RUN" starttime="20230815 20:14:22.336" endtime="20230815 20:14:22.337"/>
+</for>
+<kw name="Run Proccess Consume Queue SubmitResult" library="keyword">
+<arg>10</arg>
+<status status="NOT RUN" starttime="20230815 20:14:22.337" endtime="20230815 20:14:22.338"/>
+</kw>
+<kw name="Check Queue Transmitter" library="keyword">
+<arg>CheckQueueTransmitterReDirectSleepMode</arg>
+<status status="NOT RUN" starttime="20230815 20:14:22.338" endtime="20230815 20:14:22.338"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.242" endtime="20230815 20:14:22.339"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.241" endtime="20230815 20:14:22.340"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.241" endtime="20230815 20:14:22.342"/>
+</kw>
+<tag>Testing Sleepmode</tag>
+<status status="FAIL" starttime="20230815 20:14:22.240" endtime="20230815 20:14:22.346">NameError: name 'provider' is not defined</status>
+</test>
+<test id="s1-t24" name="TC024-Testing Smart Break Transmitter" line="98">
+<kw name="Transmitter Smart Break" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-001]</arg>
+<arg>break</arg>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect Smart Break</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>${message}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect Smart Break</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>${message}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct Smart Break</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>${message}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Transmitter Direct Smart Break" library="keyword">
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>${message}</arg>
+<kw name="Preparation Data For Smart Break" library="keyword">
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<kw name="Set Variable Test Case" library="Transmitter">
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<msg timestamp="20230815 20:14:22.444" level="INFO">expected_result = 
+quintrxid = autotrxid
+quinmessageid = automessageid
+quinmsisdn = 6281802000319
+quinmessage = Test Optional Parameter Tanpa uploadby
+quinbatchname = testing
+quinclientid = 1
+quindivisionid = 1091
+quinsenderid = QueueSenderID
+quinuid = QueueUID
+quinpwd = QueuePWD
+quincpName = Queuecpname
+quinuploadby = 
+quinapproveby = 
+quindateupload = 2018-07-18 15:45:46
+quindateapprove = 2018-07-18 15:45:46
+quindateinqueue = 
+quinservicetype = HTTPALERT
+quinproviderid = 1
+quinbillable = 1
+quinjatismessageid = 
+quinuploadtype = 
+quinsmspartition = 1
+quinexpiry = 
+quinsender = MCC
+quinchannel_mq_name = jns6.1-queuedummy-tx
+quinpriority = 4
+quinadddata1 = 
+quinadddata2 = 
+quinadddata3 = 
+quinchargecode = 2f1d1412ce4202
+quinsenderids = {"sender":"MCC","maskCodeSettings":[{"key":"INFOBIP-IM3","data":{"username":"","password":"","cpName":"","channelIsDirect":0,"senderID":"MCC"}},{"key":"INFOBIP","data":{"username":"","password":"","cpName":"","channelIsDirect":0,"senderID":"MCC"}},{"key":"JTR","data":{"username":"","password":"","cpName":"","channelIsDirect":17,"senderID":"MCC"}},{"key":"JTR-PREMIUM","data":{"username":"","password":"","cpName":"","channelIsDirect":19,"senderID":"MATAHARI"}},{"key":"JTR-ENTR","data":{"username":"cfjntr03","password":"","cpName":"","channelIsDirect":21,"senderID":"MCC"}},{"key":"ISAT-IKLANSTORE-2","data":{"username":"usernamejson","password":"passwordjson","cpName":"cpnamejson","channelIsDirect":1,"senderID":"senderJSON"}},{"key":"SMARTFREN","data":{"username":"jatismatahari","password":"","cpName":"","channelIsDirect":1,"senderID":"3021195"}},{"key":"SISKOM","data":{"username":"","password":"","cpName":"","channelIsDirect":3,"senderID":"MCC"}},{"key":"SISKOMPREMIUM","data":{"username":"","password":"","cpName":"","channelIsDirect":14,"senderID":"MCC"}},{"key":"THREE","data":{"username":"jat99123mtbulk2","password":"","cpName":"","channelIsDirect":1,"senderID":"MATAHARI"}},{"key":"TSELXYZ","data":{"username":"tselxyz","password":"tselxyz","cpName":"tselxyz","channelIsDirect":1,"senderID":"jatismatahari"}},{"key":"BUANA","data":{"username":"","password":"","cpName":"","channelIsDirect":26,"senderID":"MATAHARI"}},{"key":"XL","data":{"username":"","password":"","cpName":"","channelIsDirect":1,"senderID":"395787"}}]}</msg>
+<msg timestamp="20230815 20:14:22.445" level="FAIL">NameError: name 'provider' is not defined</msg>
+<status status="FAIL" starttime="20230815 20:14:22.359" endtime="20230815 20:14:22.446"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.358" endtime="20230815 20:14:22.449"/>
+</kw>
+<kw name="Send Topic Smart Break" library="keyword">
+<arg>${message}</arg>
+<arg>true</arg>
+<status status="NOT RUN" starttime="20230815 20:14:22.450" endtime="20230815 20:14:22.451"/>
+</kw>
+<kw name="Check Consumer Transmitter Smart Break" library="keyword">
+<arg>${message}</arg>
+<status status="NOT RUN" starttime="20230815 20:14:22.451" endtime="20230815 20:14:22.451"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.356" endtime="20230815 20:14:22.453"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.355" endtime="20230815 20:14:22.454"/>
+</kw>
+<status status="FAIL" starttime="20230815 20:14:22.353" endtime="20230815 20:14:22.456"/>
+</kw>
+<kw name="Transmitter Smart Break" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-001]</arg>
+<arg>unbreak</arg>
+<status status="NOT RUN" starttime="20230815 20:14:22.458" endtime="20230815 20:14:22.458"/>
+</kw>
+<tag>Testing Smart Break</tag>
+<status status="FAIL" starttime="20230815 20:14:22.351" endtime="20230815 20:14:22.460">NameError: name 'provider' is not defined</status>
+</test>
+<status status="FAIL" starttime="20230815 20:14:20.616" endtime="20230815 20:14:22.467"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="24" skip="0">All Tests</stat>
+</total>
+<tag>
+<stat pass="0" fail="1" skip="0">Testing Sleepmode</stat>
+<stat pass="0" fail="1" skip="0">Testing Smart Break</stat>
+<stat pass="0" fail="22" skip="0">Transmnitter 247</stat>
+</tag>
+<suite>
+<stat pass="0" fail="24" skip="0" id="s1" name="TransmitterJns247">TransmitterJns247</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

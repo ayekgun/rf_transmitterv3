@@ -21,8 +21,8 @@ passwd = "dockersit123"
 host = "192.168.181.52"
 db = "test_automation"
 pathrobot = 'C:/Python310/Scripts/pybot.bat'
-dirresult = 'result/'+transmitter_name+'/'+t_uniq
-
+# dirresult = 'result/'+transmitter_name+'/'+t_uniq
+dirresult = 'result/'
 
 
 def GetTestcase():

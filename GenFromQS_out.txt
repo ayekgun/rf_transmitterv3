@@ -1,0 +1,96 @@
+
+
+def CheckValueResultdrrealpushUserid():
+	str1 = "userid From Queue =",DrRealPush.quinuserid
+	str2 = "userid From Queue / Table  =",DrRealPush.quoutuserid
+	result = ck.MatchingData(DrRealPush.quinuserid, DrRealPush.quoutuserid, str1, str2)
+	return(result)
+
+
+def CheckValueResultdrrealpushPassword():
+	str1 = "password From Queue =",DrRealPush.quinpassword
+	str2 = "password From Queue / Table  =",DrRealPush.quoutpassword
+	result = ck.MatchingData(DrRealPush.quinpassword, DrRealPush.quoutpassword, str1, str2)
+	return(result)
+
+
+def CheckValueResultdrrealpushMessageid():
+	str1 = "messageId From Queue =",DrRealPush.quinmessageId
+	str2 = "messageId From Queue / Table  =",DrRealPush.quoutmessageId
+	result = ck.MatchingData(DrRealPush.quinmessageId, DrRealPush.quoutmessageId, str1, str2)
+	return(result)
+
+
+def CheckValueResultdrrealpushDeliverystatus():
+	str1 = "deliverystatus From Queue =",DrRealPush.quindeliverystatus
+	str2 = "deliverystatus From Queue / Table  =",DrRealPush.quoutdeliverystatus
+	result = ck.MatchingData(DrRealPush.quindeliverystatus, DrRealPush.quoutdeliverystatus, str1, str2)
+	return(result)
+
+
+def CheckValueResultdrrealpushSender():
+	str1 = "sender From Queue =",DrRealPush.quinsender
+	str2 = "sender From Queue / Table  =",DrRealPush.quoutsender
+	result = ck.MatchingData(DrRealPush.quinsender, DrRealPush.quoutsender, str1, str2)
+	return(result)
+
+
+def CheckValueResultdrrealpushDescription():
+	str1 = "description From Queue =",DrRealPush.quindescription
+	str2 = "description From Queue / Table  =",DrRealPush.quoutdescription
+	result = ck.MatchingData(DrRealPush.quindescription, DrRealPush.quoutdescription, str1, str2)
+	return(result)
+
+
+def CheckValueResultdrrealpushDatereceived():
+	str1 = "datereceived From Queue =",DrRealPush.quindatereceived
+	str2 = "datereceived From Queue / Table  =",DrRealPush.quoutdatereceived
+	result = ck.MatchingData(DrRealPush.quindatereceived, DrRealPush.quoutdatereceived, str1, str2)
+	return(result)
+
+
+def CheckValueResultdrrealpushDatehit():
+	str1 = "datehit From Queue =",DrRealPush.quindatehit
+	str2 = "datehit From Queue / Table  =",DrRealPush.quoutdatehit
+	result = ck.MatchingData(DrRealPush.quindatehit, DrRealPush.quoutdatehit, str1, str2)
+	return(result)
+insert into `drrealpush_jns`(`testcase`,`userid`,`password`,`messageId`,`deliverystatus`,`sender`,`description`,`datereceived`,`datehit`,) values ('[TC-001]','smdfinance','smdfinance235','c654fac0-a24a-11ed-9f08-b07d640c3685','1','INFO','Delivered',''02/01/2023 11:09:20 PM',''02/01/2023 11:09:15 PM',);
+
+update from drrealpush_jns set format ='\"&userid="+(quinuserid)+\"&password="+(quinpassword)+\"&messageId="+(quinmessageId)+\"&deliverystatus="+(quindeliverystatus)+\"&sender="+(quinsender)+\"&description="+(quindescription)+\"&datereceived="+(quindatereceived)+\"&datehit="+(quindatehit)+"' where testcase = "[TC-001]"
+
+
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','SetVariableQueueDrRealPush','1','1','2023-01-15 00:00:00',NULL);
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','CheckValueResultdrrealpushUserid','2','1','2023-01-15 00:00:00',NULL);
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','CheckValueResultdrrealpushPassword','3','1','2023-01-15 00:00:00',NULL);
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','CheckValueResultdrrealpushMessageid','4','1','2023-01-15 00:00:00',NULL);
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','CheckValueResultdrrealpushDeliverystatus','5','1','2023-01-15 00:00:00',NULL);
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','CheckValueResultdrrealpushSender','6','1','2023-01-15 00:00:00',NULL);
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','CheckValueResultdrrealpushDescription','7','1','2023-01-15 00:00:00',NULL);
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','CheckValueResultdrrealpushDatereceived','8','1','2023-01-15 00:00:00',NULL);
+insert into `config_keyword` (`appname`, `keyword`, `subkeyword`, `step`, `status`, `date`, `description`) values('drrealpush_jns','CheckQueueDrRealPush','CheckValueResultdrrealpushDatehit','9','1','2023-01-15 00:00:00',NULL);
+
+userid= (urllib.parse.parse_qs(message , keep_blank_values = True)['userid'][0])
+password= (urllib.parse.parse_qs(message , keep_blank_values = True)['password'][0])
+messageId= (urllib.parse.parse_qs(message , keep_blank_values = True)['messageId'][0])
+deliverystatus= (urllib.parse.parse_qs(message , keep_blank_values = True)['deliverystatus'][0])
+sender= (urllib.parse.parse_qs(message , keep_blank_values = True)['sender'][0])
+description= (urllib.parse.parse_qs(message , keep_blank_values = True)['description'][0])
+datereceived= (urllib.parse.parse_qs(message , keep_blank_values = True)['datereceived'][0])
+datehit= (urllib.parse.parse_qs(message , keep_blank_values = True)['datehit'][0])
+
+
+cur.execute("insert into out_drpush_jns values(%s,%s,%s,%s,%s,%s,%s,%s,NOW())", (userid,password,messageId,deliverystatus,sender,description,datereceived,datehit,))
+
+
+
+create table `out_drrealpush_jns`(
+`userid` varchar (300),
+`password` varchar (300),
+`messageId` varchar (300),
+`deliverystatus` varchar (300),
+`sender` varchar (300),
+`description` varchar (300),
+`datereceived` varchar (300),
+`datehit` varchar (300),
+`date_inserted` datetime);
+

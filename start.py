@@ -4,11 +4,11 @@ import os
 import pymysql
 # import paramiko
 
-# transmitter_name = sys.argv[1]
-# type = sys.argv[2]
+transmitter_name = sys.argv[1]
+type = sys.argv[2]
 
-transmitter_name = 'dws'
-type = '247'
+# transmitter_name = 'dws'
+# type = '247'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
 t_robot_e = 'robot/Transmitter'+transmitter_name+type+'.robot'

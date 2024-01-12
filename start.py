@@ -7,7 +7,7 @@ import pymysql
 transmitter_name = sys.argv[1]
 type = sys.argv[2]
 
-# transmitter_name = 'dws'
+# transmitter_name = 'infobip'
 # type = '247'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
@@ -21,6 +21,7 @@ passwd = "dockersit123"
 host = "192.168.181.52"
 db = "test_automation"
 pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
+# pathrobot = 'C:/Python310/Scripts/pybot.bat'
 # dirresult = 'result/'+transmitter_name+'/'+t_uniq
 dirresult = 'result/'
 

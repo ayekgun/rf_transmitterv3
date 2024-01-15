@@ -71,9 +71,9 @@ def CheckValueNumber():
 
 
 def CheckValueSender():
-	str1 = "sender From Queue =",Transmitter.quinsender
+	str1 = "sender From Queue =",Transmitter.quinsenderid
 	str2 = "sender From Queue / Table  =",t_sender
-	result = Transmitter.MetchingData(Transmitter.quinsender, t_sender, str1, str2)
+	result = Transmitter.MetchingData(Transmitter.quinsenderid, t_sender, str1, str2)
 	return(result)
 
 

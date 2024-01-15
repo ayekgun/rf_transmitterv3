@@ -71,10 +71,20 @@ def CheckValueNumber():
 
 
 def CheckValueSender():
-	str1 = "sender From Queue =",Transmitter.quinsenderid
-	str2 = "sender From Queue / Table  =",t_sender
-	result = Transmitter.MetchingData(Transmitter.quinsenderid, t_sender, str1, str2)
-	return(result)
+    if (Transmitter.senderids_support == 'true'):
+        if(Transmitter.sid_queue_senderid != ''):
+            c_sid = Transmitter.sid_queue_senderid
+        else:
+            c_sid = ''
+    else:
+        if(Transmitter.quinsenderid != ''):
+            c_sid = Transmitter.quinsenderid
+        else:
+            c_sid = ''
+    str1 = "sender From Queue =",c_sid
+    str2 = "sender From Queue / Table  =",t_sender
+    result = Transmitter.MetchingData(c_sid, t_sender, str1, str2)
+    return(result)
 
 
 def CheckValueMessage():

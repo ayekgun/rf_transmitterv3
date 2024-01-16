@@ -32,3 +32,6 @@ dic_txredirect = ["quottrxid", "quotmessageid", "quotmsisdn", "quotmessage", "qu
                   "quotbillable", "quotjatismessageid", "quotuploadtype", "quotsmspartition", "quotexpiry", "quotsender", "quotchannel_mq_name", "quotpriority", "quotadddata1", "quotadddata2", "quotadddata3", "quotchargecode", "quotsenderids", "quotpriority_header", "quotpersistent", "quotorigin_mq_name"]
 dic_queuesm = ["channel_name", "provider_submit_status", "date_hit", "transmitter_submit_status", "date_response", "division_id", "chargecode", "trxid", "client_id", "channel_mq_name",
                "channel_is_direct", "duration", "service_type", "without_dr", "job_id", "mask_name", "provider_id", "provider_trxid", "provider_name", "mask_id", "message_seq", "retry", "priority_header", "persistent"]
+
+mongo_conn = 'mongodb://mongoadmin:mongoadmin@192.168.181.63:27017/admin'
+# mongo_db = 'whatsappCore'

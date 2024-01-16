@@ -29,3 +29,4 @@ jantara_queue247 = 'jns.transmitter.jtr.02.dom.247'
 # jantara_queue818 = 'jns.transmitter.jtr.05.intl.818'
 # jantara_queue623 = 'jns.transmitter.jtr.05.intl.623'
 # jantara_queue247 = 'jns.transmitter.jtr.05.intl.247'
+

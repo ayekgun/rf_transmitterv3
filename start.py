@@ -7,7 +7,7 @@ import pymysql
 transmitter_name = sys.argv[1]
 type = sys.argv[2]
 
-# transmitter_name = 'infobip'
+# transmitter_name = 'mitracomm'
 # type = '247'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
@@ -32,6 +32,7 @@ def GetTestcase():
                           host=host, port=3306, autocommit=False)
     cur = con.cursor()
     sql = "SELECT testcases FROM test_skenario where status = 1 and app_name in(%s,%s)"
+    # sql = "SELECT testcases FROM test_skenario where status = 1 and app_name in(%s,%s) and id in(220)"
     cur.execute(sql, (t_app_name, t_uniq))
     # print(sql, (t_app_name, t_uniq))
     resultDB = cur.fetchall()

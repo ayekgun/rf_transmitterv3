@@ -24,9 +24,10 @@ from conf_modifylong import *
 from conf_mitracomm import *
 from conf_soip import *
 from conf_dws import *
-from conf_infobip import *
+from conf_infobip import * 
 
 sys.path.append(os.path.abspath("py/lib"))
+from py.lib.RetryTransmitter import *
 from ActiveMQ import *
 
 from ResultTelco_tsel import *
@@ -42,6 +43,7 @@ from ResultTelco_infobip import *
 from SmartBreak import *
 from SubmitResult import *
 from SleepMode import *
+
 from TransmitterRedirect import *
 
 def SetConfigDynamic(var):
@@ -56,6 +58,7 @@ def SetConfigDynamic(var):
     global robotname
     global d_provider
     global cfglookup
+    global retry_mechanisme
     
     d_provider = var.lower()
     urlchangerespon = eval(str(d_provider+'_urlchangerespon'))
@@ -68,6 +71,7 @@ def SetConfigDynamic(var):
     provider = eval(d_provider+'_provider')
     robotname = eval(d_provider+'_robotname')
     cfglookup = eval(d_provider+'_cfglookup')
+    retry_mechanisme = eval(d_provider+'_retry_mechanisme')
 
 def SetVariableTestCase(type ,testcase):
     global queuemessage
@@ -104,7 +108,7 @@ def SetVariableTestCase(type ,testcase):
        
         i += 1
     
-    queuemessage = eval(result_Db[36])
+    queuemessage = eval(result_Db[37])
     print (queuemessage)
     SetNameQueue(type)
     SetConfigLookupTransmitter()
@@ -163,10 +167,12 @@ def ChangeDummyRespone(id):
     global dummy_sleep
     global dummy_httpcode
     global dummy_respone_provider
+    global dummy_respon
     url = urlchangerespon + str(id) + str("&trxid=") + str(generatediddash)
     req = requests.get(url)
     dummy_sleep = json.loads(req.text)['sleep']
     dummy_httpcode = json.loads(req.text)['http_request']
+    dummy_respon = json.loads(req.text)['respon']
     dummy_respone_provider = json.loads(
         req.text)['respone_provider_submit_status']
     print(url)
@@ -189,26 +195,63 @@ def ChangeDummyResponeSleepMode():
 
 
 def CheckFlowToTelco():
+    global new_retry_status
     datenow = datetime.strftime(datetime.now(),'%Y%m%d%H%M%S')
     if(quinexpiry == ''):
         if(int(cfg_timeout) < int(dummy_sleep)):
             status = 'bypass'
+            new_retry_status = False
         elif(dummy_httpcode  !=  '200'):
             status = 'bypass'
+            if(retry_mechanisme == True):
+                new_retry_status = ParseStatusRetry()
+            else:
+                new_retry_status = False
         else:
             status = 'valid'
+            new_retry_status = False
 
     elif(datenow < quinexpiry):
         if(int(cfg_timeout) < int(dummy_sleep)):
             status = 'bypass'
+            new_retry_status = False
         elif(dummy_httpcode  !=  '200'):
             status = 'bypass'
+            if(retry_mechanisme == True):
+                new_retry_status = ParseStatusRetry()
+            else:
+                new_retry_status = False
         else:
             status = 'valid'
+            new_retry_status = False
     else:
         status = 'expired'
+        new_retry_status = False
     # print(status)
     return(status)
+
+def CheckFlowNewRetryMechanisme():
+    return new_retry_status
+
+def ParseStatusRetry():
+    retry_exception = cfg_retry_exception.split(',')
+    retry_service_type = cfg_retry_service_type.split(',')
+    print(retry_exception)
+    print(retry_service_type)
+    print(dummy_httpcode)
+    print(quinservicetype)
+    
+    if int(quinretry) < int(cfg_max_retry):
+        print(int(quinretry))
+        print(int(cfg_max_retry))
+        for code in retry_exception:
+            if str(dummy_httpcode) == code:
+                for rst in retry_service_type:
+                    if quinservicetype == rst:
+                        return True
+                break  # Break out of the loop if a match is found in retry_exception
+    
+    return False
 
 def GetTestResponeDummy():
     print(provider)
@@ -359,6 +402,22 @@ def MetchingData(var1, var2, string1, string2):
     else:
         status = 'NOK'
         validation = string1, var1, " &", string2, var2, "= No Match"
+    data = {
+        "status": status,
+        "message": validation
+    }
+    return data
+
+def MatchingDataDateTime(var1, var2, string1, string2):
+    datetime_format = "%Y-%m-%d %H:%M:%S"
+    date1 = datetime.strptime(var1, datetime_format)
+    date2 = datetime.strptime(var2, datetime_format)
+    if ((date1 - date2).total_seconds() <= 1):
+        status = 'OK'
+        validation = string1, var1, " &", string2, var2, "= Selisih "+ str((date1 - date2).total_seconds())  
+    else:
+        status = 'NOK'
+        validation = string1, var1, " &", string2, var2, "= Selisih Over "+   str((date1 - date2).total_seconds())  
     data = {
         "status": status,
         "message": validation

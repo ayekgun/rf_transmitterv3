@@ -9,9 +9,6 @@ sys.path.append(os.path.abspath("py"))
 import Transmitter
 
 sys.path.append(os.path.abspath("py/lib"))
-import ResultTelco_tsel
-import ResultTelco_xl
-import ResultTelco_nadynehttp
 from TelcoFunction import *
 
 sys.path.append(os.path.abspath("py/conf"))

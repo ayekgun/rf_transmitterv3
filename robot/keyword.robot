@@ -34,13 +34,14 @@ Transmitter Direct
     [Arguments]             ${type}   ${no_test}
     @{listrespon}=   GetTestResponeDummy
     FOR     ${item}   IN       @{listrespon}
-         ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${item}
-         Run Proccess Send Queue       normal
-         ${status}=    CheckFlowToTelco
-         Check Result Parameter in Telco     ${sleep}
-         Run Proccess Consume Queue SubmitResult     1
-    #      Check Result Parameter in Telco     ${sleep}
-         Check Queue Submit Result
+        ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${item}
+        Run Proccess Send Queue       normal
+        ${status}=    CheckFlowToTelco
+        Check Result Parameter in Telco     ${sleep}
+        ${newretry_status}=    CheckFlowNewRetryMechanisme
+        Run Keyword If   '${newretry_status}' == 'False'   Check Queue Submit Result    1
+        Run Keyword If   '${newretry_status}' == 'True'   Check Retry Transmitter
+        
     END
 
 Transmitter Direct Sleep Mode
@@ -151,7 +152,16 @@ Reload Application
     END
 
 Check Queue Submit Result
+    [Arguments]    ${sleep}
+    RunAmqSubmitResultHandler         ${sleep}
     Check Data Queue Submit Result
+
+Check Retry Transmitter
+    Check Data Table Transaction    SetVariableRetryTransmitterMongoDB
+    Check Data Table Transaction    CheckJsonRetryTransmitterMongoDB
+    Check Data Table Transaction    CheckJsonRetryTransmitterMongoDB_created_at
+    Check Data Table Transaction    CheckJsonRetryTransmitterMongoDB_next_schedule
+    
 
 Check Data Table Transaction
     [Arguments]     ${DataCheck}

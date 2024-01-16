@@ -4,7 +4,7 @@ Resource          resource.robot
 
 *** Test Cases ***
 TC001-sender id on DB, No key match
-    [Tags]   Transmnitter 247
+    [Tags]   Transmnitter 247    NoRetry Param
     Transmitter      T247     [TRANSJNS-001]
 
 TC002-sender id on DB, No key match
@@ -99,3 +99,15 @@ TC024-Testing Smart Break Transmitter
     [Tags]   Testing Smart Break
     Transmitter Smart Break      T247     [TRANSJNS-001]    break
     Transmitter Smart Break      T247     [TRANSJNS-001]    unbreak
+
+TC025- Test Retry Transmitter = 1
+    [Tags]   Transmnitter 247    Retry1    HTTP
+    Transmitter      T247     [TRANSJNS-025]
+
+TC026- Test Retry Transmitter = 2
+    [Tags]   Transmnitter 247    Retry2    HTTP
+    Transmitter      T247     [TRANSJNS-026]
+
+TC027- Test Retry Transmitter = 3
+    [Tags]   Transmnitter 247    Retry3    HTTP
+    Transmitter      T247     [TRANSJNS-027]

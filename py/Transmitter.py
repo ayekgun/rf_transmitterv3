@@ -27,7 +27,7 @@ from conf_dws import *
 from conf_infobip import * 
 
 sys.path.append(os.path.abspath("py/lib"))
-from RetryTransmitter import *
+from py.lib.RetryTransmitter import *
 from ActiveMQ import *
 
 from ResultTelco_tsel import *
@@ -108,7 +108,7 @@ def SetVariableTestCase(type ,testcase):
        
         i += 1
     
-    queuemessage = eval(result_Db[36])
+    queuemessage = eval(result_Db[37])
     print (queuemessage)
     SetNameQueue(type)
     SetConfigLookupTransmitter()
@@ -236,12 +236,21 @@ def CheckFlowNewRetryMechanisme():
 def ParseStatusRetry():
     retry_exception = cfg_retry_exception.split(',')
     retry_service_type = cfg_retry_service_type.split(',')
+    print(retry_exception)
+    print(retry_service_type)
+    print(dummy_httpcode)
+    print(quinservicetype)
     
-    if dummy_httpcode in retry_exception:
-        for rst in retry_service_type:
-            if quinservicetype == rst:
-                return True
-            break    
+    if int(quinretry) < int(cfg_max_retry):
+        print(int(quinretry))
+        print(int(cfg_max_retry))
+        for code in retry_exception:
+            if str(dummy_httpcode) == code:
+                for rst in retry_service_type:
+                    if quinservicetype == rst:
+                        return True
+                break  # Break out of the loop if a match is found in retry_exception
+    
     return False
 
 def GetTestResponeDummy():

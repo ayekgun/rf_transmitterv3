@@ -11,7 +11,7 @@ from config import *
 
 
 def CheckConsumerQueue(message):
-    time.sleep(int(Transmitter.cfg_sleep_after_send) / 1000)
+    time.sleep(2)
     req = requests.get(urlqueuejsp, auth=('admin', 'admin'))
     xmldata = req.text
     root = ET.fromstring(xmldata)

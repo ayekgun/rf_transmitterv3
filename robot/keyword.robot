@@ -17,7 +17,7 @@ Transmitter ReDirect
     [Arguments]             ${type}   ${no_test}
     SetVariableTestCase     ${type}   ${no_test}
     SendMessageQueue        normal
-    RunAMQTransmitter     1
+    RunAMQTransmitter     3
     Check Queue Transmitter      CheckQueueTransmitterReDirect
 
 Transmitter ReDirect Sleep Mode

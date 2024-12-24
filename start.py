@@ -7,8 +7,8 @@ import pymysql
 # transmitter_name = sys.argv[1]
 # type = sys.argv[2]
 
-transmitter_name = 'mdmedia'
-type = '623'
+transmitter_name = 'mustika'
+type = '247'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
 t_robot_e = 'robot/Transmitter'+transmitter_name+type+'.robot'

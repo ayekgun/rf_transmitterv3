@@ -1,74 +1,64 @@
-dic_testcase = ['account', 'time', 'sign', 'phones', 'senderId', 'content', 'smsType']
+dic_testcase = ['id', 'message', 'productid', 'trxdate', 'trxid', 'userid']
 
-def CheckValueTelcoAccount():
-	str1 = "account From Queue =", quin
-	str2 = "account From Queue / Table  =", quot
-	result = MetchingData(quinaccount, quoutaccount, str1, str2)
+def CheckValueTelcoId():
+	str1 = "id From Queue =", quin
+	str2 = "id From Queue / Table  =", quot
+	result = MetchingData(quinid, quoutid, str1, str2)
 	return(result)
 
 
-def CheckValueTelcoTime():
-	str1 = "time From Queue =", quin
-	str2 = "time From Queue / Table  =", quot
-	result = MetchingData(quintime, quouttime, str1, str2)
+def CheckValueTelcoMessage():
+	str1 = "message From Queue =", quin
+	str2 = "message From Queue / Table  =", quot
+	result = MetchingData(quinmessage, quoutmessage, str1, str2)
 	return(result)
 
 
-def CheckValueTelcoSign():
-	str1 = "sign From Queue =", quin
-	str2 = "sign From Queue / Table  =", quot
-	result = MetchingData(quinsign, quoutsign, str1, str2)
+def CheckValueTelcoProductid():
+	str1 = "productid From Queue =", quin
+	str2 = "productid From Queue / Table  =", quot
+	result = MetchingData(quinproductid, quoutproductid, str1, str2)
 	return(result)
 
 
-def CheckValueTelcoPhones():
-	str1 = "phones From Queue =", quin
-	str2 = "phones From Queue / Table  =", quot
-	result = MetchingData(quinphones, quoutphones, str1, str2)
+def CheckValueTelcoTrxdate():
+	str1 = "trxdate From Queue =", quin
+	str2 = "trxdate From Queue / Table  =", quot
+	result = MetchingData(quintrxdate, quouttrxdate, str1, str2)
 	return(result)
 
 
-def CheckValueTelcoSenderid():
-	str1 = "senderId From Queue =", quin
-	str2 = "senderId From Queue / Table  =", quot
-	result = MetchingData(quinsenderId, quoutsenderId, str1, str2)
+def CheckValueTelcoTrxid():
+	str1 = "trxid From Queue =", quin
+	str2 = "trxid From Queue / Table  =", quot
+	result = MetchingData(quintrxid, quouttrxid, str1, str2)
 	return(result)
 
 
-def CheckValueTelcoContent():
-	str1 = "content From Queue =", quin
-	str2 = "content From Queue / Table  =", quot
-	result = MetchingData(quincontent, quoutcontent, str1, str2)
+def CheckValueTelcoUserid():
+	str1 = "userid From Queue =", quin
+	str2 = "userid From Queue / Table  =", quot
+	result = MetchingData(quinuserid, quoutuserid, str1, str2)
 	return(result)
 
 
-def CheckValueTelcoSmstype():
-	str1 = "smsType From Queue =", quin
-	str2 = "smsType From Queue / Table  =", quot
-	result = MetchingData(quinsmsType, quoutsmsType, str1, str2)
-	return(result)
+global t_id
+global t_message
+global t_productid
+global t_trxdate
+global t_trxid
+global t_userid
 
 
-global t_account
-global t_time
-global t_sign
-global t_phones
-global t_senderId
-global t_content
-global t_smsType
-
-
-t_account = (urllib.parse.parse_qs(
-	json_data['parameter'], keep_blank_values=True)['account'][0])
-t_time = (urllib.parse.parse_qs(
-	json_data['parameter'], keep_blank_values=True)['time'][0])
-t_sign = (urllib.parse.parse_qs(
-	json_data['parameter'], keep_blank_values=True)['sign'][0])
-t_phones = (urllib.parse.parse_qs(
-	json_data['parameter'], keep_blank_values=True)['phones'][0])
-t_senderId = (urllib.parse.parse_qs(
-	json_data['parameter'], keep_blank_values=True)['senderId'][0])
-t_content = (urllib.parse.parse_qs(
-	json_data['parameter'], keep_blank_values=True)['content'][0])
-t_smsType = (urllib.parse.parse_qs(
-	json_data['parameter'], keep_blank_values=True)['smsType'][0])
+t_id = (urllib.parse.parse_qs(
+	json_data['parameter'], keep_blank_values=True)['id'][0])
+t_message = (urllib.parse.parse_qs(
+	json_data['parameter'], keep_blank_values=True)['message'][0])
+t_productid = (urllib.parse.parse_qs(
+	json_data['parameter'], keep_blank_values=True)['productid'][0])
+t_trxdate = (urllib.parse.parse_qs(
+	json_data['parameter'], keep_blank_values=True)['trxdate'][0])
+t_trxid = (urllib.parse.parse_qs(
+	json_data['parameter'], keep_blank_values=True)['trxid'][0])
+t_userid = (urllib.parse.parse_qs(
+	json_data['parameter'], keep_blank_values=True)['userid'][0])

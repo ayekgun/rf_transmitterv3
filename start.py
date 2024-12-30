@@ -20,7 +20,7 @@ user = "root"
 passwd = "dockersit123"
 host = "192.168.181.52"
 db = "test_automation"
-pathrobot = 'C:/Python310/Scripts/pybot.bat'
+pathrobot = 'C:/Python3104/Scripts/pybot.bat'
 # pathrobot = 'C:/Python310/Scripts/pybot.bat'
 # dirresult = 'result/'+transmitter_name+'/'+t_uniq
 dirresult = 'result/'
@@ -73,6 +73,7 @@ if __name__ == '__main__':
         list.append(t_robot)
         # print(list)
         call(list)
+
         # UploadResult()
     else:
         print('TestCaseNotFound')

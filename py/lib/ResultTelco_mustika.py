@@ -135,12 +135,12 @@ def CheckVallueUserIdMustika():
         if(Transmitter.sid_queue_username != ''):
             c_cpname = Transmitter.sid_queue_username
         else:
-            c_cpname = Transmitter.cfg_username
+            c_cpname = Transmitter.cfg_uid
     else:
         if(Transmitter.quinuid != ''):
             c_cpname = Transmitter.quinuid
         else:
-            c_cpname = Transmitter.cfg_username
+            c_cpname = Transmitter.cfg_uid
     result = Transmitter.MetchingData(c_cpname, t_userid, str1, str2)
     return (result)
 

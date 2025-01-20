@@ -47,7 +47,7 @@ def SetVariableResponeResultPintar():
             # Extract information
             t_senderid = json_load['messages'][0]['senderid']
             t_type = json_load['messages'][0]['type']
-            t_msisdn = json_load['messages'][0]['v']
+            t_msisdn = json_load['messages'][0]['msisdn']
             t_encoding = json_load['messages'][0]['encoding']
             t_message = json_load['messages'][0]['message']
             t_username = json_load['messages'][0]['username']

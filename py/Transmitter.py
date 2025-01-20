@@ -27,6 +27,7 @@ from conf_dws import *
 from conf_infobip import * 
 from conf_mdmedia import * 
 from conf_mustika import * 
+from conf_pintar import * 
 
 sys.path.append(os.path.abspath("py/lib"))
 from py.lib.RetryTransmitter import *
@@ -43,6 +44,7 @@ from ResultTelco_dws import *
 from ResultTelco_infobip import *
 from ResultTelco_mdmedia import *
 from ResultTelco_mustika import *
+from ResultTelco_pintar import *
 
 from SmartBreak import *
 from SubmitResult import *

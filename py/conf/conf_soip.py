@@ -13,3 +13,4 @@ soip_robotname = "transmittersoip"
 soip_cfglookup = "SELECT  lookup_name,lookup_value FROM jns_config where lookup_type = %s and lookup_name in('mail_to','mail_host','mail_pass','mail_user','mail_port','mail_auth','mail_start_tls','mail_from','mail_subject','mail_message','activemq_host','provider_host','channel_name','provider_hasdr','activemq_txque','activemq_txack','db_user','db_password','db_table','db_host','db_port','db_name','SUBMIT_UNKNOWN','SUCCESS_RECEIVED','SUCCESS_NOT_RECEIVED','SUCCESS_WITH_ERROR','FAILED_SUBMIT','ERR_EXPIRED','RETRY_TIMEOUT','max_retry','activemq_topic','activemq_topic_host','activemq_notifsender','timeout','agais_application_id','queue_persistency','sleep_after_send','string_splitter','token','encoding','working_hour','username','password','account','secret_key')"
 
 soip_retry_mechanisme = False
+soip_reroute_mechanisme = True

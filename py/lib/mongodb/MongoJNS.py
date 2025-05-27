@@ -14,3 +14,12 @@ class mongo:
         document = collection.find_one({'trx_id': trxid}, {'_id': 0})
         client.close()
         return document
+    
+    def GetMongoPintarReroute(self,trxid):
+        client = MongoClient(mongo_conn)
+        db = client['jnsCore']
+        collection_name = "transaction_pintar"
+        collection = db.get_collection(collection_name)
+        document = collection.find_one({'trx_id': trxid}, {'_id': 0})
+        client.close()
+        return document

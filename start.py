@@ -4,11 +4,11 @@ import os
 import pymysql
 # import paramiko
 
-# transmitter_name = sys.argv[1]
-# type = sys.argv[2]
+transmitter_name = sys.argv[1]
+type = sys.argv[2]
 
-transmitter_name = 'pintar'
-type = '247'
+# transmitter_name = 'pintar'
+# type = '623'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
 t_robot_e = 'robot/Transmitter'+transmitter_name+type+'.robot'
@@ -20,7 +20,8 @@ user = "root"
 passwd = "dockersit123"
 host = "192.168.181.52"
 db = "test_automation"
-pathrobot = 'C:/Python3104/Scripts/pybot.bat'
+# pathrobot = 'C:/Python310/Scripts/pybot.bat'
+pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
 # pathrobot = 'C:/Python310/Scripts/pybot.bat'
 # dirresult = 'result/'+transmitter_name+'/'+t_uniq
 dirresult = 'result/'

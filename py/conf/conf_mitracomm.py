@@ -14,3 +14,4 @@ mitracomm_robotname = "transmittermitracomm"
 mitracomm_cfglookup = "SELECT  lookup_name,lookup_value FROM jns_config where lookup_type = %s and lookup_name in('activemq_notifsender','activemq_topic','activemq_txack','activemq_txque','appKey','channel_name','ERR_EXPIRED','FAILED_SUBMIT','passwd','password','provider_hasdr','provider_pwd','provider_uid','queue_persistency','timeout','username','sleep_after_send','retry_schedule_time','retry_exception','retry_service_type','max_retry')"
 
 mitracomm_retry_mechanisme = True
+mitracomm_reroute_mechanisme = False

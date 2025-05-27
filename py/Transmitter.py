@@ -67,6 +67,7 @@ def SetConfigDynamic(var):
     global d_provider
     global cfglookup
     global retry_mechanisme
+    global reroute_mechanisme
     
     d_provider = var.lower()
     urlchangerespon = eval(str(d_provider+'_urlchangerespon'))
@@ -80,6 +81,7 @@ def SetConfigDynamic(var):
     robotname = eval(d_provider+'_robotname')
     cfglookup = eval(d_provider+'_cfglookup')
     retry_mechanisme = eval(d_provider+'_retry_mechanisme')
+    reroute_mechanisme = eval(d_provider+'_reroute_mechanisme')
 
 def SetVariableTestCase(type ,testcase):
     global queuemessage
@@ -176,11 +178,13 @@ def ChangeDummyRespone(id):
     global dummy_httpcode
     global dummy_respone_provider
     global dummy_respon
+    global dummy_status
     url = urlchangerespon + str(id) + str("&trxid=") + str(generatediddash)
     req = requests.get(url)
     dummy_sleep = json.loads(req.text)['sleep']
     dummy_httpcode = json.loads(req.text)['http_request']
     dummy_respon = json.loads(req.text)['respon']
+    dummy_status = json.loads(req.text)['status']
     dummy_respone_provider = json.loads(
         req.text)['respone_provider_submit_status']
     print(url)
@@ -204,6 +208,7 @@ def ChangeDummyResponeSleepMode():
 
 def CheckFlowToTelco():
     global new_retry_status
+    global flow_transmitter_status
     datenow = datetime.strftime(datetime.now(),'%Y%m%d%H%M%S')
     if(quinexpiry == ''):
         if(int(cfg_timeout) < int(dummy_sleep)):
@@ -236,10 +241,16 @@ def CheckFlowToTelco():
         status = 'expired'
         new_retry_status = False
     # print(status)
+    flow_transmitter_status = status
     return(status)
 
 def CheckFlowNewRetryMechanisme():
     return new_retry_status
+
+
+def CheckFlowNewRerouteMechanisme():
+    return reroute_mechanisme
+
 
 def ParseStatusRetry():
     retry_exception = cfg_retry_exception.split(',')
@@ -368,17 +379,19 @@ def Setdateexpired(time):
     return(date)
 
 def RunAMQTransmitter(sleeptime):
-    # sleeptime = int(cfg_sleep_after_send) / 1000
-    time = int(sleeptime) * int(cfg_sleep_after_send) / 1000
-    GetQueueTransmitter(queue247,time)
+    sleep_after = max(1000, int(cfg_sleep_after_send)) / 1000.0  # minimal 1 detik
+    delay = int(sleeptime) * sleep_after
+    GetQueueTransmitter(queue247, int(delay))
 
 def RunAmqSubmitResultHandler(sleeptime):
-    time = int(sleeptime) * int(cfg_sleep_after_send) / 1000
+    # time = int(sleeptime) * int(cfg_sleep_after_send) / 1000
+    sleep_after = max(1000, int(cfg_sleep_after_send)) / 1000.0  # minimal 1 detik
+    delay = int(sleeptime) * sleep_after
     if(d_provider == 'xl'):
         time2 = CheckStatusForSleepRetry()
-        GetQueueSubmitResult(queuesubmitresult, int(time)+int(time2))
+        GetQueueSubmitResult(queuesubmitresult, int(delay)+int(time2))
     else:
-        GetQueueSubmitResult(queuesubmitresult,time)
+        GetQueueSubmitResult(queuesubmitresult,delay)
 
 
 def CheckStatusForSleepRetry():

@@ -433,7 +433,7 @@ def MatchingDataDateTime(var1, var2, string1, string2):
     datetime_format = "%Y-%m-%d %H:%M:%S"
     date1 = datetime.strptime(var1, datetime_format)
     date2 = datetime.strptime(var2, datetime_format)
-    if (-10 <= (date1 - date2).total_seconds() <= 10):
+    if (-30 <= (date1 - date2).total_seconds() <= 30):
         status = 'OK'
         validation = string1, var1, " &", string2, var2, "= Selisih "+ str((date1 - date2).total_seconds())  
     else:

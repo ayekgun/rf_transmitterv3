@@ -34,6 +34,7 @@ Transmitter Direct
     [Arguments]             ${type}   ${no_test}
     @{listrespon}=   GetTestResponeDummy
     FOR     ${item}   IN       @{listrespon}
+        Sleep    2
         ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${item}
         Run Proccess Send Queue       normal
         ${status}=    CheckFlowToTelco

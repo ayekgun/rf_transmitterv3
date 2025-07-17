@@ -6,22 +6,23 @@ import pymysql
 
 transmitter_name = sys.argv[1]
 type = sys.argv[2]
+pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
 
 # transmitter_name = 'pintar'
-# type = '623'
+# type = '247'
+# pathrobot = 'C:/Python310/Scripts/pybot.bat'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
 t_robot_e = 'robot/Transmitter'+transmitter_name+type+'.robot'
 t_app_name = 'transmitter-jns'+type
 #transmitter uniq fitur
 t_uniq = 'transmitter-'+transmitter_name+type
-
 user = "root"
 passwd = "dockersit123"
 host = "192.168.181.52"
 db = "test_automation"
-# pathrobot = 'C:/Python310/Scripts/pybot.bat'
-pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
+
+
 # pathrobot = 'C:/Python310/Scripts/pybot.bat'
 # dirresult = 'result/'+transmitter_name+'/'+t_uniq
 dirresult = 'result/'
@@ -68,14 +69,14 @@ if __name__ == '__main__':
     testcase = GetTestcase()
     transmitter_name = 'TransmitterName:'+transmitter_name
     if len(testcase)  != 0:
+        # list = [pathrobot, '-t TC001-sender id on DB, No key match', '-v',transmitter_name,  '-d', dirresult]
         list = [pathrobot, '-v',transmitter_name,  '-d', dirresult]
         for row in testcase:
             list.append(row)
         list.append(t_robot)
-        # print(list)
+        print(list)
         call(list)
-
-        # UploadResult()
+        # UploadResult()zz
     else:
         print('TestCaseNotFound')
         pass

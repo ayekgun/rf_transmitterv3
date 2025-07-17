@@ -393,6 +393,10 @@ def RunAmqSubmitResultHandler(sleeptime):
     else:
         GetQueueSubmitResult(queuesubmitresult,delay)
 
+def RunAMQReroute(sleeptime):
+    sleep_after = max(1000, int(cfg_sleep_after_send)) / 1000.0  # minimal 1 detik
+    delay = int(sleeptime) * sleep_after
+    GetQueueReroute('jns.pintar.checker.reroutesubmit', int(delay))
 
 def CheckStatusForSleepRetry():
     global retryable
@@ -427,6 +431,24 @@ def MetchingData(var1, var2, string1, string2):
         "status": status,
         "message": validation
     }
+    return data
+
+def MatchingDataJson(var1, var2, string1, string2):
+    if var1 == var2:
+        status = 'OK'
+        validation = f"{string1} {var1} & {string2} {var2} = Match"
+    else:
+        status = 'NOK'
+        validation = f"{string1} {var1} & {string2} {var2} = No Match (Not dictionaries)"
+        keys1 = set(var1.keys())
+        keys2 = set(var2.keys())
+        differing_keys = keys1.symmetric_difference(keys2)
+        validation = f"Differing Keys: {differing_keys}"
+
+    data = {
+        "status": status,
+        "message": validation
+        }
     return data
 
 def MatchingDataDateTime(var1, var2, string1, string2):

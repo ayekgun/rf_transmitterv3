@@ -110,6 +110,23 @@ class MyListenerSubmitResult(stomp.ConnectionListener):
         con.commit()
         cur.close()
 
+class MyListenerReroute(stomp.ConnectionListener):
+    def on_error(self, headers, message):
+        print('received an error "%s"' % headers)
+    def on_message(self, headers, message):
+        print('received a message "%s"' % (message))
+        trxid = (urllib.parse.parse_qs(message , keep_blank_values=True)['trxid'][0])
+        persistent = headers.get('persistent' , 'false')
+        timestamp = headers.get('timestamp')
+        con = pymysql.connect(db=db, user=user, passwd=passwd,host=host,port=3306,autocommit=False)
+        cur = con.cursor()
+        cur.execute(
+            "insert into out_reroute_jns (trxid, message, persistent, timestamp) values(%s,%s,%s,%s)",
+            (trxid, message, persistent, datetime.fromtimestamp(int(timestamp) / 1000.0))
+        )
+        con.commit()
+        cur.close()
+
 def GetQueueTransmitter(mqname,sleeptime):
     conn = stomp.Connection([(host_amq,port_amq)])
     conn.set_listener('', MyListenerTransmitter())
@@ -118,6 +135,16 @@ def GetQueueTransmitter(mqname,sleeptime):
     conn.subscribe(destination="/queue/"+ mqname, id=1, ack='auto')
     #conn.send(body=' '.join(sys.argv[1:]), destination='/queue/test')
     time.sleep(sleeptime)
+    conn.disconnect()
+
+def GetQueueReroute(mqname,sleeptime):
+    conn = stomp.Connection([(host_amq,port_amq)])
+    conn.set_listener('', MyListenerReroute())
+    conn.start()
+    conn.connect('admin', 'admin', wait=True)
+    conn.subscribe(destination="/queue/"+ mqname, id=1, ack='auto')
+    #conn.send(body=' '.join(sys.argv[1:]), destination='/queue/test')
+    time.sleep(sleeptime + 1)
     conn.disconnect()
 
 def GetQueueSubmitResult(mqname,sleeptime):

@@ -7,6 +7,9 @@ import urllib
 import time
 from datetime import datetime, timedelta
 import base64
+from urllib.parse import parse_qs, unquote
+
+import pymysql
 
 sys.path.append(os.path.abspath("py/conf"))
 from config import *
@@ -41,6 +44,7 @@ def SetVariableResponeResultPintar():
             global t_callbackurl
             global t_callbackmethod
             global t_encoding
+            global t_product
 
 
             json_load = json.loads(json_data['parameter'])
@@ -54,7 +58,7 @@ def SetVariableResponeResultPintar():
             t_token          = json_load ['token']
             t_callbackurl    = json_load ['callbackurl']
             t_callbackmethod = json_load ['callbackmethod']
-
+            t_product        = json_load ['product']
 
             result = {
                 "status": "OK",
@@ -164,6 +168,13 @@ def CheckUsernameFromTelco():
     result = Transmitter.MetchingData(expected_username, t_username, str1, str2)
     return result
 
+def CheckProductFromTelco():
+    str1 = "Product From Config"
+    str2 = "Product From TelcoReceiver"
+    expected_product = Transmitter.cfg_provider_request_product
+    result = Transmitter.MetchingData(expected_product, t_product, str1, str2)
+    return result
+
 def CheckDataTempForReroute():
     if Transmitter.flow_transmitter_status == 'valid' and int(Transmitter.dummy_respon) < 100:
         result_Db = mg.GetMongoPintarReroute(str(Transmitter.quinmessageid))
@@ -174,11 +185,6 @@ def CheckDataTempForReroute():
                 "message": "Tidak Insert Data Mongo Reroute Transmitter"
             }
         else:
-
-            # global r_transmitter_mongo
-            # global r_transmitter_mongo_next_schedule
-            # global r_transmitter_mongo_created_at
-
             created_at_values = result_Db['created_at']
             updated_at_values = result_Db['updated_at']
 
@@ -189,8 +195,6 @@ def CheckDataTempForReroute():
             # Ubah format menjadi string jika diperlukan
             result_Db['created_at'] = result_Db['created_at'].strftime('%Y-%m-%d %H:%M:%S')
             result_Db['updated_at'] = result_Db['updated_at'].strftime('%Y-%m-%d %H:%M:%S')
-
-            # print(result_Db)
 
             json_dd = json.dumps(result_Db)
             data = json.loads(json_dd)
@@ -237,45 +241,82 @@ def GeneratedRerouteTransmitter():
     # print(gen_datareroute_mongo)  
     return (gen_datareroute_mongo)
 
-# def CheckRetryHitIfStatusError():
-#     str1 = "Retry Count via API"
-#     str2 = "Retry Count in Config"
+def GetDataDBReroute(trxid):
+    n = 1
+    while n <= 3:
+        con = pymysql.connect(db=db, user=user, passwd=passwd,host=host,port=3306,autocommit=False)
+        cur = con.cursor()
+        cur.execute("SELECT * FROM out_reroute_jns where trxid = %s",(trxid))
+        resultDB = cur.fetchone()
+        n +=1
+        if (resultDB is None):
+            print(n)
+            cur.close()
+            time.sleep(2)
+        else:
+            break
+            cur.close()
 
-#     retry_exception_list = [x.strip() for x in Transmitter.cfg_retry_exception.split(',')]
+    return (resultDB)
 
-#     if (
-#         Transmitter.cfg_max_retry > 1
-#         and Transmitter.dummy_status == "FAILED"
-#         and Transmitter.dummy_httpcode not in retry_exception_list
-#     ):
-#         try:
-#             url = f"http://192.168.181.52:8071/api_selenium/index.php/CekResult?id={Transmitter.generatediddash}"
-#             response = requests.get(url)
-#             response.raise_for_status()
-#             json_data = response.json()
+def CheckDataQueeueForReroute():
+    print(Transmitter.quintrxid)
+    Transmitter.RunAMQReroute(2)
+    result_Db = GetDataDBReroute(Transmitter.quintrxid)
+    if Transmitter.flow_transmitter_status == 'valid' and int(Transmitter.dummy_respon) < 100:
+        if (result_Db is None):
+            result = {
+                "status": "OK",
+                "message": "Tidak Put Queue Reroute Transmitter"
+            }
+        else:            
+            result = {
+            "status": "NOK",
+            "message": "Put Queue Reroute Transmitter, Expected Tidak put Queue Reroute"
+            }
+    else:
+        if Transmitter.flow_transmitter_status != 'valid':
+            result = {
+                "status": "OK",
+                "message": "Transaksi Tidak Valid, Tidak Put Queue Reroute Transmitter"
+            }
+            return (result)
+        else:
+            if (result_Db is None):
+                result = {
+                "status": "NOK",
+                "message": "Tidak Put Queue Reroute Transmitter"
+            }
+            else:
+                queue_reroute_from_robot = ConvertStringToJSON(Transmitter.queuemessage)
+                queue_reroute_inqueue = ConvertStringToJSON(result_Db[2])
+                str1 = "Queue Expected = ",queue_reroute_from_robot
+                str2 = "Queue Actual = ", queue_reroute_inqueue
+                result = Transmitter.MatchingDataJson(queue_reroute_from_robot,  queue_reroute_inqueue, str1, str2)
+                return(result)
+    return (result)
 
-#             if isinstance(json_data, list):
-#                 jumlah_retry = len(json_data)
-#             else:
-#                 jumlah_retry = 1  # fallback kalau hanya 1 object dikembalikan
+def ConvertStringToJSON(query_string):
+    try:
+        parsed = parse_qs(query_string)
+        # Bikin flat dict (karena parse_qs hasilnya list)
+        flattened = {k: v[0] if len(v) == 1 else v for k, v in parsed.items()}
+        # Decode value yang masih URL encoded, contoh: senderids
+        if 'senderids' in flattened:
+            flattened['senderids'] = json.loads(unquote(flattened['senderids']))
+        # Kalau ada 'message' yg formatnya "type=wa", bisa dipecah juga
+        if 'message' in flattened:
+            msg_val = flattened['message']
+            try:
+                message_kv = dict(item.split("=") for item in unquote(msg_val).split("&"))
+                flattened['message'] = message_kv
+            except ValueError:
+                flattened['message'] = unquote(msg_val)
 
-#             retry_config = Transmitter.cfg_max_retry + 1  # +1 untuk hit awal
-
-#             result = Transmitter.MetchingData(jumlah_retry,   Transmitter.cfg_max_retry, str1, str2)
-
-#         except Exception as e:
-#             result = {
-#                 "status": "ERROR",
-#                 "message": f"Gagal call API atau parsing JSON: {str(e)}"
-#             }
-#     else:
-#         result = {
-#             "status": "OK",
-#             "message": "Tidak masuk syarat untuk cek retry hit via API"
-#         }
-
-#     return result
-
-
-
-#end check hit Telco
+        # Pretty print
+        print(json.dumps(flattened, indent=2))
+        return flattened
+    
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
+        return None

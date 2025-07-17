@@ -41,7 +41,7 @@ Transmitter Direct
         Check Result Parameter in Telco     ${sleep}
         ${newretry_status}=    CheckFlowNewRetryMechanisme
         ${newreroute_status}=    CheckFlowNewRerouteMechanisme
-        Run Keyword If   '${newretry_status}' == 'False'   Check Queue Submit Result    1
+        # Run Keyword If   '${newretry_status}' == 'False'   Check Queue Submit Result    1
         Run Keyword If   '${newretry_status}' == 'True'   Check Retry Transmitter
         Run Keyword If   '${newreroute_status}' == 'True'   Check Reroute Transmitter
         
@@ -167,6 +167,7 @@ Check Retry Transmitter
 
 Check Reroute Transmitter
     Check Data Table Transaction    CheckDataTempForReroute
+    Check Data Table Transaction    CheckDataQueeueForReroute
 
 Check Data Table Transaction
     [Arguments]     ${DataCheck}

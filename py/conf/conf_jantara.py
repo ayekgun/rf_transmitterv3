@@ -1,4 +1,3 @@
-
 jantara_urlchangerespon = 'http://192.168.181.52:8071/api_selenium/index.php/Transmitterjantara/set_default?id='
 
 jantara_robotname = "transmitterjantara"
@@ -30,3 +29,5 @@ jantara_queue247 = 'jns.transmitter.jtr.02.dom.247'
 # jantara_queue623 = 'jns.transmitter.jtr.05.intl.623'
 # jantara_queue247 = 'jns.transmitter.jtr.05.intl.247'
 
+jantara_retry_mechanisme = True
+jantara_reroute_mechanisme = False

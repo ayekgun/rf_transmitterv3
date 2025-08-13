@@ -12,6 +12,15 @@ from urllib.parse import parse_qs, unquote
 sys.path.append(os.path.abspath("py/conf"))
 from config import *
 
+# Safe defaults to avoid NameError when checks run before setter
+t_sender = ''
+t_msisdn = ''
+t_message = ''
+t_header_content_type = None
+t_header_auth = None
+t_username = ''
+t_password = ''
+
 
 def SetVariableResponeResultIms():
     if (Transmitter.CheckFlowToTelco() == 'expired' or Transmitter.CheckFlowToTelco() == 'bypass'):
@@ -275,5 +284,30 @@ def CheckVallueHeaderAuthIms():
     auth = f'Basic {auth}'
     result = Transmitter.MetchingData(auth, t_header_auth, str1, str2)
     return result
+
+
+# Aliases to match existing DB config entries that use generic names
+def SetVariableResponeResult():
+    return SetVariableResponeResultIms()
+
+
+def CheckVallueMsisdnTelco():
+    return CheckValueMsisdnIms()
+
+
+def CheckVallueSenderTelco():
+    return CheckValueSenderIms()
+
+
+def CheckVallueSMSTelco():
+    return CheckValueMessageIms()
+
+
+def CheckVallueHeaderContentType():
+    return CheckVallueHeaderContentTypeIms()
+
+
+def CheckVallueHeaderAuth():
+    return CheckVallueHeaderAuthIms()
 
 

@@ -98,6 +98,25 @@ def GetResultDummyWithApiIms():
     return result
 
 
+def _ensure_ims_variables_initialized():
+    # Avoid NameError if checks run before setter populated globals
+    global t_sender, t_msisdn, t_message, t_header_content_type, t_header_auth, t_username, t_password
+    if 't_sender' not in globals():
+        t_sender = ''
+    if 't_msisdn' not in globals():
+        t_msisdn = ''
+    if 't_message' not in globals():
+        t_message = ''
+    if 't_header_content_type' not in globals():
+        t_header_content_type = None
+    if 't_header_auth' not in globals():
+        t_header_auth = None
+    if 't_username' not in globals():
+        t_username = ''
+    if 't_password' not in globals():
+        t_password = ''
+
+
 def _parse_generic_params(parameter_str: str) -> dict:
     # Try JSON first (e.g., Infobip-like payload)
     try:
@@ -158,6 +177,7 @@ def _parse_generic_params(parameter_str: str) -> dict:
 
 
 def CheckValueSenderIms():
+    _ensure_ims_variables_initialized()
     if (Transmitter.senderids_support == 'true'):
         if (Transmitter.sid_queue_senderid != ''):
             c_sid = Transmitter.sid_queue_senderid
@@ -175,6 +195,7 @@ def CheckValueSenderIms():
 
 
 def CheckVallueUsernameTelco():
+    _ensure_ims_variables_initialized()
     str1 = "Username From Config/Queue"
     str2 = "Username From TelcoReceiver"
     if (Transmitter.senderids_support == 'true'):
@@ -187,6 +208,7 @@ def CheckVallueUsernameTelco():
 
 
 def CheckValluePasswordTelco():
+    _ensure_ims_variables_initialized()
     str1 = "Password From Config/Queue"
     str2 = "Password From TelcoReceiver"
     if (Transmitter.senderids_support == 'true'):
@@ -199,6 +221,7 @@ def CheckValluePasswordTelco():
 
 
 def CheckValueMsisdnIms():
+    _ensure_ims_variables_initialized()
     str1 = "MSISDN From Queue", Transmitter.quinmsisdn
     str2 = "MSISDN From TelcoReceiver", t_msisdn
     result = Transmitter.MetchingData(Transmitter.quinmsisdn, t_msisdn, str1, str2)
@@ -206,6 +229,7 @@ def CheckValueMsisdnIms():
 
 
 def CheckValueMessageIms():
+    _ensure_ims_variables_initialized()
     str1 = "Message From Queue", Transmitter.quinmessage
     str2 = "Message From TelcoReceiver", urllib.parse.unquote_plus(t_message)
     result = Transmitter.MetchingData(
@@ -214,6 +238,7 @@ def CheckValueMessageIms():
 
 
 def CheckVallueHeaderContentTypeIms():
+    _ensure_ims_variables_initialized()
     # If header is present, accept it; otherwise compare to standard JSON
     std_content_type = 'application/json'
     expected = t_header_content_type or std_content_type
@@ -224,6 +249,7 @@ def CheckVallueHeaderContentTypeIms():
 
 
 def CheckVallueHeaderAuthIms():
+    _ensure_ims_variables_initialized()
     str1 = "Auth From DB/Queue"
     str2 = "Auth From TelcoReceiver"
     if (Transmitter.senderids_support == 'true'):

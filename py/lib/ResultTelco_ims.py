@@ -309,5 +309,3 @@ def CheckVallueHeaderContentType():
 
 def CheckVallueHeaderAuth():
     return CheckVallueHeaderAuthIms()
-
-

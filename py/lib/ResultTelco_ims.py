@@ -34,6 +34,8 @@ def SetVariableResponeResultIms():
             global t_responetrxid
             global t_header_content_type
             global t_header_auth
+            global t_username
+            global t_password
 
             # Header optional, depends on provider dummy
             try:
@@ -51,6 +53,24 @@ def SetVariableResponeResultIms():
             t_msisdn = parsed.get('msisdn', '')
             t_message = parsed.get('message', '')
             t_responetrxid = json_data.get('respon')
+
+            # Try to extract username/password from parameters first
+            t_username = parsed.get('username', '')
+            t_password = parsed.get('password', '')
+            # If not present, try to decode from Authorization: Basic <b64>
+            if (not t_username or not t_password) and t_header_auth and isinstance(t_header_auth, str) and t_header_auth.lower().startswith('basic '):
+                try:
+                    b64 = t_header_auth.split(' ', 1)[1]
+                    decoded = base64.b64decode(b64).decode('utf-8')
+                    # format: username:password
+                    if ':' in decoded:
+                        u, p = decoded.split(':', 1)
+                        if not t_username:
+                            t_username = u
+                        if not t_password:
+                            t_password = p
+                except Exception:
+                    pass
 
             result = {
                 "status": "OK",
@@ -107,7 +127,9 @@ def _parse_generic_params(parameter_str: str) -> dict:
         return {
             'sender': sender,
             'msisdn': msisdn,
-            'message': message
+            'message': message,
+            'username': obj.get('username') or obj.get('uid') or '',
+            'password': obj.get('password') or obj.get('pwd') or ''
         }
     except Exception:
         pass
@@ -123,7 +145,9 @@ def _parse_generic_params(parameter_str: str) -> dict:
         return {
             'sender': unquote(sender),
             'msisdn': unquote(msisdn),
-            'message': unquote(message)
+            'message': unquote(message),
+            'username': unquote(flat.get('username') or flat.get('uid') or ''),
+            'password': unquote(flat.get('password') or flat.get('pwd') or '')
         }
     except Exception:
         return {
@@ -147,6 +171,30 @@ def CheckValueSenderIms():
     str1 = "Sender From Queue", c_sid
     str2 = "Sender From TelcoReceiver", t_sender
     result = Transmitter.MetchingData(c_sid, t_sender, str1, str2)
+    return result
+
+
+def CheckVallueUsernameTelco():
+    str1 = "Username From Config/Queue"
+    str2 = "Username From TelcoReceiver"
+    if (Transmitter.senderids_support == 'true'):
+        expected_username = Transmitter.sid_queue_username if Transmitter.sid_queue_username != '' else Transmitter.cfg_username
+    else:
+        expected_username = Transmitter.quinuid if Transmitter.quinuid != '' else Transmitter.cfg_username
+    actual_username = t_username if 't_username' in globals() and t_username != '' else ''
+    result = Transmitter.MetchingData(expected_username, actual_username, str1, str2)
+    return result
+
+
+def CheckValluePasswordTelco():
+    str1 = "Password From Config/Queue"
+    str2 = "Password From TelcoReceiver"
+    if (Transmitter.senderids_support == 'true'):
+        expected_password = Transmitter.sid_queue_password if Transmitter.sid_queue_password != '' else Transmitter.cfg_password
+    else:
+        expected_password = Transmitter.quinpwd if Transmitter.quinpwd != '' else Transmitter.cfg_password
+    actual_password = t_password if 't_password' in globals() and t_password != '' else ''
+    result = Transmitter.MetchingData(expected_password, actual_password, str1, str2)
     return result
 
 

@@ -236,10 +236,33 @@ def CheckValueSenderIms():
             c_sid = Transmitter.quinsenderid
         else:
             c_sid = ''
+    
+    # Clean both sender values to remove unwanted characters
+    c_sid = _clean_string_value(c_sid)
+    t_sender_clean = _clean_string_value(t_sender)
+    
     str1 = "Sender From Queue", c_sid
-    str2 = "Sender From TelcoReceiver", t_sender
-    result = Transmitter.MetchingData(c_sid, t_sender, str1, str2)
+    str2 = "Sender From TelcoReceiver", t_sender_clean
+    result = Transmitter.MetchingData(c_sid, t_sender_clean, str1, str2)
     return result
+
+
+def _clean_string_value(value_str):
+    """Clean string value by removing unwanted characters and trimming whitespace"""
+    if not value_str:
+        return ''
+    # Remove semicolons, quotes, and other unwanted characters
+    cleaned = str(value_str).strip().rstrip(';').rstrip('"').rstrip("'").rstrip(',').rstrip('.')
+    return cleaned
+
+
+def _clean_password(password_str):
+    """Clean password string by removing unwanted characters and trimming whitespace"""
+    if not password_str:
+        return ''
+    # Remove semicolons, quotes, and other unwanted characters
+    cleaned = str(password_str).strip().rstrip(';').rstrip('"').rstrip("'")
+    return cleaned
 
 
 def CheckVallueUsernameTelco():
@@ -250,7 +273,11 @@ def CheckVallueUsernameTelco():
         expected_username = Transmitter.sid_queue_username if Transmitter.sid_queue_username != '' else Transmitter.cfg_username
     else:
         expected_username = Transmitter.quinuid if Transmitter.quinuid != '' else Transmitter.cfg_username
-    actual_username = t_username if 't_username' in globals() and t_username != '' else ''
+    
+    # Clean both usernames to remove unwanted characters
+    expected_username = _clean_string_value(expected_username)
+    actual_username = _clean_string_value(t_username if 't_username' in globals() and t_username != '' else '')
+    
     result = Transmitter.MetchingData(expected_username, actual_username, str1, str2)
     return result
 
@@ -263,25 +290,36 @@ def CheckValluePasswordTelco():
         expected_password = Transmitter.sid_queue_password if Transmitter.sid_queue_password != '' else Transmitter.cfg_password
     else:
         expected_password = Transmitter.quinpwd if Transmitter.quinpwd != '' else Transmitter.cfg_password
-    actual_password = t_password if 't_password' in globals() and t_password != '' else ''
+    
+    # Clean both passwords to remove unwanted characters
+    expected_password = _clean_password(expected_password)
+    actual_password = _clean_password(t_password if 't_password' in globals() and t_password != '' else '')
+    
     result = Transmitter.MetchingData(expected_password, actual_password, str1, str2)
     return result
 
 
 def CheckValueMsisdnIms():
     _ensure_ims_variables_initialized()
-    str1 = "MSISDN From Queue", Transmitter.quinmsisdn
-    str2 = "MSISDN From TelcoReceiver", t_msisdn
-    result = Transmitter.MetchingData(Transmitter.quinmsisdn, t_msisdn, str1, str2)
+    # Clean both MSISDN values to remove unwanted characters
+    expected_msisdn = _clean_string_value(Transmitter.quinmsisdn)
+    actual_msisdn = _clean_string_value(t_msisdn)
+    
+    str1 = "MSISDN From Queue", expected_msisdn
+    str2 = "MSISDN From TelcoReceiver", actual_msisdn
+    result = Transmitter.MetchingData(expected_msisdn, actual_msisdn, str1, str2)
     return result
 
 
 def CheckValueMessageIms():
     _ensure_ims_variables_initialized()
-    str1 = "Message From Queue", Transmitter.quinmessage
-    str2 = "Message From TelcoReceiver", urllib.parse.unquote_plus(t_message)
-    result = Transmitter.MetchingData(
-        urllib.parse.unquote_plus(Transmitter.quinmessage), urllib.parse.unquote_plus(t_message), str1, str2)
+    # Clean both message values to remove unwanted characters
+    expected_message = _clean_string_value(urllib.parse.unquote_plus(Transmitter.quinmessage))
+    actual_message = _clean_string_value(urllib.parse.unquote_plus(t_message))
+    
+    str1 = "Message From Queue", expected_message
+    str2 = "Message From TelcoReceiver", actual_message
+    result = Transmitter.MetchingData(expected_message, actual_message, str1, str2)
     return result
 
 

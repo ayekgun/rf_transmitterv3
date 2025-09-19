@@ -31,7 +31,7 @@ ignoretc = {
 # dirresult = 'result/'+transmitter_name+'/'+t_uniq
 dirresult = 'result/'
 
-def _is_ignored(tc: str, ignore_patterns: set[str]) -> bool:
+def _is_ignored(tc, ignore_patterns):
     """
     Return True kalau 'tc' match salah satu pola di ignore_patterns.
     Pola:

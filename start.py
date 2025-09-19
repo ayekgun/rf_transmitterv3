@@ -6,11 +6,11 @@ import pymysql
 
 transmitter_name = sys.argv[1]
 type = sys.argv[2]
-# pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
+pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
 
 # transmitter_name = 'jantarav3'
 # type = '247'
-pathrobot = 'C:/Python310/Scripts/pybot.bat'
+# pathrobot = 'C:/Python310/Scripts/pybot.bat'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
 t_robot_e = 'robot/Transmitter'+transmitter_name+type+'.robot'

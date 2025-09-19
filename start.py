@@ -8,7 +8,7 @@ transmitter_name = sys.argv[1]
 type = sys.argv[2]
 pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
 
-# transmitter_name = 'pintar'
+# transmitter_name = 'jantarav3'
 # type = '247'
 # pathrobot = 'C:/Python310/Scripts/pybot.bat'
 
@@ -22,11 +22,36 @@ passwd = "dockersit123"
 host = "192.168.181.52"
 db = "test_automation"
 
+ignoretc = {
+    "jantarav3": {"TC024*"},
+    # "tx_lain": {"TC001*", "TC888888"},
+}
 
 # pathrobot = 'C:/Python310/Scripts/pybot.bat'
 # dirresult = 'result/'+transmitter_name+'/'+t_uniq
 dirresult = 'result/'
 
+def _is_ignored(tc: str, ignore_patterns: set[str]) -> bool:
+    """
+    Return True kalau 'tc' match salah satu pola di ignore_patterns.
+    Pola:
+      - Exact (mis. 'TC0231234')
+      - Prefix wildcard (mis. 'TC023*')
+    Matching case-insensitive.
+    """
+    if not ignore_patterns:
+        return False
+    tc_u = (tc or "").upper()
+    for pat in ignore_patterns:
+        p = (pat or "").upper()
+        if not p:
+            continue
+        if p.endswith("*"):
+            if tc_u.startswith(p[:-1]):
+                return True
+        elif tc_u == p:
+            return True
+    return False
 
 def GetTestcase():
     array = list()
@@ -34,36 +59,25 @@ def GetTestcase():
                           host=host, port=3306, autocommit=False)
     cur = con.cursor()
     sql = "SELECT testcases FROM test_skenario where status = 1 and app_name in(%s,%s)"
-    # sql = "SELECT testcases FROM test_skenario where status = 1 and app_name in(%s,%s) and id in(220)"
+    # sql = "SELECT testcases FROM test_skenario where status = 1 and app_name in(%s,%s) and id in(1)"
     cur.execute(sql, (t_app_name, t_uniq))
     # print(sql, (t_app_name, t_uniq))
     resultDB = cur.fetchall()
+    # for row in resultDB:
+    #     array.append("-t " + row[0].replace(" ", ""))
+    ignore_set = set(ignoretc.get(transmitter_name.lower(), set()))
+
     for row in resultDB:
-        array.append("-t " + row[0].replace(" ", ""))
+        # bersihin spasi dari nilai test case (sesuai logic kamu sebelumnya)
+        tc = (row[0] or "").replace(" ", "")
+        if not tc:
+            continue
+        # Skip kalau ada di ignore
+        if _is_ignored(tc, ignore_set):
+            # print(f"[SKIP] {tc} utk transmitter {transmitter_name}")
+            continue
+        array.append("-t " + tc)
     return array
-
-
-# def UploadResult():
-#     hostname = '192.168.181.58'
-#     password = 'sitjatis123'
-#     username = "root"
-#     port = 22
-#     t = paramiko.SSHClient()
-#     t.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-#     t.connect(hostname, port=port, username=username, password=password)
-#     listfile = os.listdir(localdir)
-
-#     ftp = t.open_sftp()
-#     try:
-#         ftp.chdir(path=serverdir)  # Test if remote_path exists
-#     except IOError:
-#         ftp.mkdir(serverdir)  # Create remote_path
-
-#     for file in listfile:
-#         ftp.put(localdir + file, serverdir + file)
-#         print('Upload File ' + file + ' to Server')
-#     ftp.close()
-
 
 if __name__ == '__main__':
     testcase = GetTestcase()

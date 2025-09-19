@@ -20,6 +20,7 @@ from conf_xl import *
 from conf_tsel import *
 from conf_nadynehttp import *
 from conf_jantara import *
+from conf_jantarav3 import *
 from conf_modifylong import *
 from conf_mitracomm import *
 from conf_soip import *
@@ -31,6 +32,7 @@ from conf_pintar import *
 from conf_m360 import * 
 from conf_ims import * 
 
+
 sys.path.append(os.path.abspath("py/lib"))
 from py.lib.RetryTransmitter import *
 from ActiveMQ import *
@@ -39,6 +41,7 @@ from ResultTelco_tsel import *
 from ResultTelco_xl import *
 from ResultTelco_nadynehttp import *
 from ResultTelco_jantara import *
+from ResultTelco_jantarav3 import *
 from ResultTelco_modifylong import *
 from ResultTelco_mitracomm import *
 from ResultTelco_soip import *

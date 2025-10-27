@@ -50,9 +50,9 @@ def SetVariableResponeResultJantara():
             t_message = (urllib.parse.parse_qs(
                 json_data['parameter'], keep_blank_values=True)['message'][0])
             t_dataCoding = (urllib.parse.parse_qs(
-                json_data['parameter'], keep_blank_values=True)['dataCoding'][0])
+                json_data['parameter'], keep_blank_values=True).get('dataCoding', [None])[0])
             t_longMessageMode = (urllib.parse.parse_qs(
-                json_data['parameter'], keep_blank_values=True)['longMessageMode'][0])
+                json_data['parameter'], keep_blank_values=True).get('longMessageMode', [None])[0])
             t_respontrxid = json_data['provider_trxid']
             t_responstatus = json_data['respon']
             result = {
@@ -99,7 +99,10 @@ def CheckVallueANITelcoJantara():
 def CheckVallueDataCodingTelcoJantara():
     str1 = "Data Coding From DB Expected"
     str2 = "Data Coding From TelcoReceiver Actual"
-    result = Transmitter.MetchingData("0", t_dataCoding, str1, str2)
+    # If t_dataCoding is None or empty, convert to empty string
+    expected_value = None  # Expected value bisa None jika tidak dikirim
+    actual_value = t_dataCoding if t_dataCoding is not None else None
+    result = Transmitter.MetchingData(expected_value, actual_value, str1, str2)
     return (result)
 
 def CheckVallueDNISTelcoJantara():
@@ -111,7 +114,10 @@ def CheckVallueDNISTelcoJantara():
 def CheckVallueLongMessageModeTelcoJantara():
     str1 = "Long Message Mode From DB Expected"
     str2 = "Long Message Mode From TelcoReceiver Actual"
-    result = Transmitter.MetchingData("payload", t_longMessageMode, str1, str2)
+    # If t_longMessageMode is None or empty, convert to empty string
+    expected_value = None  # Expected value bisa None jika tidak dikirim
+    actual_value = t_longMessageMode if t_longMessageMode is not None else None
+    result = Transmitter.MetchingData(expected_value, actual_value, str1, str2)
     return (result)
 
 

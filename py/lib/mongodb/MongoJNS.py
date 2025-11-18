@@ -23,3 +23,12 @@ class mongo:
         document = collection.find_one({'trx_id': trxid}, {'_id': 0})
         client.close()
         return document
+    
+    def GetSmsSegment(self, transaction_id):
+        client = MongoClient(mongo_conn)
+        db = client['jnsCore']
+        collection_name = "sms_segments"
+        collection = db.get_collection(collection_name)
+        document = collection.find_one({'transaction_id': transaction_id}, {'_id': 0})
+        client.close()
+        return document

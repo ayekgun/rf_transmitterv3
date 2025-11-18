@@ -59,6 +59,13 @@ from SleepMode import *
 
 from TransmitterRedirect import *
 
+def _log_to_console(message):
+    """Helper function to write to both stdout and stderr for console visibility"""
+    sys.stdout.write(message)
+    sys.stderr.write(message)
+    sys.stdout.flush()
+    sys.stderr.flush()
+
 def SetConfigDynamic(var):
     global urlchangerespon
     global cfg_name818
@@ -426,6 +433,10 @@ def SetTopicSmartBreake(msg,direct):
 
 
 def MetchingData(var1, var2, string1, string2):
+    """
+    Compare two values and return match status
+    Note: Detailed logging is handled by the calling Check functions
+    """
     if (var1 == var2):
         status = 'OK'
         validation = string1, var1, " &", string2, var2, "= Match"
@@ -439,9 +450,18 @@ def MetchingData(var1, var2, string1, string2):
     return data
 
 def MatchingDataJson(var1, var2, string1, string2):
+    separator = "=" * 80
+    _log_to_console(separator + "\n")
+    _log_to_console("[MatchingDataJson] Starting JSON comparison...\n")
+    _log_to_console(separator + "\n")
+    
+    _log_to_console(f"  Expected ({string1}): {var1}\n")
+    _log_to_console(f"  Actual ({string2}): {var2}\n")
+    
     if var1 == var2:
         status = 'OK'
         validation = f"{string1} {var1} & {string2} {var2} = Match"
+        _log_to_console(f"  ✓ Result: {status} - JSON data matches\n")
     else:
         status = 'NOK'
         validation = f"{string1} {var1} & {string2} {var2} = No Match (Not dictionaries)"
@@ -449,7 +469,11 @@ def MatchingDataJson(var1, var2, string1, string2):
         keys2 = set(var2.keys())
         differing_keys = keys1.symmetric_difference(keys2)
         validation = f"Differing Keys: {differing_keys}"
+        _log_to_console(f"  ✗ Result: {status} - JSON data does not match\n")
+        _log_to_console(f"    Differing Keys: {differing_keys}\n")
 
+    _log_to_console(separator + "\n")
+    
     data = {
         "status": status,
         "message": validation
@@ -457,15 +481,31 @@ def MatchingDataJson(var1, var2, string1, string2):
     return data
 
 def MatchingDataDateTime(var1, var2, string1, string2):
+    separator = "=" * 80
+    _log_to_console(separator + "\n")
+    _log_to_console("[MatchingDataDateTime] Starting DateTime comparison...\n")
+    _log_to_console(separator + "\n")
+    
     datetime_format = "%Y-%m-%d %H:%M:%S"
     date1 = datetime.strptime(var1, datetime_format)
     date2 = datetime.strptime(var2, datetime_format)
-    if (-60 <= (date1 - date2).total_seconds() <= 60):
+    time_diff = (date1 - date2).total_seconds()
+    
+    _log_to_console(f"  Expected ({string1}): {var1}\n")
+    _log_to_console(f"  Actual ({string2}): {var2}\n")
+    _log_to_console(f"  Time Difference: {time_diff} seconds\n")
+    
+    if (-60 <= time_diff <= 60):
         status = 'OK'
-        validation = string1, var1, " &", string2, var2, "= Selisih "+ str((date1 - date2).total_seconds())  
+        validation = string1, var1, " &", string2, var2, "= Selisih "+ str(time_diff)
+        _log_to_console(f"  ✓ Result: {status} - DateTime difference within acceptable range (±60 seconds)\n")
     else:
         status = 'NOK'
-        validation = string1, var1, " &", string2, var2, "= Selisih Over "+   str((date1 - date2).total_seconds())  
+        validation = string1, var1, " &", string2, var2, "= Selisih Over "+ str(time_diff)
+        _log_to_console(f"  ✗ Result: {status} - DateTime difference exceeds acceptable range (±60 seconds)\n")
+    
+    _log_to_console(separator + "\n")
+    
     data = {
         "status": status,
         "message": validation

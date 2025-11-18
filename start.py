@@ -83,7 +83,7 @@ if __name__ == '__main__':
     testcase = GetTestcase()
     transmitter_name = 'TransmitterName:'+transmitter_name
     if len(testcase)  != 0:
-        # list = [pathrobot, '-t TC001-sender id on DB, No key match', '-v',transmitter_name,  '-d', dirresult]
+        # list = [pathrobot, '-t TC021-1 key match Sender Kosong', '-v',transmitter_name,  '-d', dirresult]
         list = [pathrobot, '-v',transmitter_name,  '-d', dirresult]
         for row in testcase:
             list.append(row)

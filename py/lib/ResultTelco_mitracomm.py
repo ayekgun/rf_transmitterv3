@@ -149,12 +149,12 @@ def CheckValluRefnoTelcoMitracomm():
 def CheckValluSuffixRefnoTelcoMitracomm():
     str1 = "Suffix RefNo in Config"
     str2 = "Suffix RefNo From TelcoReceiver"
-    g_suffix = t_refno.endswith('_0')
+    g_suffix = t_refno.endswith('_1')
     if(g_suffix == True):
-        suffix = '_0'
+        suffix = '_1'
     else:
         suffix = ''
-    result = Transmitter.MetchingData('_0', suffix, str1, str2)
+    result = Transmitter.MetchingData('_1', suffix, str1, str2)
     return (result)
 
 def CallMitracommResponStatus():

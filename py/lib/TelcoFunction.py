@@ -114,7 +114,7 @@ def CheckVallueSubmitResultProviderTrxidMitracomm():
     libTelco = 'ResultTelco_'+tprovider
     #Curhat , transmitter ini provider trxid buat sendiri secara random, bukan kaya yang biasanya
     #ambil dari message id , jadi pengecekan nya berdasarkan tidak sama trxid saja huftt
-    g_sufix = SubmitResult.qsm_provider_trxid.endswith('_0')
+    g_sufix = SubmitResult.qsm_provider_trxid.endswith('_1')
     if(g_sufix == True):
         if(Transmitter.CheckFlowToTelco() == 'expired' or Transmitter.CheckFlowToTelco() == 'bypass'):
             providertrxid = str(Transmitter.generatedid).replace('-', '')

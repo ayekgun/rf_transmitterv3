@@ -18,6 +18,7 @@ sys.path.append(os.path.abspath("py/conf"))
 from config import *
 from conf_xl import *
 from conf_tsel import *
+from conf_telkomsel import *
 from conf_nadynehttp import *
 from conf_jantara import *
 from conf_jantarav3 import *
@@ -38,6 +39,7 @@ from py.lib.RetryTransmitter import *
 from ActiveMQ import *
 
 from ResultTelco_tsel import *
+from ResultTelco_telkomsel import *
 from ResultTelco_xl import *
 from ResultTelco_nadynehttp import *
 from ResultTelco_jantara import *

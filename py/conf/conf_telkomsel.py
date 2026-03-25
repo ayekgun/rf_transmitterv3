@@ -1,5 +1,5 @@
 
-telkomsel_urlchangerespon = 'http://192.168.181.52:8071/api_selenium/index.php/Transmittertsel/set_default?id='
+telkomsel_urlchangerespon = 'http://192.168.181.52:8071/api_selenium/index.php/Transmittertelkomsel/set_default?id='
 
 telkomsel_cfg_name818 = 'transmitter-telkomsel-reg-818'
 telkomsel_cfg_name623 = 'transmitter-telkomsel-reg-623'

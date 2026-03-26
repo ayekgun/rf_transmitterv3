@@ -23,20 +23,12 @@ def _log_to_console(message):
 
 def GetDataQueueSubmitResult():
     n = 1
-    # Tentukan ID yang akan dicari berdasarkan provider (menangani format jts- untuk telkomsel/tsel)
-    if (Transmitter.d_provider == 'telkomsel' or Transmitter.d_provider == 'tsel'):
-        search_id = 'jts-' + str(Transmitter.quinmessageid).replace('-', '')
-    else:
-        search_id = Transmitter.quinmessageid
-        
-    print(f"DEBUG: Searching for trxid: {search_id}")
-
     while n <= 3:
         con = pymysql.connect(db=db, user=user, passwd=passwd,
                               host=host, port=3306, autocommit=False)
         cur = con.cursor()
         cur.execute(
-            "SELECT * FROM out_submitresult where  trxid = %s", (search_id,))
+            "SELECT * FROM out_submitresult where  trxid = %s", (Transmitter.quinmessageid,))
         resultDB = cur.fetchone()
         n += 1
         if (resultDB is None):
@@ -50,13 +42,6 @@ def GetDataQueueSubmitResult():
     return (resultDB)
 
 def SetVariableQueueSubmitResult():
-    # Inisialisasi semua variabel qsm_ dan pendukung agar tidak terjadi NameError jika data tidak ditemukan
-    global respone_pss, respone_tss
-    respone_pss = ''
-    respone_tss = ''
-    for field in dic_queuesm:
-        globals()['qsm_'+field] = ''
-        
     result_Db = GetDataQueueSubmitResult()
     if (result_Db is None):
         result = {

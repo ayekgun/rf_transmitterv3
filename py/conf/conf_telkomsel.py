@@ -12,5 +12,5 @@ telkomsel_provider = 'TELKOMSEL-REGULAR'
 telkomsel_robotname = "transmittertelkomsel"
 telkomsel_cfglookup = "SELECT  lookup_name,lookup_value FROM jns_config where lookup_type = %s and lookup_name in('activemq_notifsender','activemq_topic','activemq_txack','activemq_txque','appKey','channel_name','ERR_EXPIRED','FAILED_SUBMIT','passwd','password','provider_hasdr','provider_pwd','provider_uid','queue_persistency','timeout','username','sleep_after_send','max_retry','RETRY_TIMEOUT')"
 
-telkomsel_retry_mechanisme = True
+telkomsel_retry_mechanisme = False
 telkomsel_reroute_mechanisme = False

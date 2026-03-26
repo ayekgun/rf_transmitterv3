@@ -439,6 +439,7 @@ def MetchingData(var1, var2, string1, string2):
     Compare two values and return match status
     Note: Detailed logging is handled by the calling Check functions
     """
+    print(f"expected: {var1}, actual: {var2}")
     if (var1 == var2):
         status = 'OK'
         validation = string1, var1, " &", string2, var2, "= Match"

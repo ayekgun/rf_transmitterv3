@@ -23,56 +23,25 @@ def _log_to_console(message):
 
 def GetDataQueueSubmitResult():
     n = 1
-    # Formats to try for out_submitresult trxid:
-    # 1. jts-<uuid-no-dash> (Telkomsel application format)
-    # 2. <uuid-no-dash> 
-    # 3. jts-<uuid-with-dash>
-    # 4. <uuid-with-dash> (original messageid)
-    
-    raw_uuid = str(Transmitter.generatediddash)
-    nodash_uuid = raw_uuid.replace('-', '')
-    
-    formats = [
-        'jts-' + nodash_uuid,
-        nodash_uuid,
-        'jts-' + raw_uuid,
-        raw_uuid
-    ]
-    
-    print(f"[DEBUG] Searching for Submit Result with fallback formats: {formats}")
-
-    while n <= 5: # Increased retries to 5
+    while n <= 3:
         con = pymysql.connect(db=db, user=user, passwd=passwd,
                               host=host, port=3306, autocommit=False)
         cur = con.cursor()
-        
-        for fmt in formats:
-            cur.execute("SELECT * FROM out_submitresult where trxid = %s order by id desc", (fmt,))
-            resultDB = cur.fetchone()
-            if resultDB:
-                print(f"[DEBUG] Found Submit Result with ID: {fmt}")
-                cur.close()
-                con.close()
-                return resultDB
-        
-        cur.close()
-        con.close()
-        print(f"[DEBUG] Retry {n}/5: No Submit Result found yet in out_submitresult.")
+        cur.execute(
+            "SELECT * FROM out_submitresult where  trxid = %s", (Transmitter.quinmessageid,))
+        resultDB = cur.fetchone()
         n += 1
-        time.sleep(2)
+        if (resultDB is None):
+            print(n)
+            cur.close()
+            time.sleep(1)
+        else:
+            break
+            cur.close()
 
-    return None
+    return (resultDB)
 
 def SetVariableQueueSubmitResult():
-    # Defensive initialization of common global result variables to avoid NameError
-    global qsm_channel_name, qsm_provider_submit_status, qsm_transmitter_submit_status, qsm_trxid
-    global respone_pss, respone_tss
-    qsm_channel_name = qsm_provider_submit_status = qsm_transmitter_submit_status = qsm_trxid = ''
-    respone_pss = respone_tss = ''
-    # Initialize all from dic_queuesm as well
-    for key in dic_queuesm:
-        globals()['qsm_'+key] = ''
-
     result_Db = GetDataQueueSubmitResult()
     if (result_Db is None):
         result = {
@@ -82,13 +51,14 @@ def SetVariableQueueSubmitResult():
     else:
         i = 0
         while i < len(dic_queuesm):
-            globals()['qsm_'+dic_queuesm[i]] = str(result_Db[i]) if result_Db[i] is not None else ''
+            globals()['qsm_'+dic_queuesm[i]] = result_Db[i]
             i += 1
         result = {
             "status": "OK",
             "message": "OK"
         }
         SetVaribaleResponeDummy()
+    # print(qsm_channel_name)
     return (result)
 
 def SetVaribaleResponeDummy():
@@ -270,24 +240,15 @@ def CheckVallueSubmitResultTrxid():
     
     str1 = "TRX ID Queue IN"
     str2 = "TRX ID Queue Submit Result"
-    
-    # Expected can be original UUID
     expected_trxid = str(Transmitter.generatediddash)
     
-    # Actual trxid from DB might have 'jts-' prefix or no dashes.
-    # We normalize both for comparison.
-    actual_trxid_normalized = str(qsm_trxid).replace('jts-', '').replace('-', '')
-    expected_trxid_normalized = expected_trxid.replace('-', '')
-
-    _log_to_console(f"  Expected (Original): {expected_trxid}\n")
-    _log_to_console(f"  Actual (Normalized): {actual_trxid_normalized}\n")
-    
-    result = Transmitter.MetchingData(expected_trxid_normalized, actual_trxid_normalized, str1, str2)
+    _log_to_console("  TRX ID Validation Results:\n")
+    result = Transmitter.MetchingData(expected_trxid, qsm_trxid, str1, str2)
     
     if result['status'] == 'OK':
-        _log_to_console(f"    ✓ TRX ID: Correctly matches messageid (ignoring prefix and dashes)\n")
+        _log_to_console(f"    ✓ TRX ID: Expected '{expected_trxid}' matches Actual '{qsm_trxid}'\n")
     else:
-        _log_to_console(f"    ✗ TRX ID: Mismatch between Queue IN and Submit Result\n")
+        _log_to_console(f"    ✗ TRX ID: Expected '{expected_trxid}' does not match Actual '{qsm_trxid}'\n")
     
     _log_to_console(separator + "\n")
     return (result)

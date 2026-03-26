@@ -47,7 +47,7 @@ def GetDataQueueSubmitResult():
         cur = con.cursor()
         
         for fmt in formats:
-            cur.execute("SELECT * FROM out_submitresult where trxid = %s order by id desc", (fmt,))
+            cur.execute("SELECT * FROM out_submitresult where trxid = %s order by dateinserted desc", (fmt,))
             resultDB = cur.fetchone()
             if resultDB:
                 print(f"[DEBUG] Found Submit Result with ID: {fmt}")

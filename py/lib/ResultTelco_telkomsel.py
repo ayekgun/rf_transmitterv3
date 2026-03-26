@@ -32,7 +32,8 @@ def SetVariableResponeResultTelkomsel():
             global t_responetrxid
             
             # TelkomselHttpHandlerImpl.java only sends 6 parameters: appsid, pwd, sid, trx_id, msisdn, sms
-            params = urllib.parse.parse_qs(json_data['parameter'], keep_blank_values=True)
+            # Use separator='&' to prevent parse_qs from splitting at semicolons (;) in the SMS content
+            params = urllib.parse.parse_qs(json_data['parameter'], keep_blank_values=True, separator='&')
             
             t_appsid = params['appsid'][0] if 'appsid' in params else ''
             t_msisdn = params['msisdn'][0] if 'msisdn' in params else ''

@@ -51,7 +51,7 @@ def SetVariableResponeResultTelkomsel():
 def GetResultDummyWithApiTelkomsel():
     n = 1
     while n <= 3:
-        url = urlcekresult + 'jts-'+str(Transmitter.generatediddash).replace('-', '')
+        url = urlcekresult + str(Transmitter.generatediddash)
         req = requests.get(url)
         json_data = json.loads(req.text)
         n += 1

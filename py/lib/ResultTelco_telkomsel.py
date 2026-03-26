@@ -11,10 +11,6 @@ from config import *
 
 
 def SetVariableResponeResultTelkomsel():
-    # Initialize globals to prevent NameError in subsequent checks even if this one fails
-    global t_appsid, t_msisdn, t_pwd, t_sid, t_sms, t_responetrxid
-    t_appsid = t_msisdn = t_pwd = t_sid = t_sms = t_responetrxid = ''
-    
     if(Transmitter.CheckFlowToTelco() == 'expired' or Transmitter.CheckFlowToTelco() == 'bypass'):
         result = {
             "status": "OK",
@@ -28,6 +24,13 @@ def SetVariableResponeResultTelkomsel():
                 "message": "Data Telco tidak ada / Tidak Hit Telco"
             }
         else:
+            global t_appsid
+            global t_msisdn
+            global t_pwd
+            global t_sid
+            global t_sms
+            global t_responetrxid
+            
             # TelkomselHttpHandlerImpl.java only sends 6 parameters: appsid, pwd, sid, trx_id, msisdn, sms
             params = urllib.parse.parse_qs(json_data['parameter'], keep_blank_values=True)
             
@@ -47,40 +50,20 @@ def SetVariableResponeResultTelkomsel():
 
 def GetResultDummyWithApiTelkomsel():
     n = 1
-    # Formats to try:
-    # 1. jts-<uuid-no-dash> (legacy format)
-    # 2. <uuid-no-dash>
-    # 3. jts-<uuid-with-dash>
-    # 4. <uuid-with-dash> (original messageid)
-    
-    raw_uuid = str(Transmitter.generatediddash)
-    nodash_uuid = raw_uuid.replace('-', '')
-    
-    formats = [
-        'jts-' + nodash_uuid,
-        nodash_uuid,
-        'jts-' + raw_uuid,
-        raw_uuid
-    ]
-    
     while n <= 3:
-        for fmt in formats:
-            url = urlcekresult + fmt
-            try:
-                req = requests.get(url)
-                if req.status_code == 200:
-                    json_data = json.loads(req.text)
-                    if json_data != 'Data Not Found':
-                        print(f"[DEBUG] Found hit telco with ID: {fmt}")
-                        return json_data
-            except Exception as e:
-                print(f"[DEBUG] Error hitting dummy API: {str(e)}")
-        
-        print(f"[DEBUG] Retry {n}/3: Data Telco not found yet for any fallback ID format.")
+        url = urlcekresult + 'jts-'+str(Transmitter.generatediddash).replace('-', '')
+        req = requests.get(url)
+        json_data = json.loads(req.text)
         n += 1
-        time.sleep(2)
+        if(json_data == 'Data Not Found'):
+            print(url)
+            result = json_data
+            time.sleep(2)
+        else:
+            result = json_data
+            break
 
-    return 'Data Not Found'
+    return result
 
 def CheckVallueAppidTelkomsel():
     str1 = "Appid From DB Config"
@@ -141,19 +124,11 @@ def CheckVallueSidTelkomsel():
 
 
 def CheckVallueSMSTelkomsel():
-    str1 = "Message From Queue"
-    str2 = "Message From TelcoReceiver"
+    str1 = "Appid From DB Config"
+    str2 = "Appid From TelcoReceiver"
     result = Transmitter.MetchingData(urllib.parse.unquote_plus(
         Transmitter.quinmessage), urllib.parse.unquote_plus(t_sms), str1, str2)
     return (result)
-
-# Aliases for compatibility with Tsel/General keywords in DB
-SetVariableResponeResultTsel = SetVariableResponeResultTelkomsel
-CheckVallueAppidTelco = CheckVallueAppidTelkomsel
-CheckVallueMsisdnTelco = CheckVallueMsisdnTelkomsel
-CheckValluePwdTelco = CheckValluePwdTelkomsel
-CheckVallueSidTelco = CheckVallueSidTelkomsel
-CheckVallueSMSTelco = CheckVallueSMSTelkomsel
 
 # Note: cp_name and trx_date checks removed as they are not sent by TelkomselHttpHandlerImpl.java
 

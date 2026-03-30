@@ -71,8 +71,8 @@ def CheckVallueAppidTelkomsel():
     str1 = "Appid From DB Config"
     str2 = "Appid From TelcoReceiver"
     if (Transmitter.senderids_support == 'true'):
-        if(Transmitter.sid_queue_username != ''):
-            c_uid = Transmitter.sid_queue_username
+        if(Transmitter.sid_queue_cpname != ''):
+            c_uid = Transmitter.sid_queue_cpname
         else:
             c_uid = Transmitter.cfg_username
     else:
@@ -92,8 +92,8 @@ def CheckVallueMsisdnTelkomsel():
 
 
 def CheckValluePwdTelkomsel():
-    str1 = "Appid From DB Config"
-    str2 = "Appid From TelcoReceiver"
+    str1 = "PWD From DB Config"
+    str2 = "PWD From TelcoReceiver"
     if (Transmitter.senderids_support == 'true'):
         if(Transmitter.sid_queue_password != ''):
             c_pwdtelco = Transmitter.sid_queue_password

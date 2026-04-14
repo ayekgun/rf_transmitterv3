@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 6.1.1 (Python 3.10.11 on win32)" generated="20260203 14:55:16.889" rpa="false" schemaversion="4">
+<suite id="s1" name="TransmitterJns247" source="D:\Work\Automation\RobotFramework\JNS\temp_git\transmitterv3\robot\TransmitterJns247.robot">
+<test id="s1-t1" name="TC001-sender id on DB, No key match" line="6">
+<kw name="Transmitter" library="keyword">
+<arg>T247</arg>
+<arg>[TRANSJNS-001]</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>================================================================================</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:18.880" endtime="20260203 14:55:18.880"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Transmitter] Starting test: type=${type}, test=${no_test}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:18.880" endtime="20260203 14:55:18.881"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>================================================================================</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:18.881" endtime="20260203 14:55:18.881"/>
+</kw>
+<kw name="Set Config Dynamic" library="Transmitter">
+<arg>${TransmitterName}</arg>
+<status status="PASS" starttime="20260203 14:55:18.881" endtime="20260203 14:55:18.881"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${type}' == 'T818'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE IF</arg>
+<arg>'${type}' == 'T623'</arg>
+<arg>Transmitter ReDirect</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>ELSE</arg>
+<arg>Transmitter Direct</arg>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Transmitter Direct" library="keyword">
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Transmitter Direct] Starting: type=${type}, test=${no_test}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:18.882" endtime="20260203 14:55:18.883"/>
+</kw>
+<kw name="Get Test Respone Dummy" library="Transmitter">
+<var>@{listrespon}</var>
+<msg timestamp="20260203 14:55:19.209" level="INFO">PINTAR-REGULAR</msg>
+<msg timestamp="20260203 14:55:19.209" level="INFO">@{listrespon} = [ 95 | 96 | 97 | 98 | 99 | 100 | 101 | 102 ]</msg>
+<status status="PASS" starttime="20260203 14:55:18.883" endtime="20260203 14:55:19.209"/>
+</kw>
+<kw name="Get Length" library="BuiltIn">
+<var>${list_length}</var>
+<arg>${listrespon}</arg>
+<doc>Returns and logs the length of the given item as an integer.</doc>
+<msg timestamp="20260203 14:55:19.209" level="INFO">Length is 8</msg>
+<msg timestamp="20260203 14:55:19.209" level="INFO">${list_length} = 8</msg>
+<status status="PASS" starttime="20260203 14:55:19.209" endtime="20260203 14:55:19.209"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Transmitter Direct] Found ${list_length} dummy responses to process</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:19.209" endtime="20260203 14:55:19.210"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${counter}</var>
+<arg>0</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:19.210" level="INFO">${counter} = 0</msg>
+<status status="PASS" starttime="20260203 14:55:19.210" endtime="20260203 14:55:19.210"/>
+</kw>
+<for flavor="IN">
+<var>${item}</var>
+<value>@{listrespon}</value>
+<iter>
+<var name="${item}">95</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:19.210" level="INFO">${counter} = 1</msg>
+<status status="PASS" starttime="20260203 14:55:19.210" endtime="20260203 14:55:19.210"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Transmitter Direct] Processing dummy response ${counter}/${list_length}: item=${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:19.211" endtime="20260203 14:55:19.211"/>
+</kw>
+<kw name="Sleep" library="BuiltIn">
+<arg>2</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<msg timestamp="20260203 14:55:21.225" level="INFO">Slept 2 seconds</msg>
+<status status="PASS" starttime="20260203 14:55:19.211" endtime="20260203 14:55:21.225"/>
+</kw>
+<kw name="Preparation Data and Dummy" library="keyword">
+<var>${sleep}</var>
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Preparation Data and Dummy] Preparing: type=${type}, test=${no_test}, item=${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:21.225" endtime="20260203 14:55:21.226"/>
+</kw>
+<kw name="Set Variable Test Case" library="Transmitter">
+<arg>${type}</arg>
+<arg>${no_test}</arg>
+<msg timestamp="20260203 14:55:21.761" level="INFO">expected_result = 
+quintrxid = autotrxid
+quinmessageid = automessageid
+quinmsisdn = 6281802000319
+quinmessage = Promo spesial: kuota data 320,307,480 MB hanya untuk pelanggan setia; aktifkan sekarang juga sebelum tengah malam agar koneksi internetmu tetap ngebut harian!!
+quinbatchname = testing
+quinclientid = 1
+quindivisionid = 1091
+quinsenderid = QueueSenderID
+quinuid = QueueUID
+quinpwd = QueuePWD
+quincpName = Queuecpname
+quinuploadby = 
+quinapproveby = 
+quindateupload = 2018-07-18 15:45:46
+quindateapprove = 2018-07-18 15:45:46
+quindateinqueue = 
+quinservicetype = HTTPALERT
+quinproviderid = 1
+quinbillable = 1
+quinjatismessageid = 
+quinuploadtype = 
+quinsmspartition = 1
+quinexpiry = 
+quinsender = MCC
+quinchannel_mq_name = jns6.1-queuedummy-tx
+quinpriority = 4
+quinadddata1 = 
+quinadddata2 = 
+quinadddata3 = 
+quinchargecode = 2f1d1412ce4202
+quinsenderids = {"sender":"MCC","maskCodeSettings":[{"key":"INFOBIP-IM3","data":{"username":"","password":"","cpName":"","channelIsDirect":0,"senderID":"MCC"}},{"key":"INFOBIP","data":{"username":"","password":"","cpName":"","channelIsDirect":0,"senderID":"MCC"}},{"key":"JTR","data":{"username":"","password":"","cpName":"","channelIsDirect":17,"senderID":"MCC"}},{"key":"JTR-PREMIUM","data":{"username":"","password":"","cpName":"","channelIsDirect":19,"senderID":"MATAHARI"}},{"key":"JTR-ENTR","data":{"username":"cfjntr03","password":"","cpName":"","channelIsDirect":21,"senderID":"MCC"}},{"key":"ISAT-IKLANSTORE-2","data":{"username":"usernamejson","password":"passwordjson","cpName":"cpnamejson","channelIsDirect":1,"senderID":"senderJSON"}},{"key":"SMARTFREN","data":{"username":"jatismatahari","password":"","cpName":"","channelIsDirect":1,"senderID":"3021195"}},{"key":"SISKOM","data":{"username":"","password":"","cpName":"","channelIsDirect":3,"senderID":"MCC"}},{"key":"SISKOMPREMIUM","data":{"username":"","password":"","cpName":"","channelIsDirect":14,"senderID":"MCC"}},{"key":"THREE","data":{"username":"jat99123mtbulk2","password":"","cpName":"","channelIsDirect":1,"senderID":"MATAHARI"}},{"key":"TSELXYZ","data":{"username":"tselxyz","password":"tselxyz","cpName":"tselxyz","channelIsDirect":1,"senderID":"jatismatahari"}},{"key":"BUANA","data":{"username":"","password":"","cpName":"","channelIsDirect":26,"senderID":"MATAHARI"}},{"key":"XL","data":{"username":"","password":"","cpName":"","channelIsDirect":1,"senderID":"395787"}}]}
+quinpriority_header = 4
+quinpersistent = TRUE
+quinoriginmqname = 
+quinretry = 0
+trxid=E0EE638E554E4B44AAAD46B8&amp;messageid=2af8dbee-7f4d-4bb9-be29-591f933ae96c&amp;msisdn=6281802000319&amp;message=Promo+spesial%3A+kuota+data+320%2C307%2C480+MB+hanya+untuk+pelanggan+setia%3B+aktifkan+sekarang+juga+sebelum+tengah+malam+agar+koneksi+internetmu+tetap+ngebut+harian%21%21&amp;batchname=testing&amp;clientid=1&amp;divisionid=1091&amp;senderid=QueueSenderID&amp;uid=QueueUID&amp;pwd=QueuePWD&amp;cpName=Queuecpname&amp;uploadby=&amp;approveby=&amp;dateupload=2018-07-18+15%3A45%3A46&amp;dateapprove=2018-07-18+15%3A45%3A46&amp;dateinqueue=&amp;servicetype=HTTPALERT&amp;providerid=1&amp;billable=1&amp;jatismessageid=&amp;uploadtype=&amp;smspartition=1&amp;expiry=&amp;sender=MCC&amp;channel_mq_name=jns6.1-queuedummy-tx&amp;priority=4&amp;adddata1=&amp;adddata2=&amp;adddata3=&amp;chargecode=2f1d1412ce4202&amp;senderids=%7B%22sender%22%3A%22MCC%22%2C%22maskCodeSettings%22%3A%5B%7B%22key%22%3A%22INFOBIP-IM3%22%2C%22data%22%3A%7B%22username%22%3A%22%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A0%2C%22senderID%22%3A%22MCC%22%7D%7D%2C%7B%22key%22%3A%22INFOBIP%22%2C%22data%22%3A%7B%22username%22%3A%22%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A0%2C%22senderID%22%3A%22MCC%22%7D%7D%2C%7B%22key%22%3A%22JTR%22%2C%22data%22%3A%7B%22username%22%3A%22%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A17%2C%22senderID%22%3A%22MCC%22%7D%7D%2C%7B%22key%22%3A%22JTR-PREMIUM%22%2C%22data%22%3A%7B%22username%22%3A%22%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A19%2C%22senderID%22%3A%22MATAHARI%22%7D%7D%2C%7B%22key%22%3A%22JTR-ENTR%22%2C%22data%22%3A%7B%22username%22%3A%22cfjntr03%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A21%2C%22senderID%22%3A%22MCC%22%7D%7D%2C%7B%22key%22%3A%22ISAT-IKLANSTORE-2%22%2C%22data%22%3A%7B%22username%22%3A%22usernamejson%22%2C%22password%22%3A%22passwordjson%22%2C%22cpName%22%3A%22cpnamejson%22%2C%22channelIsDirect%22%3A1%2C%22senderID%22%3A%22senderJSON%22%7D%7D%2C%7B%22key%22%3A%22SMARTFREN%22%2C%22data%22%3A%7B%22username%22%3A%22jatismatahari%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A1%2C%22senderID%22%3A%223021195%22%7D%7D%2C%7B%22key%22%3A%22SISKOM%22%2C%22data%22%3A%7B%22username%22%3A%22%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A3%2C%22senderID%22%3A%22MCC%22%7D%7D%2C%7B%22key%22%3A%22SISKOMPREMIUM%22%2C%22data%22%3A%7B%22username%22%3A%22%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A14%2C%22senderID%22%3A%22MCC%22%7D%7D%2C%7B%22key%22%3A%22THREE%22%2C%22data%22%3A%7B%22username%22%3A%22jat99123mtbulk2%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A1%2C%22senderID%22%3A%22MATAHARI%22%7D%7D%2C%7B%22key%22%3A%22TSELXYZ%22%2C%22data%22%3A%7B%22username%22%3A%22tselxyz%22%2C%22password%22%3A%22tselxyz%22%2C%22cpName%22%3A%22tselxyz%22%2C%22channelIsDirect%22%3A1%2C%22senderID%22%3A%22jatismatahari%22%7D%7D%2C%7B%22key%22%3A%22BUANA%22%2C%22data%22%3A%7B%22username%22%3A%22%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A26%2C%22senderID%22%3A%22MATAHARI%22%7D%7D%2C%7B%22key%22%3A%22XL%22%2C%22data%22%3A%7B%22username%22%3A%22%22%2C%22password%22%3A%22%22%2C%22cpName%22%3A%22%22%2C%22channelIsDirect%22%3A1%2C%22senderID%22%3A%22395787%22%7D%7D%5D%7D</msg>
+<status status="PASS" starttime="20260203 14:55:21.226" endtime="20260203 14:55:21.761"/>
+</kw>
+<kw name="Change Dummy Respone" library="Transmitter">
+<var>${sleep}</var>
+<arg>${item}</arg>
+<msg timestamp="20260203 14:55:22.086" level="INFO">http://192.168.181.52:8071/api_selenium/index.php/TransmitterPintar/set_default?id=95&amp;trxid=2af8dbee-7f4d-4bb9-be29-591f933ae96c</msg>
+<msg timestamp="20260203 14:55:22.087" level="INFO">${sleep} = &lt;Response [200]&gt;</msg>
+<status status="PASS" starttime="20260203 14:55:21.761" endtime="20260203 14:55:22.087"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Preparation Data and Dummy] Sleep time: ${sleep.json()['sleep']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:22.087" endtime="20260203 14:55:22.087"/>
+</kw>
+<msg timestamp="20260203 14:55:22.088" level="INFO">${sleep} = 1</msg>
+<status status="PASS" starttime="20260203 14:55:21.225" endtime="20260203 14:55:22.088"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Transmitter Direct] Sleep time: ${sleep}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:22.088" endtime="20260203 14:55:22.088"/>
+</kw>
+<kw name="Run Proccess Send Queue" library="keyword">
+<arg>normal</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Run Proccess Send Queue] Sending message: type=${type}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:22.089" endtime="20260203 14:55:22.089"/>
+</kw>
+<kw name="Send Message Queue" library="Transmitter">
+<arg>${type}</arg>
+<msg timestamp="20260203 14:55:22.269" level="INFO">Attempting connection to host 192.168.181.51, port 61613</msg>
+<msg timestamp="20260203 14:55:22.354" level="INFO">Established connection to host 192.168.181.51, port 61613</msg>
+<msg timestamp="20260203 14:55:22.357" level="INFO">Sending frame: 'STOMP', headers={'accept-version': '1.1', 'login': 'admin', 'passcode': '********'}</msg>
+<msg timestamp="20260203 14:55:22.447" level="INFO">Sending frame: 'SEND', headers={'content-length': None, 'destination': 'jns.transmitter.pintar.reg.247'}</msg>
+<msg timestamp="20260203 14:55:22.448" level="INFO">Sending frame: 'DISCONNECT', headers={'receipt': 'cc71622d-89f7-4f70-8515-626d3f0a63b3'}</msg>
+<status status="PASS" starttime="20260203 14:55:22.089" endtime="20260203 14:55:22.671"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Run Proccess Send Queue] Message sent</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:22.671" endtime="20260203 14:55:22.672"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:22.089" endtime="20260203 14:55:22.672"/>
+</kw>
+<kw name="Check Flow To Telco" library="Transmitter">
+<var>${status}</var>
+<msg timestamp="20260203 14:55:22.672" level="INFO">${status} = valid</msg>
+<status status="PASS" starttime="20260203 14:55:22.672" endtime="20260203 14:55:22.673"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Transmitter Direct] Flow status: ${status}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:22.673" endtime="20260203 14:55:22.674"/>
+</kw>
+<kw name="Check Result Parameter in Telco" library="keyword">
+<arg>${sleep}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Parameter in Telco] Starting validation (sleep=${sleep})</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:22.674" endtime="20260203 14:55:22.675"/>
+</kw>
+<kw name="Sleep" library="BuiltIn">
+<arg>${sleep}</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<msg timestamp="20260203 14:55:23.688" level="INFO">Slept 1 second</msg>
+<status status="PASS" starttime="20260203 14:55:22.675" endtime="20260203 14:55:23.688"/>
+</kw>
+<kw name="Set Senderids Parameter For Check" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:23.688" endtime="20260203 14:55:23.688"/>
+</kw>
+<kw name="Check Flow To Telco" library="Transmitter">
+<var>${status}</var>
+<msg timestamp="20260203 14:55:23.688" level="INFO">${status} = valid</msg>
+<status status="PASS" starttime="20260203 14:55:23.688" endtime="20260203 14:55:23.688"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Parameter in Telco] Flow status: ${status}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:23.688" endtime="20260203 14:55:23.688"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'valid'</arg>
+<arg>Check Result Telco</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Check Result Telco" library="keyword">
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Starting validation</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:23.690" endtime="20260203 14:55:23.690"/>
+</kw>
+<kw name="Get Keyword From DB" library="Transmitter">
+<var>@{list}</var>
+<arg>CheckResultTelco</arg>
+<msg timestamp="20260203 14:55:24.840" level="INFO">SELECT subkeyword FROM config_keyword where status = 1 and appname in(%s,%s) and keyword = %s order by step asc ('transmitterjns', 'transmitterpintar', 'CheckResultTelco')</msg>
+<msg timestamp="20260203 14:55:24.841" level="INFO">@{list} = [ SetVariableResponeResultPintar | CheckCallbackMethodFromTelco | CheckCallbackUrlFromTelco | CheckEncodingFromTelco | CheckMessageContentFromTelco | CheckMsisdnFromTelco | CheckPasswordFromTelco | Ch...</msg>
+<status status="PASS" starttime="20260203 14:55:23.690" endtime="20260203 14:55:24.841"/>
+</kw>
+<kw name="Set Suite Variable" library="BuiltIn">
+<arg>@{list}</arg>
+<doc>Makes a variable available everywhere within the scope of the current suite.</doc>
+<msg timestamp="20260203 14:55:24.841" level="INFO">@{list} = [ SetVariableResponeResultPintar | CheckCallbackMethodFromTelco | CheckCallbackUrlFromTelco | CheckEncodingFromTelco | CheckMessageContentFromTelco | CheckMsisdnFromTelco | CheckPasswordFromTelco | Ch...</msg>
+<status status="PASS" starttime="20260203 14:55:24.841" endtime="20260203 14:55:24.841"/>
+</kw>
+<kw name="Get Length" library="BuiltIn">
+<var>${list_length}</var>
+<arg>${list}</arg>
+<doc>Returns and logs the length of the given item as an integer.</doc>
+<msg timestamp="20260203 14:55:24.842" level="INFO">Length is 11</msg>
+<msg timestamp="20260203 14:55:24.842" level="INFO">${list_length} = 11</msg>
+<status status="PASS" starttime="20260203 14:55:24.841" endtime="20260203 14:55:24.842"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Found ${list_length} checks to perform</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.842" endtime="20260203 14:55:24.842"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${counter}</var>
+<arg>0</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:24.843" level="INFO">${counter} = 0</msg>
+<status status="PASS" starttime="20260203 14:55:24.843" endtime="20260203 14:55:24.843"/>
+</kw>
+<for flavor="IN">
+<var>${item}</var>
+<value>@{list}</value>
+<iter>
+<var name="${item}">SetVariableResponeResultPintar</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:24.843" level="INFO">${counter} = 1</msg>
+<status status="PASS" starttime="20260203 14:55:24.843" endtime="20260203 14:55:24.844"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.844" endtime="20260203 14:55:24.844"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:24.845" level="INFO">SetVariableResponeResultPintar</msg>
+<status status="PASS" starttime="20260203 14:55:24.844" endtime="20260203 14:55:24.845"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.845" endtime="20260203 14:55:24.846"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Set Variable Respone Result Pintar" library="Transmitter">
+<msg timestamp="20260203 14:55:24.973" level="INFO">{'provider_trxid': '2af8dbee-7f4d-4bb9-be29-591f933ae96c', 'parameter': '{"senderid":"QueueSenderID","type":"sms","msisdn":"6281802000319","encoding":"GSM","message":"Promo spesial: kuota data 320,307,480 MB hanya untuk pelanggan setia; aktifkan sekarang juga sebelum tengah malam agar koneksi internetmu tetap ngebut harian!!","username":"QueueUID","password":"QueuePWD","token":"Queuecpname","callbackurl":"http://192.168.181.51:8179/DRReceiverPintar","callbackmethod":"post","product":"SMS-1"}', 'respon': '000', 'dateinserted': '2026-02-03 14:55:23', 'header': None}</msg>
+<status status="PASS" starttime="20260203 14:55:24.852" endtime="20260203 14:55:24.973"/>
+</kw>
+<msg timestamp="20260203 14:55:24.973" level="INFO">${respone} = {'status': 'OK', 'message': 'OK'}</msg>
+<status status="PASS" starttime="20260203 14:55:24.846" endtime="20260203 14:55:24.973"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:24.974" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:24.973" endtime="20260203 14:55:24.974"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:24.975" endtime="20260203 14:55:24.975"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.974" endtime="20260203 14:55:24.975"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.976" endtime="20260203 14:55:24.977"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.975" endtime="20260203 14:55:24.977"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.845" endtime="20260203 14:55:24.977"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.843" endtime="20260203 14:55:24.977"/>
+</iter>
+<iter>
+<var name="${item}">CheckCallbackMethodFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:24.978" level="INFO">${counter} = 2</msg>
+<status status="PASS" starttime="20260203 14:55:24.978" endtime="20260203 14:55:24.978"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.978" endtime="20260203 14:55:24.979"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:24.979" level="INFO">CheckCallbackMethodFromTelco</msg>
+<status status="PASS" starttime="20260203 14:55:24.979" endtime="20260203 14:55:24.979"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.979" endtime="20260203 14:55:24.980"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Check Callback Method From Telco" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:24.988" endtime="20260203 14:55:24.989"/>
+</kw>
+<msg timestamp="20260203 14:55:24.989" level="INFO">${respone} = {'status': 'OK', 'message': ('Callback Method From Config', 'post', ' &amp;', 'Callback Method From TelcoReceiver', 'post', '= Match')}</msg>
+<status status="PASS" starttime="20260203 14:55:24.980" endtime="20260203 14:55:24.989"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:24.989" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:24.989" endtime="20260203 14:55:24.989"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:24.989" endtime="20260203 14:55:24.989"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.989" endtime="20260203 14:55:24.989"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.989" endtime="20260203 14:55:24.992"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.989" endtime="20260203 14:55:24.993"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.979" endtime="20260203 14:55:24.993"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.977" endtime="20260203 14:55:24.993"/>
+</iter>
+<iter>
+<var name="${item}">CheckCallbackUrlFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:24.993" level="INFO">${counter} = 3</msg>
+<status status="PASS" starttime="20260203 14:55:24.993" endtime="20260203 14:55:24.993"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.994" endtime="20260203 14:55:24.994"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:24.994" level="INFO">CheckCallbackUrlFromTelco</msg>
+<status status="PASS" starttime="20260203 14:55:24.994" endtime="20260203 14:55:24.994"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:24.994" endtime="20260203 14:55:24.995"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Check Callback Url From Telco" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:25.005" endtime="20260203 14:55:25.005"/>
+</kw>
+<msg timestamp="20260203 14:55:25.005" level="INFO">${respone} = {'status': 'OK', 'message': ('Callback URL From Config', 'http://192.168.181.51:8179/DRReceiverPintar', ' &amp;', 'Callback URL From TelcoReceiver', 'http://192.168.181.51:8179/DRReceiverPintar', '= Match...</msg>
+<status status="PASS" starttime="20260203 14:55:24.995" endtime="20260203 14:55:25.005"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:25.007" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:25.006" endtime="20260203 14:55:25.007"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:25.008" endtime="20260203 14:55:25.008"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.007" endtime="20260203 14:55:25.008"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.008" endtime="20260203 14:55:25.009"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.008" endtime="20260203 14:55:25.009"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.994" endtime="20260203 14:55:25.009"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:24.993" endtime="20260203 14:55:25.009"/>
+</iter>
+<iter>
+<var name="${item}">CheckEncodingFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:25.010" level="INFO">${counter} = 4</msg>
+<status status="PASS" starttime="20260203 14:55:25.010" endtime="20260203 14:55:25.010"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.010" endtime="20260203 14:55:25.010"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:25.011" level="INFO">CheckEncodingFromTelco</msg>
+<status status="PASS" starttime="20260203 14:55:25.011" endtime="20260203 14:55:25.011"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.012" endtime="20260203 14:55:25.013"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Check Encoding From Telco" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:25.022" endtime="20260203 14:55:25.023"/>
+</kw>
+<msg timestamp="20260203 14:55:25.023" level="INFO">${respone} = {'status': 'OK', 'message': ('Encoding From Config', 'GSM', ' &amp;', 'Encoding From TelcoReceiver', 'GSM', '= Match')}</msg>
+<status status="PASS" starttime="20260203 14:55:25.013" endtime="20260203 14:55:25.023"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:25.024" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:25.023" endtime="20260203 14:55:25.024"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:25.024" endtime="20260203 14:55:25.024"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.024" endtime="20260203 14:55:25.024"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.024" endtime="20260203 14:55:25.025"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.024" endtime="20260203 14:55:25.025"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.011" endtime="20260203 14:55:25.025"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.009" endtime="20260203 14:55:25.025"/>
+</iter>
+<iter>
+<var name="${item}">CheckMessageContentFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:25.025" level="INFO">${counter} = 5</msg>
+<status status="PASS" starttime="20260203 14:55:25.025" endtime="20260203 14:55:25.025"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.025" endtime="20260203 14:55:25.026"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:25.026" level="INFO">CheckMessageContentFromTelco</msg>
+<status status="PASS" starttime="20260203 14:55:25.026" endtime="20260203 14:55:25.026"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.026" endtime="20260203 14:55:25.026"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Check Message Content From Telco" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:25.032" endtime="20260203 14:55:25.032"/>
+</kw>
+<msg timestamp="20260203 14:55:25.032" level="INFO">${respone} = {'status': 'OK', 'message': ('Message Content From Queue', 'Promo spesial: kuota data 320,307,480 MB hanya untuk pelanggan setia; aktifkan sekarang juga sebelum tengah malam agar koneksi internetmu te...</msg>
+<status status="PASS" starttime="20260203 14:55:25.026" endtime="20260203 14:55:25.032"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:25.034" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:25.033" endtime="20260203 14:55:25.034"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:25.034" endtime="20260203 14:55:25.034"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.034" endtime="20260203 14:55:25.034"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.034" endtime="20260203 14:55:25.035"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.034" endtime="20260203 14:55:25.035"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.026" endtime="20260203 14:55:25.035"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.025" endtime="20260203 14:55:25.035"/>
+</iter>
+<iter>
+<var name="${item}">CheckMsisdnFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:25.036" level="INFO">${counter} = 6</msg>
+<status status="PASS" starttime="20260203 14:55:25.036" endtime="20260203 14:55:25.036"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.036" endtime="20260203 14:55:25.036"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:25.036" level="INFO">CheckMsisdnFromTelco</msg>
+<status status="PASS" starttime="20260203 14:55:25.036" endtime="20260203 14:55:25.036"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.036" endtime="20260203 14:55:25.036"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Check Msisdn From Telco" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:25.046" endtime="20260203 14:55:25.047"/>
+</kw>
+<msg timestamp="20260203 14:55:25.047" level="INFO">${respone} = {'status': 'OK', 'message': ('MSISDN From Queue', '6281802000319', ' &amp;', 'MSISDN From TelcoReceiver', '6281802000319', '= Match')}</msg>
+<status status="PASS" starttime="20260203 14:55:25.036" endtime="20260203 14:55:25.048"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:25.049" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:25.048" endtime="20260203 14:55:25.049"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:25.049" endtime="20260203 14:55:25.050"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.049" endtime="20260203 14:55:25.050"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.050" endtime="20260203 14:55:25.051"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.050" endtime="20260203 14:55:25.051"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.036" endtime="20260203 14:55:25.051"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.036" endtime="20260203 14:55:25.051"/>
+</iter>
+<iter>
+<var name="${item}">CheckPasswordFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:25.051" level="INFO">${counter} = 7</msg>
+<status status="PASS" starttime="20260203 14:55:25.051" endtime="20260203 14:55:25.051"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.051" endtime="20260203 14:55:25.051"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:25.051" level="INFO">CheckPasswordFromTelco</msg>
+<status status="PASS" starttime="20260203 14:55:25.051" endtime="20260203 14:55:25.051"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.051" endtime="20260203 14:55:25.051"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Check Password From Telco" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:25.063" endtime="20260203 14:55:25.063"/>
+</kw>
+<msg timestamp="20260203 14:55:25.063" level="INFO">${respone} = {'status': 'OK', 'message': ('Password From Config', 'QueuePWD', ' &amp;', 'Password From TelcoReceiver', 'QueuePWD', '= Match')}</msg>
+<status status="PASS" starttime="20260203 14:55:25.051" endtime="20260203 14:55:25.063"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:25.065" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:25.065" endtime="20260203 14:55:25.065"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:25.065" endtime="20260203 14:55:25.065"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.065" endtime="20260203 14:55:25.065"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.065" endtime="20260203 14:55:25.065"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.065" endtime="20260203 14:55:25.065"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.051" endtime="20260203 14:55:25.065"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.051" endtime="20260203 14:55:25.065"/>
+</iter>
+<iter>
+<var name="${item}">CheckSenderIdFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:25.067" level="INFO">${counter} = 8</msg>
+<status status="PASS" starttime="20260203 14:55:25.065" endtime="20260203 14:55:25.067"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.067" endtime="20260203 14:55:25.067"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:25.067" level="INFO">CheckSenderIdFromTelco</msg>
+<status status="PASS" starttime="20260203 14:55:25.067" endtime="20260203 14:55:25.067"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.068" endtime="20260203 14:55:25.068"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Check Sender Id From Telco" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:25.077" endtime="20260203 14:55:25.077"/>
+</kw>
+<msg timestamp="20260203 14:55:25.077" level="INFO">${respone} = {'status': 'OK', 'message': ('Sender ID From Queue', 'QueueSenderID', ' &amp;', 'Sender ID From TelcoReceiver', 'QueueSenderID', '= Match')}</msg>
+<status status="PASS" starttime="20260203 14:55:25.068" endtime="20260203 14:55:25.077"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:25.079" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:25.077" endtime="20260203 14:55:25.079"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:25.079" endtime="20260203 14:55:25.080"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.079" endtime="20260203 14:55:25.080"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.080"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.080"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.067" endtime="20260203 14:55:25.080"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.065" endtime="20260203 14:55:25.080"/>
+</iter>
+<iter>
+<var name="${item}">CheckTokenFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<msg timestamp="20260203 14:55:25.080" level="INFO">${counter} = 9</msg>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.080"/>
+</kw>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Result Telco] Running check ${counter}/${list_length}: ${item}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.080"/>
+</kw>
+<kw name="Log" library="BuiltIn">
+<arg>${item}</arg>
+<doc>Logs the given message with the given level.</doc>
+<msg timestamp="20260203 14:55:25.080" level="INFO">CheckTokenFromTelco</msg>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.080"/>
+</kw>
+<kw name="Check Data Table Transaction" library="keyword">
+<arg>${item}</arg>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] Running: ${DataCheck}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.080"/>
+</kw>
+<kw name="Run Keyword" library="BuiltIn">
+<var>${respone}</var>
+<arg>${DataCheck}</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<kw name="Check Token From Telco" library="Transmitter">
+<status status="PASS" starttime="20260203 14:55:25.090" endtime="20260203 14:55:25.090"/>
+</kw>
+<msg timestamp="20260203 14:55:25.090" level="INFO">${respone} = {'status': 'OK', 'message': ('Token From Config', 'Queuecpname', ' &amp;', 'Token From TelcoReceiver', 'Queuecpname', '= Match')}</msg>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.090"/>
+</kw>
+<kw name="Set Variable" library="BuiltIn">
+<var>${status}</var>
+<arg>${respone['status']}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<msg timestamp="20260203 14:55:25.090" level="INFO">${status} = OK</msg>
+<status status="PASS" starttime="20260203 14:55:25.090" endtime="20260203 14:55:25.090"/>
+</kw>
+<kw name="Run Keyword And Continue On Failure" library="BuiltIn">
+<arg>Should Be Equal</arg>
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Runs the keyword and continues execution even if a failure occurs.</doc>
+<kw name="Should Be Equal" library="BuiltIn">
+<arg>${status}</arg>
+<arg>OK</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" starttime="20260203 14:55:25.090" endtime="20260203 14:55:25.090"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.090" endtime="20260203 14:55:25.090"/>
+</kw>
+<kw name="Run Keyword If" library="BuiltIn">
+<arg>'${status}' == 'OK'</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<arg>ELSE</arg>
+<arg>Log To Console</arg>
+<arg>[Check Data Table Transaction] ✗ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<kw name="Log To Console" library="BuiltIn">
+<arg>[Check Data Table Transaction] ✓ ${DataCheck}: ${status} - ${respone['message']}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" starttime="20260203 14:55:25.090" endtime="20260203 14:55:25.090"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.090" endtime="20260203 14:55:25.090"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.090"/>
+</kw>
+<status status="PASS" starttime="20260203 14:55:25.080" endtime="20260203 14:55:25.090"/>
+</iter>
+<iter>
+<var name="${item}">CheckTypeFromTelco</var>
+<kw name="Evaluate" library="BuiltIn">
+<var>${counter}</var>
+<arg>${counter} + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>

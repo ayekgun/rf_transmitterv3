@@ -18,6 +18,7 @@ sys.path.append(os.path.abspath("py/conf"))
 from config import *
 from conf_xl import *
 from conf_tsel import *
+from conf_telkomsel import *
 from conf_nadynehttp import *
 from conf_jantara import *
 from conf_jantarav3 import *
@@ -38,6 +39,7 @@ from py.lib.RetryTransmitter import *
 from ActiveMQ import *
 
 from ResultTelco_tsel import *
+from ResultTelco_telkomsel import *
 from ResultTelco_xl import *
 from ResultTelco_nadynehttp import *
 from ResultTelco_jantara import *
@@ -437,6 +439,7 @@ def MetchingData(var1, var2, string1, string2):
     Compare two values and return match status
     Note: Detailed logging is handled by the calling Check functions
     """
+    print(f"expected: {var1}, actual: {var2}")
     if (var1 == var2):
         status = 'OK'
         validation = string1, var1, " &", string2, var2, "= Match"

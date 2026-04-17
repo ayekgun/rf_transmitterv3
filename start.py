@@ -81,17 +81,10 @@ def GetTestcase():
 
 if __name__ == '__main__':
     testcase = GetTestcase()
-    
-    # Check for optional 3rd argument to filter specific Test Case
-    if len(sys.argv) > 3:
-        target_tc = sys.argv[3]
-        testcase = [tc for tc in testcase if target_tc.lower() in tc.lower()]
-        print(f"Filtering to run only: {target_tc}")
-        
-    transmitter_name_param = 'TransmitterName:'+transmitter_name
+    transmitter_name = 'TransmitterName:'+transmitter_name
     if len(testcase)  != 0:
-        # list = [pathrobot, '-t TC001-sender id on DB, No key match', '-v',transmitter_name_param,  '-d', dirresult]
-        list = [pathrobot, '-v',transmitter_name_param,  '-d', dirresult]
+        # list = [pathrobot, '-t TC001-sender id on DB, No key match', '-v',transmitter_name,  '-d', dirresult]
+        list = [pathrobot, '-v',transmitter_name,  '-d', dirresult]
         for row in testcase:
             list.append(row)
         list.append(t_robot)

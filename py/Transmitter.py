@@ -32,6 +32,7 @@ from conf_mustika import *
 from conf_pintar import * 
 from conf_m360 import * 
 from conf_ims import * 
+from conf_bhramayasa import * 
 
 
 sys.path.append(os.path.abspath("py/lib"))
@@ -54,6 +55,7 @@ from ResultTelco_mustika import *
 from ResultTelco_pintar import *
 from ResultTelco_m360 import *
 from ResultTelco_ims import *
+from ResultTelco_bhramayasa import *
 
 from SmartBreak import *
 from SubmitResult import *

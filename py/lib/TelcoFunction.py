@@ -142,4 +142,4 @@ def CheckVallueSubmitResultProviderTrxidMitracomm():
     str2 = "Provider Trxid Queue Submit Result"
     result = Transmitter.MetchingData(
         providertrxid, SubmitResult.qsm_provider_trxid, str1, str2)
-    return (result)
+    return (result)

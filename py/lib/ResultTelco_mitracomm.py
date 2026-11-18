@@ -135,8 +135,9 @@ def CheckVallueMaskinTelcoMitracomm():
 def CheckVallueMessageTelcoMitracomm():
     str1 = "Appid From DB Config"
     str2 = "Appid From TelcoReceiver"
-    result = Transmitter.MetchingData(urllib.parse.unquote_plus(
-        Transmitter.quinmessage), urllib.parse.unquote_plus(t_message), str1, str2)
+    expected = urllib.parse.unquote_plus(Transmitter.quinmessage)
+    actual = t_message if expected == t_message else urllib.parse.unquote_plus(t_message)
+    result = Transmitter.MetchingData(expected, actual, str1, str2)
     return (result)
 
 

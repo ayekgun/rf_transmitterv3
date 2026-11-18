@@ -1,13 +1,17 @@
 from datetime import datetime, timedelta
 import sys,os,json,time,re
 
-sys.path.append(os.path.abspath("py"))
+_curr_dir = os.path.dirname(os.path.abspath(__file__))
+_py_dir = os.path.abspath(os.path.join(_curr_dir, ".."))
+_conf_dir = os.path.join(_py_dir, "conf")
+_mongo_dir = os.path.join(_curr_dir, "mongodb")
+
+for p in (_py_dir, _conf_dir, _mongo_dir):
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 import Transmitter
-
-sys.path.append(os.path.abspath("py/conf"))
 from config import *
-
-sys.path.append(os.path.abspath("py/lib/mongodb"))
 from MongoJNS import *
 mg = mongo()
 
@@ -23,6 +27,7 @@ def SetVariableRetryTransmitterMongoDB():
         global r_transmitter_mongo
         global r_transmitter_mongo_next_schedule
         global r_transmitter_mongo_created_at
+        global effective_site_mode
 
         created_at_values = result_Db['created_at']
         next_schedule_values = result_Db['next_schedule']
@@ -46,16 +51,32 @@ def SetVariableRetryTransmitterMongoDB():
             r_transmitter_mongo_next_schedule = data['next_schedule']
             del data['next_schedule']
         
+        # Determine effective site mode (configurable: 'auto' | 'dual_site' | 'one_site')
+        configured_mode = getattr(Transmitter, 'site_mode', globals().get('site_mode', 'auto'))
+        if configured_mode == 'auto':
+            # Auto-detect: if document contains 'site', use dual_site; else legacy one_site
+            effective_site_mode = 'dual_site' if 'site' in data else 'one_site'
+        else:
+            effective_site_mode = configured_mode
+
+        print(f"[RetryTransmitter] Effective site mode: {effective_site_mode}")
+
+        if effective_site_mode == 'one_site':
+            # In one_site (legacy PROD) mode, strip dual-site fields so comparison matches legacy schema
+            data.pop('site', None)
+            data.pop('status', None)
+            data.pop('message_id', None)
+
         r_transmitter_mongo = json.dumps(data)
         print(r_transmitter_mongo)
-        GeneratedRetryTransmitter()
+        GeneratedRetryTransmitter(effective_site_mode)
         result = {
             "status": "OK",
             "message": "OK"
         }
     return (result)
 
-def GeneratedRetryTransmitter():
+def GeneratedRetryTransmitter(current_mode='auto'):
     global gen_transmitter_mongo
     global gendatetime
     gentimestamp = str(int(time.time()))
@@ -64,15 +85,23 @@ def GeneratedRetryTransmitter():
     retry = str(int(Transmitter.quinretry) + 1)
     queueTransmiter = ProccesingQueue(Transmitter.queuemessage)
     
-    gen_transmitter_mongo = {
-            "trx_id" : str(Transmitter.quintrxid),
-            "queue_message" : queueTransmiter,
-            "queue_name_transmitter" : Transmitter.quinchannel_mq_name ,
-            "priority" : str(Transmitter.quinpriority),
-            "retry" : retry
-        }
-    gen_transmitter_mongo = json.dumps(gen_transmitter_mongo)
-    
+    gen_dict = {
+        "trx_id" : str(Transmitter.quintrxid),
+        "queue_message" : queueTransmiter,
+        "queue_name_transmitter" : Transmitter.quinchannel_mq_name,
+        "priority" : str(Transmitter.quinpriority),
+        "retry" : retry
+    }
+
+    if current_mode == 'dual_site':
+        # v1.3.0 Dual-Site Contract: includes site, status=READY, message_id
+        expected_site = getattr(Transmitter, 'cfg_instance_site', None) or 'PROD'
+        expected_message_id = getattr(Transmitter, 'quinmessageid', '')
+        gen_dict["site"] = expected_site
+        gen_dict["status"] = "READY"
+        gen_dict["message_id"] = str(expected_message_id)
+
+    gen_transmitter_mongo = json.dumps(gen_dict)
     print(gen_transmitter_mongo)   
 
 def ProccesingQueue(query_string):

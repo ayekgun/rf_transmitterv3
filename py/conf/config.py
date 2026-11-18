@@ -35,3 +35,10 @@ dic_queuesm = ["channel_name", "provider_submit_status", "date_hit", "transmitte
 
 mongo_conn = 'mongodb://mongoadmin:mongoadmin@192.168.181.63:27017/admin'
 # mongo_db = 'whatsappCore'
+
+# Site mode configuration for Retry validation:
+# 'auto'      : Auto-detect based on presence of 'site' in MongoDB document / DB config
+# 'dual_site' : Enforce dual-site contract v1.3.0+ (validates site, status='READY', message_id in MongoDB retry)
+# 'one_site'  : Enforce legacy one-site contract (7 fields in MongoDB, no site/status/message_id) - for legacy version in PROD
+import os
+site_mode = os.environ.get('SITE_MODE', 'auto')

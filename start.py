@@ -1,16 +1,41 @@
 import sys
 from subprocess import call
 import os
+import shutil
 import pymysql
 # import paramiko
 
+# Parse optional site mode flag from arguments
+site_mode_arg = os.environ.get('SITE_MODE', 'auto')
+for arg in list(sys.argv):
+    if arg.lower() in ('--one-site', '--onesite'):
+        site_mode_arg = 'one_site'
+        os.environ['SITE_MODE'] = 'one_site'
+        print("[start.py] Configured SITE_MODE: one_site (legacy PROD mode)")
+        sys.argv.remove(arg)
+    elif arg.lower() in ('--dual-site', '--dualsite'):
+        site_mode_arg = 'dual_site'
+        os.environ['SITE_MODE'] = 'dual_site'
+        print("[start.py] Configured SITE_MODE: dual_site (v1.3.0 Single DB mode)")
+        sys.argv.remove(arg)
+
+if len(sys.argv) < 3:
+    print("Usage: python start.py <transmitter_name> <type> [testcase_filter] [--one-site|--dual-site]")
+    print("Example: python start.py infobip 247")
+    print("         python start.py infobip 247 TC025 --dual-site")
+    sys.exit(1)
+
 transmitter_name = sys.argv[1]
 type = sys.argv[2]
+
+# Path robot runner (default Jenkins / Python 3.7)
 pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
-#
-# transmitter_name = 'pintar'
-# type = '247'
 # pathrobot = 'C:/Python310/Scripts/pybot.bat'
+
+# Fallback otomatis jika path Python 3.7 di atas tidak ditemukan di mesin lokal
+if not os.path.exists(pathrobot):
+    import shutil
+    pathrobot = shutil.which('robot') or shutil.which('pybot') or 'robot'
 
 t_robot = 'robot/TransmitterJns'+type+'.robot'
 t_robot_e = 'robot/Transmitter'+transmitter_name+type+'.robot'
@@ -90,8 +115,8 @@ if __name__ == '__main__':
         
     transmitter_name_param = 'TransmitterName:'+transmitter_name
     if len(testcase)  != 0:
-        # list = [pathrobot, '-t TC001-sender id on DB, No key match', '-v',transmitter_name_param,  '-d', dirresult]
-        list = [pathrobot, '-v',transmitter_name_param,  '-d', dirresult]
+        listener_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libraries', 'ExcelReporter.py')
+        list = [pathrobot, '--listener', listener_path, '-v', transmitter_name_param, '-d', dirresult]
         for row in testcase:
             list.append(row)
         list.append(t_robot)

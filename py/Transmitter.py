@@ -14,7 +14,12 @@ import sys
 from datetime import datetime, timedelta
 from urllib import parse
 
-sys.path.append(os.path.abspath("py/conf"))
+_curr_dir = os.path.dirname(os.path.abspath(__file__))
+_conf_dir = os.path.join(_curr_dir, "conf")
+if _conf_dir not in sys.path:
+    sys.path.insert(0, _conf_dir)
+if _curr_dir not in sys.path:
+    sys.path.insert(0, _curr_dir)
 from config import *
 from conf_xl import *
 from conf_tsel import *
@@ -35,8 +40,10 @@ from conf_ims import *
 from conf_bhramayasa import * 
 
 
-sys.path.append(os.path.abspath("py/lib"))
-from py.lib.RetryTransmitter import *
+_lib_dir = os.path.join(os.path.dirname(__file__), 'lib')
+if _lib_dir not in sys.path:
+    sys.path.insert(0, _lib_dir)
+from RetryTransmitter import *
 from ActiveMQ import *
 
 from ResultTelco_tsel import *
@@ -84,6 +91,7 @@ def SetConfigDynamic(var):
     global cfglookup
     global retry_mechanisme
     global reroute_mechanisme
+    global site_mode
     
     d_provider = var.lower()
     urlchangerespon = eval(str(d_provider+'_urlchangerespon'))
@@ -98,6 +106,10 @@ def SetConfigDynamic(var):
     cfglookup = eval(d_provider+'_cfglookup')
     retry_mechanisme = eval(d_provider+'_retry_mechanisme')
     reroute_mechanisme = eval(d_provider+'_reroute_mechanisme')
+    try:
+        site_mode = eval(d_provider+'_site_mode')
+    except Exception:
+        site_mode = globals().get('site_mode', 'auto')
 
 def SetVariableTestCase(type ,testcase):
     global queuemessage
@@ -352,6 +364,8 @@ def GetChannelisDirect(): #method biasa
 
 def SetConfigLookupTransmitter():
     # cfg_queue = cfg_name818
+    global cfg_instance_site
+    cfg_instance_site = None
     con = pymysql.connect(db=db_cfg, user=user_cfg, passwd=passwd_cfg,host=host_cfg,port=3306,autocommit=False)
     cur = con.cursor()
     cur.execute(cfglookup, cfg_queue)

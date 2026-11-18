@@ -10,10 +10,20 @@ import requests
 sys.path.append(os.path.abspath("py/conf"))
 from config import *
 
+def _unpack_msg(args):
+    if len(args) == 1:
+        frame = args[0]
+        return getattr(frame, 'headers', {}), getattr(frame, 'body', '')
+    elif len(args) >= 2:
+        return args[0], args[1]
+    return {}, ''
+
 class MyListenerTransmitter(stomp.ConnectionListener):
-    def on_error(self, headers, message):
+    def on_error(self, *args):
+        headers, message = _unpack_msg(args)
         print('received an error "%s"' % headers)
-    def on_message(self, headers, message):
+    def on_message(self, *args):
+        headers, message = _unpack_msg(args)
         print('received a message "%s"' % (message))
         trxid = (urllib.parse.parse_qs(message , keep_blank_values=True)['trxid'][0])
         messageid = (urllib.parse.parse_qs(message , keep_blank_values=True)['messageid'][0])
@@ -49,7 +59,7 @@ class MyListenerTransmitter(stomp.ConnectionListener):
         persistent = headers.get('persistent' , 'false')
         timestamp = headers.get('timestamp')
         # origin_mq_name = (urllib.parse.parse_qs(message , keep_blank_values=True)['origin_mq_name'][1])
-        priority_header = headers['priority']
+        priority_header = headers.get('priority', '4')
         try:
             senderids = (urllib.parse.parse_qs(message , keep_blank_values=True)['senderids'][0])
         except:
@@ -65,9 +75,11 @@ class MyListenerTransmitter(stomp.ConnectionListener):
         cur.close()
 
 class MyListenerSubmitResult(stomp.ConnectionListener):
-    def on_error(self, headers, message):
+    def on_error(self, *args):
+        headers, message = _unpack_msg(args)
         print('received an error "%s"' % headers)
-    def on_message(self, headers, message):
+    def on_message(self, *args):
+        headers, message = _unpack_msg(args)
         print('received a message "%s"' % (message))
         channel_name = (urllib.parse.parse_qs(message , keep_blank_values=True)['channel_name'][0])
         provider_submit_status = str((urllib.parse.parse_qs(message , keep_blank_values=True)['provider_submit_status'][0]))
@@ -93,7 +105,7 @@ class MyListenerSubmitResult(stomp.ConnectionListener):
         date_hit =  datetime.strptime(date_hit,'%Y%m%d%H%M%S')
         date_response = datetime.strptime(date_response,'%Y%m%d%H%M%S')
         persistent = headers.get('persistent' , 'false')
-        priority_header = headers['priority']
+        priority_header = headers.get('priority', '4')
         timestamp = headers.get('timestamp')
         try:
             retry = (urllib.parse.parse_qs(message , keep_blank_values=True)['retry'][0])
@@ -111,9 +123,11 @@ class MyListenerSubmitResult(stomp.ConnectionListener):
         cur.close()
 
 class MyListenerReroute(stomp.ConnectionListener):
-    def on_error(self, headers, message):
+    def on_error(self, *args):
+        headers, message = _unpack_msg(args)
         print('received an error "%s"' % headers)
-    def on_message(self, headers, message):
+    def on_message(self, *args):
+        headers, message = _unpack_msg(args)
         print('received a message "%s"' % (message))
         trxid = (urllib.parse.parse_qs(message , keep_blank_values=True)['trxid'][0])
         persistent = headers.get('persistent' , 'false')
@@ -130,8 +144,9 @@ class MyListenerReroute(stomp.ConnectionListener):
 def GetQueueTransmitter(mqname,sleeptime):
     conn = stomp.Connection([(host_amq,port_amq)])
     conn.set_listener('', MyListenerTransmitter())
-    conn.start()
-    conn.connect('admin', 'admin', wait=True)
+    if hasattr(conn, 'start'):
+        conn.start()
+    conn.connect('admin', 'JAtis123!@#', wait=True)
     conn.subscribe(destination="/queue/"+ mqname, id=1, ack='auto')
     #conn.send(body=' '.join(sys.argv[1:]), destination='/queue/test')
     time.sleep(sleeptime)
@@ -140,8 +155,9 @@ def GetQueueTransmitter(mqname,sleeptime):
 def GetQueueReroute(mqname,sleeptime):
     conn = stomp.Connection([(host_amq,port_amq)])
     conn.set_listener('', MyListenerReroute())
-    conn.start()
-    conn.connect('admin', 'admin', wait=True)
+    if hasattr(conn, 'start'):
+        conn.start()
+    conn.connect('admin', 'JAtis123!@#', wait=True)
     conn.subscribe(destination="/queue/"+ mqname, id=1, ack='auto')
     #conn.send(body=' '.join(sys.argv[1:]), destination='/queue/test')
     time.sleep(sleeptime + 1)
@@ -150,35 +166,55 @@ def GetQueueReroute(mqname,sleeptime):
 def GetQueueSubmitResult(mqname,sleeptime):
     conn = stomp.Connection([(host_amq,port_amq)])
     conn.set_listener('', MyListenerSubmitResult())
-    conn.start()
-    conn.connect('admin', 'admin', wait=True)
+    if hasattr(conn, 'start'):
+        conn.start()
+    conn.connect('admin', 'JAtis123!@#', wait=True)
     conn.subscribe(destination="/queue/"+ mqname, id=1, ack='auto')
     #conn.send(body=' '.join(sys.argv[1:]), destination='/queue/test')
     time.sleep(sleeptime + 1)
     conn.disconnect()
+
+def _create_stomp_conn():
+    try:
+        conn = stomp.Connection([(host_amq, port_amq)], auto_content_length=False)
+    except TypeError:
+        conn = stomp.Connection([(host_amq, port_amq)])
+        try:
+            conn.auto_content_length = False
+        except Exception:
+            pass
+    return conn
 
 def SendQueue(queuMessage , destinationqueue, prefix):
     global prefname
     global datesend
     prefname = prefix
     datesend = GetDateTimeServer()
-    conn = stomp.Connection([(host_amq,port_amq)])
-    conn.start()
+    conn = _create_stomp_conn()
+    if hasattr(conn, 'start'):
+        conn.start()
     conn.connect('admin', 'JAtis123!@#', wait=True)
-    conn.send(destinationqueue , queuMessage , headers={'content-length': None})
+    dest = destinationqueue if destinationqueue.startswith('/queue/') else '/queue/' + destinationqueue
+    headers = {
+        'amq-msg-type': 'text',
+        'transformation': 'jms-text'
+    }
+    conn.send(dest, queuMessage, headers=headers)
     conn.disconnect()
 
 def SendTopic():
-    conn = stomp.Connection([(host_amq,port_amq)])
-    conn.start()
+    conn = _create_stomp_conn()
+    if hasattr(conn, 'start'):
+        conn.start()
     conn.connect('admin', 'JAtis123!@#', wait=True)
     conn.send('/topic/jns6.5-command' , 'reload' , headers={'content-length': None})
     conn.disconnect()
 
 def SendTopicSmartBreake(queuename,msg,direct):
     payload = '{"queName":"'+ queuename +'","message":"'+ msg +'","direct":"'+ direct +'"}'
-    conn = stomp.Connection([(host_amq,port_amq)])
-    conn.start()
+    conn = _create_stomp_conn()
+    if hasattr(conn, 'start'):
+        conn.start()
     conn.connect('admin', 'JAtis123!@#', wait=True)
     conn.send('/topic/jns.topic.command' , payload , headers={'content-length': None})
     conn.disconnect()

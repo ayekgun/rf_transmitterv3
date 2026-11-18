@@ -2,7 +2,7 @@
 mitracomm_urlchangerespon = 'http://192.168.181.52:8071/api_selenium/index.php/Transmittermitracomm/set_default?id='
 
 mitracomm_cfg_name818 = 'transmitter-mitracomm818'
-mitracomm_cfg_name623 = 'transmitter-mitracomm628'
+mitracomm_cfg_name623 = 'transmitter-mitracomm623'
 mitracomm_cfg_name247 = 'transmitter-mitracomm247'
 
 mitracomm_queue818 = 'jns.transmitter.mitracomm.premium.818'

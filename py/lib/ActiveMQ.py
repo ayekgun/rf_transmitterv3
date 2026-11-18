@@ -216,7 +216,12 @@ def SendTopicSmartBreake(queuename,msg,direct):
     if hasattr(conn, 'start'):
         conn.start()
     conn.connect('admin', 'JAtis123!@#', wait=True)
-    conn.send('/topic/jns.topic.command' , payload , headers={'content-length': None})
+    headers = {
+        'content-length': None,
+        'transformation': 'jms-text',
+        'amq-msg-type': 'text'
+    }
+    conn.send('/topic/jns.topic.command', payload, headers=headers)
     conn.disconnect()
 
 def GetDateTimeServer():

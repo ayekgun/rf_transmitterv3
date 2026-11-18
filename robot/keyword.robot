@@ -14,6 +14,7 @@ Transmitter
 
 Transmitter Sleep Mode
     [Arguments]       ${type}     ${no_test}
+    SetConfigDynamic        ${TransmitterName}
     Run Keyword If   '${type}' == 'T818'     Transmitter ReDirect Sleep Mode      ${type}     ${no_test}
     ...    ELSE IF   '${type}' == 'T623'    Transmitter ReDirect Sleep Mode      ${type}     ${no_test}
     ...    ELSE       Transmitter Direct Sleep Mode      ${type}     ${no_test}
@@ -82,6 +83,7 @@ Transmitter Direct Sleep Mode
 
 Transmitter Smart Break
     [Arguments]       ${type}     ${no_test}      ${message}
+    SetConfigDynamic        ${TransmitterName}
     Run Keyword If   '${type}' == 'T818'     Transmitter ReDirect Smart Break      ${type}     ${no_test}   ${message}
     ...    ELSE IF   '${type}' == 'T623'    Transmitter ReDirect Smart Break      ${type}     ${no_test}    ${message}
     ...    ELSE       Transmitter Direct Smart Break      ${type}     ${no_test}    ${message}

@@ -4,6 +4,7 @@ Transmitter
     Log To Console    ================================================================================
     Log To Console    [Transmitter] Starting test: type=${type}, test=${no_test}
     Log To Console    ================================================================================
+    SetSiteMode             ${SiteMode}
     SetConfigDynamic        ${TransmitterName}
     Run Keyword If   '${type}' == 'T818'     Transmitter ReDirect      ${type}     ${no_test}
     ...    ELSE IF   '${type}' == 'T623'    Transmitter ReDirect      ${type}     ${no_test}
@@ -247,7 +248,11 @@ Transmitter Dual Site Deduplication
     Log To Console    ================================================================================
     Log To Console    [Transmitter Dual Site Deduplication] Starting: type=${type}, test=${no_test}
     Log To Console    ================================================================================
+    SetSiteMode             ${SiteMode}
     SetConfigDynamic        ${TransmitterName}
+    ${is_single}=           IsSingleSiteMode
+    Run Keyword If    ${is_single}    Log To Console    [Transmitter Dual Site Deduplication] NOTICE: Running in single-site / legacy mode. Skipping dual-site injection and deduplication check.
+    Return From Keyword If    ${is_single}
     SetVariableTestCase     ${type}   ${no_test}
     ${sleep}=   ChangeDummyRespone      93
     Log To Console    [Transmitter Dual Site Deduplication] Set dummy HTTP 404 (id=93) to trigger retry

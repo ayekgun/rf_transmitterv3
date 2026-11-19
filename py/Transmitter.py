@@ -77,6 +77,67 @@ def _log_to_console(message):
     sys.stdout.flush()
     sys.stderr.flush()
 
+def NormalizeSiteMode(mode_str):
+    if not mode_str:
+        return 'auto'
+    m = str(mode_str).strip().lower()
+    if m in ('one_site', 'onesite', 'single_site', 'singlesite', 'single', 'one', 'legacy', '1'):
+        return 'one_site'
+    if m in ('dual_site', 'dualsite', 'dual', 'two_site', 'twosite', 'two', '2'):
+        return 'dual_site'
+    return 'auto'
+
+def ResolveSiteMode(provider_name=None):
+    # 1. Environment variable SITE_MODE (highest priority, e.g. from start.py CLI flag)
+    env_mode = os.environ.get('SITE_MODE')
+    if env_mode:
+        normalized = NormalizeSiteMode(env_mode)
+        if normalized != 'auto':
+            return normalized
+
+    # 2. Provider specific config (<provider>_site_mode)
+    if provider_name:
+        try:
+            prov_mode = eval(str(provider_name).lower() + '_site_mode')
+            normalized = NormalizeSiteMode(prov_mode)
+            if normalized != 'auto':
+                return normalized
+        except Exception:
+            pass
+
+    # 3. Global config site_mode
+    global_mode = globals().get('site_mode')
+    if global_mode:
+        normalized = NormalizeSiteMode(global_mode)
+        if normalized != 'auto':
+            return normalized
+
+    return 'auto'
+
+def SetSiteMode(mode):
+    """Keyword / helper to explicitly set the site mode for the current test run."""
+    global site_mode
+    site_mode = NormalizeSiteMode(mode)
+    os.environ['SITE_MODE'] = site_mode
+    print(f"[Transmitter] Configured site_mode: {site_mode}")
+    return site_mode
+
+def GetSiteMode():
+    """Returns current active site mode: 'one_site', 'dual_site', or 'auto'."""
+    global site_mode
+    current = globals().get('site_mode')
+    if current:
+        return NormalizeSiteMode(current)
+    return NormalizeSiteMode(os.environ.get('SITE_MODE', 'auto'))
+
+def IsSingleSiteMode():
+    """Returns True if site mode is configured as single-site / legacy mode."""
+    return GetSiteMode() == 'one_site'
+
+def IsDualSiteMode():
+    """Returns True if site mode is configured as dual-site mode."""
+    return GetSiteMode() == 'dual_site'
+
 def SetConfigDynamic(var):
     global urlchangerespon
     global cfg_name818
@@ -106,10 +167,8 @@ def SetConfigDynamic(var):
     cfglookup = eval(d_provider+'_cfglookup')
     retry_mechanisme = eval(d_provider+'_retry_mechanisme')
     reroute_mechanisme = eval(d_provider+'_reroute_mechanisme')
-    try:
-        site_mode = eval(d_provider+'_site_mode')
-    except Exception:
-        site_mode = globals().get('site_mode', 'auto')
+    site_mode = ResolveSiteMode(d_provider)
+    print(f"[Transmitter] SetConfigDynamic {d_provider} - resolved site_mode: {site_mode}")
 
 def SetVariableTestCase(type ,testcase):
     global queuemessage

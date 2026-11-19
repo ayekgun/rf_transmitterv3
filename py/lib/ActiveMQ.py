@@ -178,9 +178,12 @@ def _create_stomp_conn(host=None, port=None):
     h = host or host_amq
     p = port or port_amq
     try:
-        conn = stomp.Connection([(h, p)], auto_content_length=False)
+        conn = stomp.Connection([(h, p)], auto_content_length=False, timeout=15)
     except TypeError:
-        conn = stomp.Connection([(h, p)])
+        try:
+            conn = stomp.Connection([(h, p)], timeout=15)
+        except TypeError:
+            conn = stomp.Connection([(h, p)])
         try:
             conn.auto_content_length = False
         except Exception:

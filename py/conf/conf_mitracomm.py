@@ -15,3 +15,10 @@ mitracomm_cfglookup = "SELECT  lookup_name,lookup_value FROM jns_config where lo
 
 mitracomm_retry_mechanisme = True
 mitracomm_reroute_mechanisme = False
+
+# Site mode setting for Mitracomm:
+# 'auto'        : Auto-detect from MongoDB document (dual_site if 'site' exists, one_site if not)
+# 'dual_site'   : Enforce v1.3.0 contract (requires site, status='READY', message_id)
+# 'one_site'    : Enforce legacy contract (no site/status/message_id) for testing older versions still in PROD
+import os
+mitracomm_site_mode = os.environ.get('SITE_MODE', 'auto')

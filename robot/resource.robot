@@ -11,3 +11,7 @@ Library         String
 Library         Collections
 Library         ../py/Transmitter.py
 Resource        keyword.robot
+
+*** Variables ***
+${SiteMode}         auto
+

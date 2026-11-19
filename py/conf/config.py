@@ -18,11 +18,13 @@ passwd_cfg = "jatis123"
 host_cfg = "192.168.181.63"
 db_cfg = "apps_config"
 
+import os
+
 # host_amq ="10.0.7.106"
-host_amq ="192.168.181.51"
-port_amq = 61613
-host_amq_drc = "192.168.181.58"
-port_amq_drc = 61613
+host_amq = os.environ.get('HOST_AMQ', "192.168.181.51")
+port_amq = int(os.environ.get('PORT_AMQ', 61613))
+host_amq_drc = os.environ.get('HOST_AMQ_DRC', "192.168.181.58")
+port_amq_drc = int(os.environ.get('PORT_AMQ_DRC', 61613))
 
 queuesubmitresult ='jns.app.submitresults'
 

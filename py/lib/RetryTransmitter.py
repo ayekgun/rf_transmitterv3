@@ -53,7 +53,12 @@ def SetVariableRetryTransmitterMongoDB():
             del data['next_schedule']
         
         # Determine effective site mode (configurable: 'auto' | 'dual_site' | 'one_site')
-        configured_mode = getattr(Transmitter, 'site_mode', globals().get('site_mode', 'auto'))
+        configured_mode = 'auto'
+        if hasattr(Transmitter, 'GetSiteMode'):
+            configured_mode = Transmitter.GetSiteMode()
+        else:
+            configured_mode = getattr(Transmitter, 'site_mode', globals().get('site_mode', 'auto'))
+
         if configured_mode == 'auto':
             # Auto-detect: if document contains 'site', use dual_site; else legacy one_site
             effective_site_mode = 'dual_site' if 'site' in data else 'one_site'
@@ -146,10 +151,29 @@ def CheckJsonRetryTransmitterMongoDB_next_schedule():
 def CheckDualSiteDeduplicationMongoDB():
     """Validates that exactly 1 document exists in MongoDB retry_transmitter for the given trx_id.
     
-    Proves that when both PROD (.51) and DRC (.58) receive identical queue messages,
-    the Single DB unique index {trx_id, message_id} successfully deduplicates and prevents
-    double storage.
+    In Single-Site / Legacy mode:
+      Gracefully skips verification because deduplication across dual sites
+      applies only to the dual-site architecture (v1.3.0+).
+    
+    In Dual-Site mode:
+      Proves that when both PROD (.51) and DRC (.58) receive identical queue messages,
+      the Single DB unique index {trx_id, message_id} successfully deduplicates and prevents
+      double storage.
     """
+    # Check if single-site mode is active
+    is_single = False
+    if hasattr(Transmitter, 'IsSingleSiteMode'):
+        is_single = Transmitter.IsSingleSiteMode()
+    elif os.environ.get('SITE_MODE', '').lower() in ('one_site', 'onesite', 'single_site', 'singlesite', 'single', 'legacy'):
+        is_single = True
+
+    if is_single:
+        print("[CheckDualSiteDeduplicationMongoDB] Running in SINGLE-SITE / LEGACY mode. Skipping dual-site deduplication assertion.")
+        return {
+            "status": "OK",
+            "message": "SKIPPED: Dual-site deduplication verification is skipped in single-site / legacy mode."
+        }
+
     client = MongoClient(mongo_conn)
     db = client['scheduler_retry']
     coll = db['retry_transmitter']

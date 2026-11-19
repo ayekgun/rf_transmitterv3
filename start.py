@@ -46,6 +46,7 @@ if len(sys.argv) < 3:
 
 transmitter_name = sys.argv[1]
 type = sys.argv[2]
+os.environ['TRANSMITTER_NAME'] = transmitter_name
 
 # Path robot runner (default Jenkins / Python 3.7)
 pathrobot = 'C:/Python/Python37-32/Scripts/pybot.bat'
@@ -135,7 +136,12 @@ if __name__ == '__main__':
     transmitter_name_param = 'TransmitterName:'+transmitter_name
     site_mode_param = 'SiteMode:' + site_mode_arg
     if len(testcase)  != 0:
-        listener_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libraries', 'ExcelReporter.py')
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        listener_path = os.path.join(base_dir, 'libraries', 'ExcelReporter.py')
+        report_excel_name = f'Transmitter_{transmitter_name}_Test_Results.xlsx'
+        report_excel_path = os.path.join(base_dir, 'reports', report_excel_name)
+        os.environ['EXCEL_REPORT_PATH'] = report_excel_path
+
         list = [pathrobot, '--listener', listener_path, '-v', transmitter_name_param, '-v', site_mode_param, '-d', dirresult]
         for row in testcase:
             list.append(row)

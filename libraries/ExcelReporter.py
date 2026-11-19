@@ -50,27 +50,55 @@ class ExcelReporter:
     # Class-level results store shared across all Library and Listener instances
     _results = {}
 
+    @staticmethod
+    def _resolve_transmitter_name():
+        t_name = os.environ.get("TRANSMITTER_NAME")
+        if t_name:
+            return t_name.strip()
+        try:
+            from robot.libraries.BuiltIn import BuiltIn
+            val = BuiltIn().get_variable_value("${TransmitterName}")
+            if val:
+                return str(val).strip()
+        except Exception:
+            pass
+        return None
+
     def __init__(self, excel_path=None, sheet_name=None, original_path=None):
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.base_dir = base_dir
 
         self.excel_path = excel_path
         self.sheet_name = sheet_name or "SIT"
         self.original_path = original_path
 
+        t_name = self._resolve_transmitter_name()
+
         if not self.excel_path:
-            self.excel_path = os.path.join(
-                base_dir, "reports", "TransmitterInfobip_Test_Results.xlsx"
-            )
-        if not self.original_path:
-            template_candidate = os.path.join(
-                base_dir, "templates", "TransmitterInfobip_Test_Results_Template.xlsx"
-            )
-            if not os.path.exists(template_candidate):
-                template_candidate = os.path.join(
-                    base_dir, "templates", "RedisCacheManager_Test_Results_Template.xlsx"
+            env_excel = os.environ.get("EXCEL_REPORT_PATH")
+            if env_excel:
+                self.excel_path = env_excel
+            elif t_name:
+                self.excel_path = os.path.join(
+                    base_dir, "reports", f"Transmitter_{t_name}_Test_Results.xlsx"
                 )
-            if os.path.exists(template_candidate):
-                self.original_path = template_candidate
+            else:
+                self.excel_path = os.path.join(
+                    base_dir, "reports", "TransmitterInfobip_Test_Results.xlsx"
+                )
+
+        if not self.original_path:
+            template_candidates = [
+                os.path.join(base_dir, "templates", f"Transmitter_{t_name}_Test_Results_Template.xlsx") if t_name else None,
+                os.path.join(base_dir, "templates", "Transmitter_Template.xlsx"),
+                os.path.join(base_dir, "templates", "TransmitterInfobip_Test_Results_Template.xlsx"),
+                os.path.join(base_dir, "reports", "TransmitterInfobip_Test_Results.xlsx"),
+                os.path.join(base_dir, "templates", "RedisCacheManager_Test_Results_Template.xlsx"),
+            ]
+            for candidate in template_candidates:
+                if candidate and os.path.exists(candidate):
+                    self.original_path = candidate
+                    break
 
         if self.excel_path and not os.path.isabs(self.excel_path):
             self.excel_path = os.path.normpath(os.path.join(base_dir, self.excel_path))
@@ -188,6 +216,28 @@ class ExcelReporter:
             logger.info("No results to flush to Excel.")
             return
 
+        t_name = self._resolve_transmitter_name()
+        if t_name and (
+            not self.excel_path
+            or os.path.basename(self.excel_path) == "TransmitterInfobip_Test_Results.xlsx"
+        ):
+            self.excel_path = os.path.join(
+                self.base_dir, "reports", f"Transmitter_{t_name}_Test_Results.xlsx"
+            )
+
+        if not self.original_path or not os.path.exists(self.original_path):
+            template_candidates = [
+                os.path.join(self.base_dir, "templates", f"Transmitter_{t_name}_Test_Results_Template.xlsx") if t_name else None,
+                os.path.join(self.base_dir, "templates", "Transmitter_Template.xlsx"),
+                os.path.join(self.base_dir, "templates", "TransmitterInfobip_Test_Results_Template.xlsx"),
+                os.path.join(self.base_dir, "reports", "TransmitterInfobip_Test_Results.xlsx"),
+                os.path.join(self.base_dir, "templates", "RedisCacheManager_Test_Results_Template.xlsx"),
+            ]
+            for candidate in template_candidates:
+                if candidate and os.path.exists(candidate):
+                    self.original_path = candidate
+                    break
+
         target_path = self.excel_path
         try:
             wb = self._ensure_workbook(target_path)
@@ -278,13 +328,19 @@ class ExcelReporter:
                     c2.border = thin_border
 
                 if cat.get("scenario"):
-                    c3 = safe_set_cell(ws, row_idx, 3, cat["scenario"])
+                    scenario_text = cat["scenario"]
+                    if t_name and t_name.lower() != "infobip":
+                        scenario_text = scenario_text.replace("Infobip", t_name.capitalize()).replace("infobip", t_name.lower())
+                    c3 = safe_set_cell(ws, row_idx, 3, scenario_text)
                     c3.font = regular_font
                     c3.alignment = align_left
                     c3.border = thin_border
 
                 if cat.get("test_case"):
-                    c4 = safe_set_cell(ws, row_idx, 4, cat["test_case"])
+                    tc_text = cat["test_case"]
+                    if t_name and t_name.lower() != "infobip":
+                        tc_text = tc_text.replace("Infobip", t_name.capitalize()).replace("infobip", t_name.lower())
+                    c4 = safe_set_cell(ws, row_idx, 4, tc_text)
                     c4.font = regular_font
                     c4.alignment = align_left
                     c4.border = thin_border
@@ -357,7 +413,11 @@ class ExcelReporter:
                 safe_set_cell(sum_ws, 11, 4, overall_status)
                 safe_set_cell(sum_ws, 7, 4, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
                 safe_set_cell(sum_ws, 14, 4, "Automated (Robot Framework)")
-                safe_set_cell(sum_ws, 15, 4, "automation/rediscachemanager")
+                if t_name:
+                    safe_set_cell(sum_ws, 2, 4, f"PB - JATIS - JNS 6.5 - Transmitter {t_name.capitalize()}")
+                    safe_set_cell(sum_ws, 15, 4, f"automation/transmitter/{t_name}")
+                else:
+                    safe_set_cell(sum_ws, 15, 4, "automation/transmitter")
 
             # Adjust column widths for professional presentation
             col_widths = {

@@ -222,4 +222,12 @@ TEST_CATALOG = {
         "test_data": "Retry step 3 (max)",
         "expected": "Pesan di-drop dari retry loop dan status submitresult FAILED_SUBMIT dikirim.",
     },
+    "TC028": {
+        "description": "Dual-Site Single DB Deduplication",
+        "scenario": "Transmitter Mitracomm - Dual Site Deduplication",
+        "test_case": "Verifikasi ketika kedua broker (PROD & DRC) dikirimi antrean identik secara simultan, hanya masuk 1 data di DB MongoDB retry_transmitter",
+        "steps": "1. Set dummy response Telco ke error HTTP 404 (id=93) untuk memicu retry.\n2. Injeksi pesan antrean dengan trx_id dan message_id identik ke broker ActiveMQ PROD (.51) dan DRC (.58).\n3. Kedua transmitter (PROD & DRC) memproses antrean dan berusaha menyimpan retry ke MongoDB.\n4. Verifikasi bahwa tepat 1 dokumen retry tersimpan di MongoDB retry_transmitter (idempotent / deduplicated).",
+        "test_data": "Injeksi paralel ActiveMQ PROD (192.168.181.51) dan DRC (192.168.181.58)",
+        "expected": "Tepat 1 record retry tersimpan di MongoDB dengan status='READY' dan site ('PROD' atau 'DRC').",
+    },
 }

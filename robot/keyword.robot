@@ -241,4 +241,25 @@ Check Consumer Transmitter Smart Break
     ${respone}=  Run Keyword      CheckConsumerQueue    ${message}
     Should Be Equal   ${respone['status']}   OK
     # Log     ${respone['message']}
+
+Transmitter Dual Site Deduplication
+    [Arguments]             ${type}   ${no_test}
+    Log To Console    ================================================================================
+    Log To Console    [Transmitter Dual Site Deduplication] Starting: type=${type}, test=${no_test}
+    Log To Console    ================================================================================
+    SetConfigDynamic        ${TransmitterName}
+    SetVariableTestCase     ${type}   ${no_test}
+    ${sleep}=   ChangeDummyRespone      93
+    Log To Console    [Transmitter Dual Site Deduplication] Set dummy HTTP 404 (id=93) to trigger retry
+    Log To Console    [Transmitter Dual Site Deduplication] Sending queue to BOTH PROD (.51) and DRC (.58)...
+    SendMessageQueueDualSite    dual_site
+    Log To Console    [Transmitter Dual Site Deduplication] Waiting 5s for both transmitters to process...
+    Sleep    5
+    Log To Console    [Transmitter Dual Site Deduplication] Verifying deduplication in MongoDB retry_transmitter...
+    Check Dual Site Deduplication
+    Log To Console    [Transmitter Dual Site Deduplication] Completed successfully
+    Log To Console    ================================================================================
+
+Check Dual Site Deduplication
+    Check Data Table Transaction    CheckDualSiteDeduplicationMongoDB
 #batas

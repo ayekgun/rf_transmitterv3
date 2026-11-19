@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import sys,os,json,time,re
+from pymongo import MongoClient
 
 _curr_dir = os.path.dirname(os.path.abspath(__file__))
 _py_dir = os.path.abspath(os.path.join(_curr_dir, ".."))
@@ -140,4 +141,58 @@ def CheckJsonRetryTransmitterMongoDB_next_schedule():
     str2 = "Json Object In MongoDB Collection MSgIn_PushHistory DateSubmit= ", r_transmitter_mongo_next_schedule
     result = Transmitter.MatchingDataDateTime(gendatetime,  r_transmitter_mongo_next_schedule, str1, str2)
     print(result)
-    return(result)   
+    return(result)
+
+def CheckDualSiteDeduplicationMongoDB():
+    """Validates that exactly 1 document exists in MongoDB retry_transmitter for the given trx_id.
+    
+    Proves that when both PROD (.51) and DRC (.58) receive identical queue messages,
+    the Single DB unique index {trx_id, message_id} successfully deduplicates and prevents
+    double storage.
+    """
+    client = MongoClient(mongo_conn)
+    db = client['scheduler_retry']
+    coll = db['retry_transmitter']
+    
+    trxid = str(Transmitter.quintrxid)
+    msgid = str(Transmitter.quinmessageid)
+    
+    docs = list(coll.find({'trx_id': trxid}))
+    doc_count = len(docs)
+    print(f"[CheckDualSiteDeduplicationMongoDB] trx_id={trxid}, found {doc_count} documents in MongoDB")
+    for d in docs:
+        print(f" - Doc ID: {d.get('_id')}, trx_id: {d.get('trx_id')}, site: {d.get('site')}, status: {d.get('status')}, message_id: {d.get('message_id')}")
+    
+    client.close()
+    
+    if doc_count != 1:
+        return {
+            "status": "NOK",
+            "message": f"Expected exactly 1 document in MongoDB for trx_id={trxid}, but found {doc_count} (Deduplication failed!)"
+        }
+    
+    doc = docs[0]
+    site = doc.get('site')
+    status = doc.get('status')
+    stored_msgid = doc.get('message_id')
+    
+    if site not in ('PROD', 'DRC'):
+        return {
+            "status": "NOK",
+            "message": f"Document has invalid site={site}, expected PROD or DRC"
+        }
+    if status != 'READY':
+        return {
+            "status": "NOK",
+            "message": f"Document has invalid status={status}, expected READY"
+        }
+    if msgid and stored_msgid != msgid:
+        return {
+            "status": "NOK",
+            "message": f"Document message_id mismatch: expected={msgid}, actual={stored_msgid}"
+        }
+        
+    return {
+        "status": "OK",
+        "message": f"Deduplication SUCCESS: exactly 1 document stored in MongoDB (site={site}, status={status}, message_id={stored_msgid})"
+    }   

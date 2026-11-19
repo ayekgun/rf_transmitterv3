@@ -171,6 +171,11 @@ def SendMessageQueue(prefname):
     txprefname = prefname
     SendQueue(queuemessage, queuename, prefname)
 
+def SendMessageQueueDualSite(prefname):
+    global txprefname
+    txprefname = prefname
+    SendQueueDualSite(queuemessage, queuename, prefname)
+
 def GetKeywordFromDB(keyword):
     con = pymysql.connect(db=db, user=user, passwd=passwd,host=host,port=3306,autocommit=False)
     cur = con.cursor()

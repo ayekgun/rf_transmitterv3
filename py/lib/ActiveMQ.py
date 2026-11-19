@@ -174,23 +174,25 @@ def GetQueueSubmitResult(mqname,sleeptime):
     time.sleep(sleeptime + 1)
     conn.disconnect()
 
-def _create_stomp_conn():
+def _create_stomp_conn(host=None, port=None):
+    h = host or host_amq
+    p = port or port_amq
     try:
-        conn = stomp.Connection([(host_amq, port_amq)], auto_content_length=False)
+        conn = stomp.Connection([(h, p)], auto_content_length=False)
     except TypeError:
-        conn = stomp.Connection([(host_amq, port_amq)])
+        conn = stomp.Connection([(h, p)])
         try:
             conn.auto_content_length = False
         except Exception:
             pass
     return conn
 
-def SendQueue(queuMessage , destinationqueue, prefix):
+def SendQueue(queuMessage , destinationqueue, prefix, host=None, port=None):
     global prefname
     global datesend
     prefname = prefix
     datesend = GetDateTimeServer()
-    conn = _create_stomp_conn()
+    conn = _create_stomp_conn(host, port)
     if hasattr(conn, 'start'):
         conn.start()
     conn.connect('admin', 'JAtis123!@#', wait=True)
@@ -201,6 +203,18 @@ def SendQueue(queuMessage , destinationqueue, prefix):
     }
     conn.send(dest, queuMessage, headers=headers)
     conn.disconnect()
+
+def SendQueueDualSite(queuMessage, destinationqueue, prefix, host_prod=None, host_drc=None):
+    h_prod = host_prod or host_amq
+    p_prod = port_amq
+    h_drc = host_drc or globals().get('host_amq_drc', '192.168.181.58')
+    p_drc = globals().get('port_amq_drc', 61613)
+
+    print(f"[SendQueueDualSite] Sending to PROD ({h_prod}:{p_prod})...")
+    SendQueue(queuMessage, destinationqueue, prefix, host=h_prod, port=p_prod)
+
+    print(f"[SendQueueDualSite] Sending to DRC ({h_drc}:{p_drc})...")
+    SendQueue(queuMessage, destinationqueue, prefix, host=h_drc, port=p_drc)
 
 def SendTopic():
     conn = _create_stomp_conn()

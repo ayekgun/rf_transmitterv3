@@ -111,3 +111,7 @@ TC026- Test Retry Transmitter = 2
 TC027- Test Retry Transmitter = 3
     [Tags]   Transmnitter 247    Retry3    HTTP
     Transmitter      T247     [TRANSJNS-027]
+
+TC028- Test Dual Site Deduplication Single DB
+    [Tags]   Transmitter 247    DualSite    Deduplication
+    Transmitter Dual Site Deduplication      T247     [TRANSJNS-025]

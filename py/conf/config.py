@@ -21,6 +21,8 @@ db_cfg = "apps_config"
 # host_amq ="10.0.7.106"
 host_amq ="192.168.181.51"
 port_amq = 61613
+host_amq_drc = "192.168.181.58"
+port_amq_drc = 61613
 
 queuesubmitresult ='jns.app.submitresults'
 

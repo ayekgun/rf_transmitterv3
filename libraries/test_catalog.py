@@ -268,3 +268,30 @@ TEST_CATALOG["TC032"] = {
     "test_data": "Dummy response ID 185 (sleep = 16s, timeout limit = 15s, retry = 3)",
     "expected": "SUT mendeteksi timeout pada detik ke-15, melempar SocketTimeoutException, dan mengirimkan submit result PROVIDER_SUBMIT_STATUS=FAILED_SUBMIT serta TRANSMITTER_SUBMIT_STATUS=SUCCESS_RECEIVED."
 }
+
+TEST_CATALOG["TC033"] = {
+    "description": "MSISDN Validation - Valid Alternative Telkomsel NDC Prefix 62811 (Kartu Halo)",
+    "scenario": "Transmitter Telkomsel MT V2 - Valid MSISDN Halo Prefix 62811",
+    "test_case": "Verifikasi Transmitter mampu mengirimkan SMS MT V2 ke nomor pelanggan dengan prefix resmi Telkomsel 62811 (Kartu Halo)",
+    "steps": "1. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan MSISDN 6281102000319.\n2. Verifikasi SUT membentuk payload JSON dengan msisdn 6281102000319 dan HMAC signature valid.\n3. Vendor menerima pesan dan merespons HTTP 200 (response_code 1).\n4. Verifikasi ACK submit SUCCESS_RECEIVED (status 1).",
+    "test_data": "MSISDN = 6281102000319 (Telkomsel Halo), dummy_id = 177",
+    "expected": "Pesan berhasil diproses dan dikirimkan ke vendor dengan response_code 1, ACK submit status 1."
+}
+
+TEST_CATALOG["TC034"] = {
+    "description": "MSISDN Validation - Invalid Non-Telkomsel MSISDN Prefix 62818 (XL Axiata)",
+    "scenario": "Transmitter Telkomsel MT V2 - Negative Test Non-Telkomsel Operator Prefix",
+    "test_case": "Verifikasi penanganan Transmitter saat mengirimkan nomor operator non-Telkomsel (62818 XL), vendor menolak dengan HTTP 400 (Invalid Request, code 4), dan SUT fail-fast tanpa retry",
+    "steps": "1. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan MSISDN 6281802000319.\n2. SUT meneruskan pesan ke vendor.\n3. Vendor menolak dengan HTTP 400 (response_code 4 Invalid Request).\n4. SUT memetakan response_code 4 sebagai error permanen (non-retryable).\n5. Verifikasi antrean submitresults menerima ACK PROVIDER_SUBMIT_STATUS=4 dan TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT tanpa ada pengulangan pengiriman (retry=0).",
+    "test_data": "MSISDN = 6281802000319 (XL Axiata non-Telkomsel), dummy_id = 178",
+    "expected": "Vendor merespon HTTP 400 (code 4), SUT tidak melakukan retry, dan mencatat submit result PROVIDER_SUBMIT_STATUS=4 serta TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT."
+}
+
+TEST_CATALOG["TC035"] = {
+    "description": "MSISDN Validation - Malformed MSISDN Local Format Without Country Code 62",
+    "scenario": "Transmitter Telkomsel MT V2 - Negative Test Malformed MSISDN Without CC",
+    "test_case": "Verifikasi penanganan Transmitter saat format nomor tidak menyertakan kode negara 62 (081202000319), vendor menolak dengan HTTP 400 (code 4), dan SUT fail-fast tanpa retry",
+    "steps": "1. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan MSISDN 081202000319.\n2. SUT meneruskan pesan ke vendor.\n3. Vendor menolak dengan HTTP 400 (response_code 4 Invalid Request).\n4. SUT mendeteksi HTTP 400 sebagai non-retryable error.\n5. Verifikasi submit result mencatat PROVIDER_SUBMIT_STATUS=4 dan TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT.",
+    "test_data": "MSISDN = 081202000319 (Local format no CC 62), dummy_id = 178",
+    "expected": "Vendor menolak format nomor lokal dengan HTTP 400, SUT fail-fast tanpa retry, submit result PROVIDER_SUBMIT_STATUS=4 dan TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT."
+}

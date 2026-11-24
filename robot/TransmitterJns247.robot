@@ -130,3 +130,15 @@ TC031- Test Boundary SMS 2001 Chars Over Limit
 TC032- Test HTTP Socket Timeout 15s SUT To Vendor
     [Tags]   Transmitter 247    Timeout    SocketTimeout
     Transmitter Single Respon      T247     [TRANSJNS-032]    185
+
+TC033- Test Valid MSISDN Telkomsel Prefix Halo 62811
+    [Tags]   Transmitter 247    MSISDN    Halo62811    Positive
+    Transmitter Single Respon      T247     [TRANSJNS-033]    177
+
+TC034- Test Invalid MSISDN Non-Telkomsel Prefix 62818
+    [Tags]   Transmitter 247    MSISDN    NonTsel    HTTP400    Negative
+    Transmitter Single Respon      T247     [TRANSJNS-034]    178
+
+TC035- Test Malformed MSISDN Without Country Code 0812
+    [Tags]   Transmitter 247    MSISDN    Malformed    HTTP400    Negative
+    Transmitter Single Respon      T247     [TRANSJNS-035]    178

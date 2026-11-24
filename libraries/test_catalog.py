@@ -231,3 +231,31 @@ TEST_CATALOG = {
         "expected": "Tepat 1 record retry tersimpan di MongoDB dengan status='READY' dan site ('PROD' atau 'DRC').",
     },
 }
+
+# Added for PB172645142601YA - Boundary Testing (IFA v5.0 MT V2)
+TEST_CATALOG["TC029"] = {
+    "description": "Boundary Testing - SMS 1999 Chars",
+    "scenario": "Transmitter Telkomsel MT V2 - Boundary SMS Near Max Limit",
+    "test_case": "Verifikasi Transmitter mampu memproses dan mengirimkan pesan SMS dengan panjang 1999 karakter secara utuh tanpa pemotongan",
+    "steps": "1. Kirim antrean dengan payload sms sepanjang 1999 karakter.\n2. Verifikasi SUT membentuk JSON MT V2 ke mock Telkomsel.\n3. Validasi panjang dan isi field sms di mock sama persis 1999 karakter.\n4. Verifikasi ACK submit SUCCESS_RECEIVED.",
+    "test_data": "SMS text 1999 characters (Boundary near max)",
+    "expected": "Pesan 1999 karakter terkirim utuh tanpa truncate, signature valid, submit result SUCCESS_RECEIVED."
+}
+
+TEST_CATALOG["TC030"] = {
+    "description": "Boundary Testing - SMS 2000 Chars Max Limit",
+    "scenario": "Transmitter Telkomsel MT V2 - Boundary SMS Max Limit",
+    "test_case": "Verifikasi Transmitter mampu memproses dan mengirimkan pesan SMS dengan panjang tepat 2000 karakter (batas maksimum IFA v5.0) secara utuh",
+    "steps": "1. Kirim antrean dengan payload sms sepanjang 2000 karakter.\n2. Verifikasi SUT membentuk JSON MT V2 ke mock Telkomsel.\n3. Validasi panjang dan isi field sms di mock sama persis 2000 karakter.\n4. Verifikasi ACK submit SUCCESS_RECEIVED.",
+    "test_data": "SMS text 2000 characters (Boundary exact max)",
+    "expected": "Pesan 2000 karakter terkirim utuh tanpa truncate, signature valid, submit result SUCCESS_RECEIVED."
+}
+
+TEST_CATALOG["TC031"] = {
+    "description": "Boundary Testing - SMS 2001 Chars Over Limit",
+    "scenario": "Transmitter Telkomsel MT V2 - Boundary SMS Over Limit",
+    "test_case": "Verifikasi perilaku Transmitter saat menerima pesan SMS melebihi batas 2000 karakter (2001 karakter)",
+    "steps": "1. Kirim antrean dengan payload sms sepanjang 2001 karakter.\n2. Observasi apakah SUT menolak atau meneruskan ke endpoint Telkomsel.\n3. Verifikasi konsistensi payload dan respon submit.",
+    "test_data": "SMS text 2001 characters (Boundary over limit)",
+    "expected": "SUT menangani pesan 2001 karakter sesuai kontrak atau diteruskan secara aman ke provider."
+}

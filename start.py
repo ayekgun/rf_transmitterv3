@@ -3,6 +3,7 @@ from subprocess import call
 import os
 import shutil
 import pymysql
+import re
 # import paramiko
 
 # Parse optional site mode flag from arguments
@@ -129,9 +130,27 @@ if __name__ == '__main__':
     
     # Check for optional 3rd argument to filter specific Test Case
     if len(sys.argv) > 3:
-        target_tc = sys.argv[3]
-        testcase = [tc for tc in testcase if target_tc.lower() in tc.lower()]
-        print(f"Filtering to run only: {target_tc}")
+        target_tc = sys.argv[3].strip()
+        matched_tcs = []
+        if ',' in target_tc:
+            targets = [t.strip().lower() for t in target_tc.split(',') if t.strip()]
+            matched_tcs = [tc for tc in testcase if any(t in tc.lower() for t in targets)]
+        elif '..' in target_tc or ('-' in target_tc and re.search(r'(?:tc)?\d+\s*(?:-|\.\.)\s*(?:tc)?\d+', target_tc, re.I)):
+            m = re.search(r'(?:tc)?(\d+)\s*(?:-|\.\.)\s*(?:tc)?(\d+)', target_tc, re.I)
+            if m:
+                start_num = int(m.group(1))
+                end_num = int(m.group(2))
+                for tc in testcase:
+                    tc_m = re.search(r'TC(\d+)', tc, re.I)
+                    if tc_m and start_num <= int(tc_m.group(1)) <= end_num:
+                        matched_tcs.append(tc)
+            else:
+                matched_tcs = [tc for tc in testcase if target_tc.lower() in tc.lower()]
+        else:
+            matched_tcs = [tc for tc in testcase if target_tc.lower() in tc.lower()]
+        
+        testcase = matched_tcs
+        print(f"Filtering to run: {target_tc} -> Matched {len(testcase)} testcase(s): {[tc.replace('-t ', '') for tc in testcase]}")
         
     transmitter_name_param = 'TransmitterName:'+transmitter_name
     site_mode_param = 'SiteMode:' + site_mode_arg

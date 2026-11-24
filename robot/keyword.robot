@@ -254,8 +254,8 @@ Transmitter Dual Site Deduplication
     Run Keyword If    ${is_single}    Log To Console    [Transmitter Dual Site Deduplication] NOTICE: Running in single-site / legacy mode. Skipping dual-site injection and deduplication check.
     Return From Keyword If    ${is_single}
     SetVariableTestCase     ${type}   ${no_test}
-    ${sleep}=   ChangeDummyRespone      93
-    Log To Console    [Transmitter Dual Site Deduplication] Set dummy HTTP 404 (id=93) to trigger retry
+    ${sleep}=   ChangeDummyRespone      181
+    Log To Console    [Transmitter Dual Site Deduplication] Set dummy HTTP 502 (id=181) to trigger retry
     Log To Console    [Transmitter Dual Site Deduplication] Sending queue to BOTH PROD (.51) and DRC (.58)...
     SendMessageQueueDualSite    dual_site
     Log To Console    [Transmitter Dual Site Deduplication] Waiting 5s for both transmitters to process...
@@ -268,3 +268,20 @@ Transmitter Dual Site Deduplication
 Check Dual Site Deduplication
     Check Data Table Transaction    CheckDualSiteDeduplicationMongoDB
 #batas
+
+Transmitter Single Respon
+    [Arguments]       ${type}     ${no_test}    ${dummy_id}
+    Log To Console    ================================================================================
+    Log To Console    [Transmitter Single Respon] Starting: type=${type}, test=${no_test}, dummy_id=${dummy_id}
+    Log To Console    ================================================================================
+    SetSiteMode             ${SiteMode}
+    SetConfigDynamic        ${TransmitterName}
+    ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${dummy_id}
+    Log To Console    [Transmitter Single Respon] Sleep time: ${sleep}
+    Run Proccess Send Queue       normal
+    ${status}=    CheckFlowToTelco
+    Log To Console    [Transmitter Single Respon] Flow status: ${status}
+    Check Result Parameter in Telco     ${sleep}
+    Check Queue Submit Result    1
+    Log To Console    [Transmitter Single Respon] Completed test: type=${type}, test=${no_test}
+    Log To Console    ================================================================================

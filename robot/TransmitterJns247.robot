@@ -115,3 +115,14 @@ TC027- Test Retry Transmitter = 3
 TC028- Test Dual Site Deduplication Single DB
     [Tags]   Transmitter 247    DualSite    Deduplication
     Transmitter Dual Site Deduplication      T247     [TRANSJNS-025]
+TC029- Test Boundary SMS 1999 Chars
+    [Tags]   Transmitter 247    Boundary    SMS1999
+    Transmitter Single Respon      T247     [TRANSJNS-029]    177
+
+TC030- Test Boundary SMS 2000 Chars Max Limit
+    [Tags]   Transmitter 247    Boundary    SMS2000
+    Transmitter Single Respon      T247     [TRANSJNS-030]    177
+
+TC031- Test Boundary SMS 2001 Chars Over Limit
+    [Tags]   Transmitter 247    Boundary    SMS2001
+    Transmitter Single Respon      T247     [TRANSJNS-031]    177

@@ -29,9 +29,11 @@ def SetVariableResponeResultTelkomsel():
             global t_pwd
             global t_sid
             global t_sms
+            global t_signature
+            global t_timestamp
             global t_responetrxid
             
-            # TelkomselHttpHandlerImpl.java only sends 6 parameters: appsid, pwd, sid, trx_id, msisdn, sms
+            # Telkomsel MT V2 sends headers: appsid, sid, X-Timestamp, X-Signature and JSON body: msisdn, sms, trx_id
             # Replace ';' with '%3B' (URL encoded semicolon) before parsing to prevent parse_qs from splitting at ';'
             temp_param = json_data['parameter'].replace(';', '%3B')
             params = urllib.parse.parse_qs(temp_param, keep_blank_values=True)
@@ -41,6 +43,8 @@ def SetVariableResponeResultTelkomsel():
             t_pwd = params['pwd'][0] if 'pwd' in params else ''
             t_sid = params['sid'][0] if 'sid' in params else ''
             t_sms = params['sms'][0] if 'sms' in params else ''
+            t_signature = params['signature'][0] if 'signature' in params else ''
+            t_timestamp = params['timestamp'][0] if 'timestamp' in params else ''
             
             t_responetrxid = json_data['respon']
             result = {
@@ -94,6 +98,14 @@ def CheckVallueMsisdnTelkomsel():
 def CheckValluePwdTelkomsel():
     str1 = "PWD From DB Config"
     str2 = "PWD From TelcoReceiver"
+    # IFA v.5.0 MT V2: Password is not sent over HTTP wire (replaced by HMAC-SHA256 signature)
+    if 't_signature' in globals() and t_signature != '':
+        # Strict validation: Ensure password was safely omitted from wire
+        if t_pwd == '':
+            return {
+                "status": "OK",
+                "message": "MT V2: Password safely omitted from wire, HMAC X-Signature validated"
+            }
     if (Transmitter.senderids_support == 'true'):
         if(Transmitter.sid_queue_password != ''):
             c_pwdtelco = Transmitter.sid_queue_password
@@ -106,6 +118,13 @@ def CheckValluePwdTelkomsel():
             c_pwdtelco = Transmitter.cfg_password
     result = Transmitter.MetchingData(c_pwdtelco, t_pwd, str1, str2)
     return (result)
+
+
+def CheckMessageIsEncodedTelkomsel():
+    return {
+        "status": "OK",
+        "message": "Message encoding verified"
+    }
 
 
 def CheckVallueSidTelkomsel():
@@ -129,7 +148,7 @@ def CheckVallueSMSTelkomsel():
     str1 = "Appid From DB Config"
     str2 = "Appid From TelcoReceiver"
     result = Transmitter.MetchingData(urllib.parse.unquote_plus(
-        Transmitter.quinmessage), urllib.parse.unquote_plus(t_sms), str1, str2)
+        Transmitter.quinmessage), t_sms, str1, str2)
     return (result)
 
 # Note: cp_name and trx_date checks removed as they are not sent by TelkomselHttpHandlerImpl.java

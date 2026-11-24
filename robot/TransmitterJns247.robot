@@ -126,3 +126,7 @@ TC030- Test Boundary SMS 2000 Chars Max Limit
 TC031- Test Boundary SMS 2001 Chars Over Limit
     [Tags]   Transmitter 247    Boundary    SMS2001
     Transmitter Single Respon      T247     [TRANSJNS-031]    177
+
+TC032- Test HTTP Socket Timeout 15s SUT To Vendor
+    [Tags]   Transmitter 247    Timeout    SocketTimeout
+    Transmitter Single Respon      T247     [TRANSJNS-032]    185

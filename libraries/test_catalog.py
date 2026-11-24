@@ -259,3 +259,12 @@ TEST_CATALOG["TC031"] = {
     "test_data": "SMS text 2001 characters (Boundary over limit)",
     "expected": "SUT menangani pesan 2001 karakter sesuai kontrak atau diteruskan secara aman ke provider."
 }
+
+TEST_CATALOG["TC032"] = {
+    "description": "HTTP Socket Timeout Testing - SUT Client Timeout >= 15 Seconds",
+    "scenario": "Transmitter Telkomsel MT V2 - Real HTTP Socket Timeout Handling (IFA v5.0 Section D)",
+    "test_case": "Verifikasi Transmitter mematuhi batas client timeout minimum 15 detik, memicu SocketTimeoutException saat vendor tidak merespon dalam 16s, dan mengirimkan ACK FAILED_SUBMIT / SUCCESS_RECEIVED ke queue submitresults",
+    "steps": "1. Set dummy response simulator Telkomsel dengan sleep = 16 detik (melebihi konfigurasi timeout SUT 15 detik).\n2. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan retry = 3.\n3. SUT mengirimkan request MT V2 ke mock dan menunggu hingga 15 detik sebelum timeout.\n4. Verifikasi SUT memicu SocketTimeoutException tanpa hanging thread.\n5. Verifikasi antrean jns.app.submitresults menerima ACK dengan PROVIDER_SUBMIT_STATUS = FAILED_SUBMIT dan TRANSMITTER_SUBMIT_STATUS = SUCCESS_RECEIVED.",
+    "test_data": "Dummy response ID 185 (sleep = 16s, timeout limit = 15s, retry = 3)",
+    "expected": "SUT mendeteksi timeout pada detik ke-15, melempar SocketTimeoutException, dan mengirimkan submit result PROVIDER_SUBMIT_STATUS=FAILED_SUBMIT serta TRANSMITTER_SUBMIT_STATUS=SUCCESS_RECEIVED."
+}

@@ -295,3 +295,12 @@ TEST_CATALOG["TC035"] = {
     "test_data": "MSISDN = 081202000319 (Local format no CC 62), dummy_id = 178",
     "expected": "Vendor menolak format nomor lokal dengan HTTP 400, SUT fail-fast tanpa retry, submit result PROVIDER_SUBMIT_STATUS=4 dan TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT."
 }
+
+TEST_CATALOG["TC036"] = {
+    "description": "Delivery Report - Registrasi DR Pull PENDING pada ActiveMQ jns.db.mongodbv2",
+    "scenario": "Transmitter Telkomsel MT V2 - Verification DR Pull PENDING Registration",
+    "test_case": "Verifikasi Transmitter menerbitkan perintah registrasi DR Pull berstatus PENDING ke ActiveMQ antrean jns.db.mongodbv2 setelah MT V2 berhasil dikirim ke Telkomsel",
+    "steps": "1. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan MSISDN 6281102000319.\n2. SUT meneruskan MT SMS ke Telkomsel IFA v5.0 dan menerima HTTP 200 (Success).\n3. SUT menerbitkan ACK ke antrean jns.app.submitresults.\n4. SUT memanggil registerDrPull() dan mempublikasikan command JSON ke antrean ActiveMQ jns.db.mongodbv2.\n5. Verifikasi payload ActiveMQ: collection=dr_pull_telkomsel, type=insert, status=PENDING, provider_id=1, channel_name=TSEL, attempt=0, next_pull_at=+2 menit.\n6. Verifikasi trace log SUT mencatat 'publish PENDING provider_trxid=... to queue jns.db.mongodbv2'.",
+    "test_data": "MSISDN = 6281102000319, dummy_id = 177, queue = jns.db.mongodbv2",
+    "expected": "Dokumen registrasi DR Pull PENDING diterbitkan ke ActiveMQ jns.db.mongodbv2 dengan metadata lengkap dan next_pull_at dijadwalkan tepat 2 menit setelah submit_date."
+}

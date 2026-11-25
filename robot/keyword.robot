@@ -285,3 +285,32 @@ Transmitter Single Respon
     Check Queue Submit Result    1
     Log To Console    [Transmitter Single Respon] Completed test: type=${type}, test=${no_test}
     Log To Console    ================================================================================
+
+
+Check Queue DR Pull Registration
+    Log To Console    [Check Queue DR Pull Registration] Starting DR Pull registration validation
+    Check Data Table Transaction    SetVariableQueueDrPullRegistration
+    Check Data Table Transaction    CheckDrPullCollectionAndType
+    Check Data Table Transaction    CheckDrPullDocumentsStatusPending
+    Check Data Table Transaction    CheckDrPullDocumentsIdentifiers
+    Check Data Table Transaction    CheckDrPullNextPullSchedule
+    Check Data Table Transaction    CheckDrPullSutLogTrace
+    Log To Console    [Check Queue DR Pull Registration] DR Pull registration validation completed
+
+Transmitter Single Respon DRPull
+    [Arguments]       ${type}     ${no_test}    ${dummy_id}
+    Log To Console    ================================================================================
+    Log To Console    [Transmitter Single Respon DRPull] Starting: type=${type}, test=${no_test}, dummy_id=${dummy_id}
+    Log To Console    ================================================================================
+    SetSiteMode             ${SiteMode}
+    SetConfigDynamic        ${TransmitterName}
+    ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${dummy_id}
+    Log To Console    [Transmitter Single Respon DRPull] Sleep time: ${sleep}
+    Run Proccess Send Queue       normal
+    ${status}=    CheckFlowToTelco
+    Log To Console    [Transmitter Single Respon DRPull] Flow status: ${status}
+    Check Result Parameter in Telco     ${sleep}
+    Check Queue Submit Result    1
+    Check Queue DR Pull Registration
+    Log To Console    [Transmitter Single Respon DRPull] Completed test: type=${type}, test=${no_test}
+    Log To Console    ================================================================================

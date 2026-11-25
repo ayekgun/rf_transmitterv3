@@ -161,7 +161,7 @@ if __name__ == '__main__':
         report_excel_path = os.path.join(base_dir, 'reports', report_excel_name)
         os.environ['EXCEL_REPORT_PATH'] = report_excel_path
 
-        list = [pathrobot, '--listener', listener_path, '-v', transmitter_name_param, '-v', site_mode_param, '-d', dirresult]
+        list = [pathrobot, '--listener', listener_path, '--maxassignlength', '0', '-v', transmitter_name_param, '-v', site_mode_param, '-d', dirresult]
         for row in testcase:
             list.append(row)
         list.append(t_robot)

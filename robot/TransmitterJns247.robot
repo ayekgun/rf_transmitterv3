@@ -142,3 +142,7 @@ TC034- Test Invalid MSISDN Non-Telkomsel Prefix 62818
 TC035- Test Malformed MSISDN Without Country Code 0812
     [Tags]   Transmitter 247    MSISDN    Malformed    HTTP400    Negative
     Transmitter Single Respon      T247     [TRANSJNS-035]    178
+
+TC036- Test Register DR Pull Pending To ActiveMQ MongoDB Queue
+    [Tags]   Transmitter 247    DRPull    ActiveMQ    Positive
+    Transmitter Single Respon DRPull      T247     [TRANSJNS-036]    177

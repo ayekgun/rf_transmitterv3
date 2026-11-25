@@ -44,6 +44,7 @@ _lib_dir = os.path.join(os.path.dirname(__file__), 'lib')
 if _lib_dir not in sys.path:
     sys.path.insert(0, _lib_dir)
 from RetryTransmitter import *
+from DrPullVerifier import *
 from ActiveMQ import *
 
 from ResultTelco_tsel import *

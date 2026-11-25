@@ -254,8 +254,8 @@ Transmitter Dual Site Deduplication
     Run Keyword If    ${is_single}    Log To Console    [Transmitter Dual Site Deduplication] NOTICE: Running in single-site / legacy mode. Skipping dual-site injection and deduplication check.
     Return From Keyword If    ${is_single}
     SetVariableTestCase     ${type}   ${no_test}
-    ${sleep}=   ChangeDummyRespone      93
-    Log To Console    [Transmitter Dual Site Deduplication] Set dummy HTTP 404 (id=93) to trigger retry
+    ${sleep}=   ChangeDummyRespone      181
+    Log To Console    [Transmitter Dual Site Deduplication] Set dummy HTTP 502 (id=181) to trigger retry
     Log To Console    [Transmitter Dual Site Deduplication] Sending queue to BOTH PROD (.51) and DRC (.58)...
     SendMessageQueueDualSite    dual_site
     Log To Console    [Transmitter Dual Site Deduplication] Waiting 5s for both transmitters to process...
@@ -268,3 +268,81 @@ Transmitter Dual Site Deduplication
 Check Dual Site Deduplication
     Check Data Table Transaction    CheckDualSiteDeduplicationMongoDB
 #batas
+
+Transmitter Single Respon
+    [Arguments]       ${type}     ${no_test}    ${dummy_id}
+    Log To Console    ================================================================================
+    Log To Console    [Transmitter Single Respon] Starting: type=${type}, test=${no_test}, dummy_id=${dummy_id}
+    Log To Console    ================================================================================
+    SetSiteMode             ${SiteMode}
+    SetConfigDynamic        ${TransmitterName}
+    ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${dummy_id}
+    Log To Console    [Transmitter Single Respon] Sleep time: ${sleep}
+    Run Proccess Send Queue       normal
+    ${status}=    CheckFlowToTelco
+    Log To Console    [Transmitter Single Respon] Flow status: ${status}
+    Check Result Parameter in Telco     ${sleep}
+    Check Queue Submit Result    1
+    Log To Console    [Transmitter Single Respon] Completed test: type=${type}, test=${no_test}
+    Log To Console    ================================================================================
+
+
+Check Queue DR Pull Registration
+    Log To Console    [Check Queue DR Pull Registration] Starting DR Pull registration validation
+    Check Data Table Transaction    SetVariableQueueDrPullRegistration
+    Check Data Table Transaction    CheckDrPullCollectionAndType
+    Check Data Table Transaction    CheckDrPullDocumentsStatusPending
+    Check Data Table Transaction    CheckDrPullDocumentsIdentifiers
+    Check Data Table Transaction    CheckDrPullNextPullSchedule
+    Check Data Table Transaction    CheckDrPullSutLogTrace
+    Log To Console    [Check Queue DR Pull Registration] DR Pull registration validation completed
+
+Transmitter Single Respon DRPull
+    [Arguments]       ${type}     ${no_test}    ${dummy_id}
+    Log To Console    ================================================================================
+    Log To Console    [Transmitter Single Respon DRPull] Starting: type=${type}, test=${no_test}, dummy_id=${dummy_id}
+    Log To Console    ================================================================================
+    SetSiteMode             ${SiteMode}
+    SetConfigDynamic        ${TransmitterName}
+    ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${dummy_id}
+    Log To Console    [Transmitter Single Respon DRPull] Sleep time: ${sleep}
+    Run Proccess Send Queue       normal
+    ${status}=    CheckFlowToTelco
+    Log To Console    [Transmitter Single Respon DRPull] Flow status: ${status}
+    Check Result Parameter in Telco     ${sleep}
+    Check Queue Submit Result    1
+    Check Queue DR Pull Registration
+    Log To Console    [Transmitter Single Respon DRPull] Completed test: type=${type}, test=${no_test}
+    Log To Console    ================================================================================
+
+
+Transmitter Secret Rotation Test
+    [Arguments]       ${type}     ${no_test}    ${dummy_id}    ${new_secret}    ${old_secret}
+    [Teardown]        Restore Client Secret In Config Db    ${old_secret}
+    Log To Console    ================================================================================
+    Log To Console    [Transmitter Secret Rotation Test] Starting: test=${no_test}, new_secret=${new_secret}
+    Log To Console    ================================================================================
+    SetSiteMode             ${SiteMode}
+    SetConfigDynamic        ${TransmitterName}
+    
+    # 1. Rotate secret in DB and broadcast reload to ActiveMQ Topic
+    ${res1}=    Rotate Client Secret In Config Db    ${new_secret}
+    Should Be Equal    ${res1['status']}    OK
+    ${res2}=    Broadcast Active Mq Topic Reload
+    Should Be Equal    ${res2['status']}    OK
+    ${res3}=    Verify Sut Reloaded Log Trace
+    Should Be Equal    ${res3['status']}    OK
+    
+    # 2. Send SMS using the standard pipeline
+    ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${dummy_id}
+    Log To Console    [Transmitter Secret Rotation Test] Sleep time: ${sleep}
+    Run Proccess Send Queue       normal
+    ${status}=    CheckFlowToTelco
+    Log To Console    [Transmitter Secret Rotation Test] Flow status: ${status}
+    
+    # 3. Verify outgoing request was signed with new secret
+    ${res4}=    Verify Outgoing Hmac Signature With Rotated Secret    ${new_secret}    ${old_secret}
+    Should Be Equal    ${res4['status']}    OK
+    Check Queue Submit Result    1
+    Log To Console    [Transmitter Secret Rotation Test] Completed test: type=${type}, test=${no_test}
+    Log To Console    ================================================================================

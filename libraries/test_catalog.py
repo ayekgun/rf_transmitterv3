@@ -231,3 +231,85 @@ TEST_CATALOG = {
         "expected": "Tepat 1 record retry tersimpan di MongoDB dengan status='READY' dan site ('PROD' atau 'DRC').",
     },
 }
+
+# Added for PB172645142601YA - Boundary Testing (IFA v5.0 MT V2)
+TEST_CATALOG["TC029"] = {
+    "description": "Boundary Testing - SMS 1999 Chars",
+    "scenario": "Transmitter Telkomsel MT V2 - Boundary SMS Near Max Limit",
+    "test_case": "Verifikasi Transmitter mampu memproses dan mengirimkan pesan SMS dengan panjang 1999 karakter secara utuh tanpa pemotongan",
+    "steps": "1. Kirim antrean dengan payload sms sepanjang 1999 karakter.\n2. Verifikasi SUT membentuk JSON MT V2 ke mock Telkomsel.\n3. Validasi panjang dan isi field sms di mock sama persis 1999 karakter.\n4. Verifikasi ACK submit SUCCESS_RECEIVED.",
+    "test_data": "SMS text 1999 characters (Boundary near max)",
+    "expected": "Pesan 1999 karakter terkirim utuh tanpa truncate, signature valid, submit result SUCCESS_RECEIVED."
+}
+
+TEST_CATALOG["TC030"] = {
+    "description": "Boundary Testing - SMS 2000 Chars Max Limit",
+    "scenario": "Transmitter Telkomsel MT V2 - Boundary SMS Max Limit",
+    "test_case": "Verifikasi Transmitter mampu memproses dan mengirimkan pesan SMS dengan panjang tepat 2000 karakter (batas maksimum IFA v5.0) secara utuh",
+    "steps": "1. Kirim antrean dengan payload sms sepanjang 2000 karakter.\n2. Verifikasi SUT membentuk JSON MT V2 ke mock Telkomsel.\n3. Validasi panjang dan isi field sms di mock sama persis 2000 karakter.\n4. Verifikasi ACK submit SUCCESS_RECEIVED.",
+    "test_data": "SMS text 2000 characters (Boundary exact max)",
+    "expected": "Pesan 2000 karakter terkirim utuh tanpa truncate, signature valid, submit result SUCCESS_RECEIVED."
+}
+
+TEST_CATALOG["TC031"] = {
+    "description": "Boundary Testing - SMS 2001 Chars Over Limit",
+    "scenario": "Transmitter Telkomsel MT V2 - Boundary SMS Over Limit",
+    "test_case": "Verifikasi perilaku Transmitter saat menerima pesan SMS melebihi batas 2000 karakter (2001 karakter)",
+    "steps": "1. Kirim antrean dengan payload sms sepanjang 2001 karakter.\n2. Observasi apakah SUT menolak atau meneruskan ke endpoint Telkomsel.\n3. Verifikasi konsistensi payload dan respon submit.",
+    "test_data": "SMS text 2001 characters (Boundary over limit)",
+    "expected": "SUT menangani pesan 2001 karakter sesuai kontrak atau diteruskan secara aman ke provider."
+}
+
+TEST_CATALOG["TC032"] = {
+    "description": "HTTP Socket Timeout Testing - SUT Client Timeout >= 15 Seconds",
+    "scenario": "Transmitter Telkomsel MT V2 - Real HTTP Socket Timeout Handling (IFA v5.0 Section D)",
+    "test_case": "Verifikasi Transmitter mematuhi batas client timeout minimum 15 detik, memicu SocketTimeoutException saat vendor tidak merespon dalam 16s, dan mengirimkan ACK FAILED_SUBMIT / SUCCESS_RECEIVED ke queue submitresults",
+    "steps": "1. Set dummy response simulator Telkomsel dengan sleep = 16 detik (melebihi konfigurasi timeout SUT 15 detik).\n2. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan retry = 3.\n3. SUT mengirimkan request MT V2 ke mock dan menunggu hingga 15 detik sebelum timeout.\n4. Verifikasi SUT memicu SocketTimeoutException tanpa hanging thread.\n5. Verifikasi antrean jns.app.submitresults menerima ACK dengan PROVIDER_SUBMIT_STATUS = FAILED_SUBMIT dan TRANSMITTER_SUBMIT_STATUS = SUCCESS_RECEIVED.",
+    "test_data": "Dummy response ID 185 (sleep = 16s, timeout limit = 15s, retry = 3)",
+    "expected": "SUT mendeteksi timeout pada detik ke-15, melempar SocketTimeoutException, dan mengirimkan submit result PROVIDER_SUBMIT_STATUS=FAILED_SUBMIT serta TRANSMITTER_SUBMIT_STATUS=SUCCESS_RECEIVED."
+}
+
+TEST_CATALOG["TC033"] = {
+    "description": "MSISDN Validation - Valid Alternative Telkomsel NDC Prefix 62811 (Kartu Halo)",
+    "scenario": "Transmitter Telkomsel MT V2 - Valid MSISDN Halo Prefix 62811",
+    "test_case": "Verifikasi Transmitter mampu mengirimkan SMS MT V2 ke nomor pelanggan dengan prefix resmi Telkomsel 62811 (Kartu Halo)",
+    "steps": "1. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan MSISDN 6281102000319.\n2. Verifikasi SUT membentuk payload JSON dengan msisdn 6281102000319 dan HMAC signature valid.\n3. Vendor menerima pesan dan merespons HTTP 200 (response_code 1).\n4. Verifikasi ACK submit SUCCESS_RECEIVED (status 1).",
+    "test_data": "MSISDN = 6281102000319 (Telkomsel Halo), dummy_id = 177",
+    "expected": "Pesan berhasil diproses dan dikirimkan ke vendor dengan response_code 1, ACK submit status 1."
+}
+
+TEST_CATALOG["TC034"] = {
+    "description": "MSISDN Validation - Invalid Non-Telkomsel MSISDN Prefix 62818 (XL Axiata)",
+    "scenario": "Transmitter Telkomsel MT V2 - Negative Test Non-Telkomsel Operator Prefix",
+    "test_case": "Verifikasi penanganan Transmitter saat mengirimkan nomor operator non-Telkomsel (62818 XL), vendor menolak dengan HTTP 400 (Invalid Request, code 4), dan SUT fail-fast tanpa retry",
+    "steps": "1. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan MSISDN 6281802000319.\n2. SUT meneruskan pesan ke vendor.\n3. Vendor menolak dengan HTTP 400 (response_code 4 Invalid Request).\n4. SUT memetakan response_code 4 sebagai error permanen (non-retryable).\n5. Verifikasi antrean submitresults menerima ACK PROVIDER_SUBMIT_STATUS=4 dan TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT tanpa ada pengulangan pengiriman (retry=0).",
+    "test_data": "MSISDN = 6281802000319 (XL Axiata non-Telkomsel), dummy_id = 178",
+    "expected": "Vendor merespon HTTP 400 (code 4), SUT tidak melakukan retry, dan mencatat submit result PROVIDER_SUBMIT_STATUS=4 serta TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT."
+}
+
+TEST_CATALOG["TC035"] = {
+    "description": "MSISDN Validation - Malformed MSISDN Local Format Without Country Code 62",
+    "scenario": "Transmitter Telkomsel MT V2 - Negative Test Malformed MSISDN Without CC",
+    "test_case": "Verifikasi penanganan Transmitter saat format nomor tidak menyertakan kode negara 62 (081202000319), vendor menolak dengan HTTP 400 (code 4), dan SUT fail-fast tanpa retry",
+    "steps": "1. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan MSISDN 081202000319.\n2. SUT meneruskan pesan ke vendor.\n3. Vendor menolak dengan HTTP 400 (response_code 4 Invalid Request).\n4. SUT mendeteksi HTTP 400 sebagai non-retryable error.\n5. Verifikasi submit result mencatat PROVIDER_SUBMIT_STATUS=4 dan TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT.",
+    "test_data": "MSISDN = 081202000319 (Local format no CC 62), dummy_id = 178",
+    "expected": "Vendor menolak format nomor lokal dengan HTTP 400, SUT fail-fast tanpa retry, submit result PROVIDER_SUBMIT_STATUS=4 dan TRANSMITTER_SUBMIT_STATUS=FAILED_SUBMIT."
+}
+
+TEST_CATALOG["TC036"] = {
+    "description": "Delivery Report - Registrasi DR Pull PENDING pada ActiveMQ jns.db.mongodbv2",
+    "scenario": "Transmitter Telkomsel MT V2 - Verification DR Pull PENDING Registration",
+    "test_case": "Verifikasi Transmitter menerbitkan perintah registrasi DR Pull berstatus PENDING ke ActiveMQ antrean jns.db.mongodbv2 setelah MT V2 berhasil dikirim ke Telkomsel",
+    "steps": "1. Kirim pesan ke antrean jns.transmitter.telkomsel.reg.247 dengan MSISDN 6281102000319.\n2. SUT meneruskan MT SMS ke Telkomsel IFA v5.0 dan menerima HTTP 200 (Success).\n3. SUT menerbitkan ACK ke antrean jns.app.submitresults.\n4. SUT memanggil registerDrPull() dan mempublikasikan command JSON ke antrean ActiveMQ jns.db.mongodbv2.\n5. Verifikasi payload ActiveMQ: collection=dr_pull_telkomsel, type=insert, status=PENDING, provider_id=1, channel_name=TSEL, attempt=0, next_pull_at=+2 menit.\n6. Verifikasi trace log SUT mencatat 'publish PENDING provider_trxid=... to queue jns.db.mongodbv2'.",
+    "test_data": "MSISDN = 6281102000319, dummy_id = 177, queue = jns.db.mongodbv2",
+    "expected": "Dokumen registrasi DR Pull PENDING diterbitkan ke ActiveMQ jns.db.mongodbv2 dengan metadata lengkap dan next_pull_at dijadwalkan tepat 2 menit setelah submit_date."
+}
+
+TEST_CATALOG["TC037"] = {
+    "description": "Security - Uji Rotasi Secret Dinamis via ActiveMQ Topic Reload (Zero Downtime)",
+    "scenario": "Transmitter Telkomsel MT V2 - Dynamic Client Secret Rotation via Topic Command",
+    "test_case": "Verifikasi Transmitter mampu merotasi HMAC client_secret secara dinamis tanpa restart JVM saat menerima perintah broadcast reload pada ActiveMQ Topic jns.topic.command",
+    "steps": "1. Update client_secret pada apps_config.jns_config menjadi secret baru (RotatedSecret2026).\n2. Publikasikan pesan reload ke ActiveMQ Topic jns.topic.command.\n3. Verifikasi trace log SUT mencatat 'Topic command : reload' dan 'Success reload all config'.\n4. Kirim MT SMS ke antrean jns.transmitter.telkomsel.reg.247 tanpa queue secret.\n5. Verifikasi outgoing request dihitung menggunakan secret baru (HMAC cocok 100% dengan RotatedSecret2026 dan berbeda dari secret lama 7s5tLvM1).\n6. Vendor menerima pesan dengan HTTP 200.\n7. Rollback secret ke 7s5tLvM1 dan broadcast reload kembali.",
+    "test_data": "New Secret = RotatedSecret2026, Old Secret = 7s5tLvM1, Topic = jns.topic.command, Dummy = 177",
+    "expected": "SUT me-reload konfigurasi tanpa restart JVM, menandatangani request dengan secret baru, dan seluruh flow berhasil PASS."
+}

@@ -70,8 +70,12 @@ def SetVaribaleResponeDummy():
     cur.execute(
         "SELECT * FROM dummy_respon where provider = %s  and `default` = %s ", (Transmitter.provider, '1'))
     resultDB = cur.fetchone()
-    respone_pss = resultDB[9]
-    respone_tss = resultDB[10]
+    if resultDB is None:
+        cur.execute("SELECT * FROM dummy_respon where `default` = '1' ORDER BY date_update DESC LIMIT 1")
+        resultDB = cur.fetchone()
+    if resultDB:
+        respone_pss = resultDB[9]
+        respone_tss = resultDB[10]
     return(resultDB)
 
 def CheckVallueSubmitResultChannelName():
@@ -314,7 +318,7 @@ def CheckVallueSubmitResultChannelIsDirect():
     
     str1 = "Client ID Queue IN"
     str2 = "Client ID Queue Submit Result"
-    if (Transmitter.senderids_support == 'true'):
+    if (getattr(Transmitter, 'senderids_support', 'false') == 'true'):
         c_channelisdirect = str(Transmitter.sid_queue_isdirect)
     else:
         c_channelisdirect = ''

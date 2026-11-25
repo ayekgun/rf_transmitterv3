@@ -115,3 +115,38 @@ TC027- Test Retry Transmitter = 3
 TC028- Test Dual Site Deduplication Single DB
     [Tags]   Transmitter 247    DualSite    Deduplication
     Transmitter Dual Site Deduplication      T247     [TRANSJNS-025]
+TC029- Test Boundary SMS 1999 Chars
+    [Tags]   Transmitter 247    Boundary    SMS1999
+    Transmitter Single Respon      T247     [TRANSJNS-029]    177
+
+TC030- Test Boundary SMS 2000 Chars Max Limit
+    [Tags]   Transmitter 247    Boundary    SMS2000
+    Transmitter Single Respon      T247     [TRANSJNS-030]    177
+
+TC031- Test Boundary SMS 2001 Chars Over Limit
+    [Tags]   Transmitter 247    Boundary    SMS2001
+    Transmitter Single Respon      T247     [TRANSJNS-031]    177
+
+TC032- Test HTTP Socket Timeout 15s SUT To Vendor
+    [Tags]   Transmitter 247    Timeout    SocketTimeout
+    Transmitter Single Respon      T247     [TRANSJNS-032]    185
+
+TC033- Test Valid MSISDN Telkomsel Prefix Halo 62811
+    [Tags]   Transmitter 247    MSISDN    Halo62811    Positive
+    Transmitter Single Respon      T247     [TRANSJNS-033]    177
+
+TC034- Test Invalid MSISDN Non-Telkomsel Prefix 62818
+    [Tags]   Transmitter 247    MSISDN    NonTsel    HTTP400    Negative
+    Transmitter Single Respon      T247     [TRANSJNS-034]    178
+
+TC035- Test Malformed MSISDN Without Country Code 0812
+    [Tags]   Transmitter 247    MSISDN    Malformed    HTTP400    Negative
+    Transmitter Single Respon      T247     [TRANSJNS-035]    178
+
+TC036- Test Register DR Pull Pending To ActiveMQ MongoDB Queue
+    [Tags]   Transmitter 247    DRPull    ActiveMQ    Positive
+    Transmitter Single Respon DRPull      T247     [TRANSJNS-036]    177
+
+TC037- Test Dynamic Client Secret Rotation via ActiveMQ Topic Reload
+    [Tags]   Transmitter 247    SecretRotation    ActiveMQ    Topic    Positive
+    Transmitter Secret Rotation Test      T247     [TRANSJNS-037]    177    RotatedSecret2026    7s5tLvM1

@@ -314,3 +314,35 @@ Transmitter Single Respon DRPull
     Check Queue DR Pull Registration
     Log To Console    [Transmitter Single Respon DRPull] Completed test: type=${type}, test=${no_test}
     Log To Console    ================================================================================
+
+
+Transmitter Secret Rotation Test
+    [Arguments]       ${type}     ${no_test}    ${dummy_id}    ${new_secret}    ${old_secret}
+    [Teardown]        Restore Client Secret In Config Db    ${old_secret}
+    Log To Console    ================================================================================
+    Log To Console    [Transmitter Secret Rotation Test] Starting: test=${no_test}, new_secret=${new_secret}
+    Log To Console    ================================================================================
+    SetSiteMode             ${SiteMode}
+    SetConfigDynamic        ${TransmitterName}
+    
+    # 1. Rotate secret in DB and broadcast reload to ActiveMQ Topic
+    ${res1}=    Rotate Client Secret In Config Db    ${new_secret}
+    Should Be Equal    ${res1['status']}    OK
+    ${res2}=    Broadcast Active Mq Topic Reload
+    Should Be Equal    ${res2['status']}    OK
+    ${res3}=    Verify Sut Reloaded Log Trace
+    Should Be Equal    ${res3['status']}    OK
+    
+    # 2. Send SMS using the standard pipeline
+    ${sleep}=   Preparation Data and Dummy     ${type}   ${no_test}    ${dummy_id}
+    Log To Console    [Transmitter Secret Rotation Test] Sleep time: ${sleep}
+    Run Proccess Send Queue       normal
+    ${status}=    CheckFlowToTelco
+    Log To Console    [Transmitter Secret Rotation Test] Flow status: ${status}
+    
+    # 3. Verify outgoing request was signed with new secret
+    ${res4}=    Verify Outgoing Hmac Signature With Rotated Secret    ${new_secret}    ${old_secret}
+    Should Be Equal    ${res4['status']}    OK
+    Check Queue Submit Result    1
+    Log To Console    [Transmitter Secret Rotation Test] Completed test: type=${type}, test=${no_test}
+    Log To Console    ================================================================================

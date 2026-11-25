@@ -45,6 +45,7 @@ if _lib_dir not in sys.path:
     sys.path.insert(0, _lib_dir)
 from RetryTransmitter import *
 from DrPullVerifier import *
+from SecretRotationVerifier import *
 from ActiveMQ import *
 
 from ResultTelco_tsel import *
@@ -70,6 +71,13 @@ from SubmitResult import *
 from SleepMode import *
 
 from TransmitterRedirect import *
+
+senderids_support = 'false'
+sid_queue_password = ''
+sid_queue_username = ''
+sid_queue_senderid = ''
+sid_queue_cpname = ''
+sid_queue_isdirect = ''
 
 def _log_to_console(message):
     """Helper function to write to both stdout and stderr for console visibility"""

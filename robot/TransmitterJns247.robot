@@ -146,3 +146,7 @@ TC035- Test Malformed MSISDN Without Country Code 0812
 TC036- Test Register DR Pull Pending To ActiveMQ MongoDB Queue
     [Tags]   Transmitter 247    DRPull    ActiveMQ    Positive
     Transmitter Single Respon DRPull      T247     [TRANSJNS-036]    177
+
+TC037- Test Dynamic Client Secret Rotation via ActiveMQ Topic Reload
+    [Tags]   Transmitter 247    SecretRotation    ActiveMQ    Topic    Positive
+    Transmitter Secret Rotation Test      T247     [TRANSJNS-037]    177    RotatedSecret2026    7s5tLvM1

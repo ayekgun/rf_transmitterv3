@@ -304,3 +304,12 @@ TEST_CATALOG["TC036"] = {
     "test_data": "MSISDN = 6281102000319, dummy_id = 177, queue = jns.db.mongodbv2",
     "expected": "Dokumen registrasi DR Pull PENDING diterbitkan ke ActiveMQ jns.db.mongodbv2 dengan metadata lengkap dan next_pull_at dijadwalkan tepat 2 menit setelah submit_date."
 }
+
+TEST_CATALOG["TC037"] = {
+    "description": "Security - Uji Rotasi Secret Dinamis via ActiveMQ Topic Reload (Zero Downtime)",
+    "scenario": "Transmitter Telkomsel MT V2 - Dynamic Client Secret Rotation via Topic Command",
+    "test_case": "Verifikasi Transmitter mampu merotasi HMAC client_secret secara dinamis tanpa restart JVM saat menerima perintah broadcast reload pada ActiveMQ Topic jns.topic.command",
+    "steps": "1. Update client_secret pada apps_config.jns_config menjadi secret baru (RotatedSecret2026).\n2. Publikasikan pesan reload ke ActiveMQ Topic jns.topic.command.\n3. Verifikasi trace log SUT mencatat 'Topic command : reload' dan 'Success reload all config'.\n4. Kirim MT SMS ke antrean jns.transmitter.telkomsel.reg.247 tanpa queue secret.\n5. Verifikasi outgoing request dihitung menggunakan secret baru (HMAC cocok 100% dengan RotatedSecret2026 dan berbeda dari secret lama 7s5tLvM1).\n6. Vendor menerima pesan dengan HTTP 200.\n7. Rollback secret ke 7s5tLvM1 dan broadcast reload kembali.",
+    "test_data": "New Secret = RotatedSecret2026, Old Secret = 7s5tLvM1, Topic = jns.topic.command, Dummy = 177",
+    "expected": "SUT me-reload konfigurasi tanpa restart JVM, menandatangani request dengan secret baru, dan seluruh flow berhasil PASS."
+}

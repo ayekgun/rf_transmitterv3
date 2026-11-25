@@ -377,7 +377,7 @@ def GetTestResponeDummy():
     print(provider)
     con = pymysql.connect(db=db, user=user, passwd=passwd,host=host,port=3306,autocommit=False)
     cur = con.cursor()
-    cur.execute("SELECT id FROM dummy_respon where provider = %s",(provider,))
+    cur.execute("SELECT id FROM dummy_respon where provider = %s and (sleep = 0 or sleep is null)",(provider,))
     result_set = cur.fetchall()
     array = list()
     for row in result_set:

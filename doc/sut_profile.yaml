@@ -1,0 +1,27 @@
+sut: drpulltelkomsel
+version_validated: "2.0.0"
+access: local
+log_dir: /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin
+exclude_files:
+  - "*.jar"
+  - "*.conf"
+  - "*.sh"
+  - "*.pid"
+  - "*.xml"
+  - "*.properties"
+files:
+  - name: out-drpulltelkomsel.log
+    role: info
+    timestamp_regex: '^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}'
+    error_like: false
+  - name: log/drpulltelkomsel.debug.log
+    role: info
+    timestamp_regex: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+    error_like: false
+  - name: log/drpulltelkomsel.error.log
+    role: error
+    timestamp_regex: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+    error_like: true
+settle_seconds: 0.5
+settle_max: 3.0
+max_delta_bytes: 1048576

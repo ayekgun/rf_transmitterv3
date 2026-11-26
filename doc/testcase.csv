@@ -1,5 +1,5 @@
 "Test Case ID","Description","Test Case","Test Scenario","Priority","Test Steps","Test Data/Precondition","Expected Result","Actual Output","Status","Log","Note/Description"
-"META-SUT","SUT Version & Update Traceability Matrix (Post-Review Hardening V2.2)","drpulltelkomsel v2.0.0 (prev: v1.2.0)","Baseline: v1.2.0 | Target: v2.0.0 | Ticket: PB172645152602YA","META","[U-01] Migrasi Endpoint Get Delivery Status ke Telkomsel API V2: Perubahan endpoint dari GET /bank/transaction-status (query string) menjadi POST /bank/v2/transaction-status dengan body JSON {""transaction_id"":""...""} sesuai IFA SMS Bulk Premium v5.0 Section E.iv & E.vi.
+"META-SUT","SUT Version & Update Traceability Matrix (V2.3 Final Pre-Automation Baseline)","drpulltelkomsel v2.0.0 (prev: v1.2.0)","Baseline: v1.2.0 | Target: v2.0.0 | Ticket: PB172645152602YA","META","[U-01] Migrasi Endpoint Get Delivery Status ke Telkomsel API V2: Perubahan endpoint dari GET /bank/transaction-status (query string) menjadi POST /bank/v2/transaction-status dengan body JSON {""transaction_id"":""...""} sesuai IFA SMS Bulk Premium v5.0 Section E.iv & E.vi.
 [U-02] Autentikasi HMAC-SHA256 & Signature Header: Implementasi HmacSignerUtil untuk menghitung X-Signature hex lowercase atas canonical string (POST\n<path>\n<appsid>\n<sid>\n<timestamp>\n<rawRequestBody>) dengan batas toleransi waktu X-Timestamp +-300 detik epoch detik.
 [U-03] Resolusi Hirarki 3 Tingkat Client Secret: Penghapusan penyimpanan secret dari dokumen MongoDB; resolusi dinamis dari apps_config dengan urutan prioritas: 1) appsid:sid -> 2) appsid -> 3) client_secret fallback tunggal.
 [U-04] Pemetaan Error Fail-Fast (Permanent Error): HTTP 400/2400 dan 405/2405 kini langsung transisi ke GIVE_UP permanen tanpa retry/backoff; 401/2401 tetap langsung GIVE_UP.
@@ -22,7 +22,7 @@ Dependency Environment: MongoDB (smsCore.dr_pull_telkomsel), ActiveMQ (jns.dr.dr
 [U-08] Concurrency Fencing & Zero Double Publish -> diuji oleh: TC-012, TC-031, TC-033
 [U-09] Kompatibilitas Kontrak Hilir Ganda -> diuji oleh: TC-001, TC-002, TC-011, TC-031
 [U-10] Validasi Startup, Sanitasi Konfigurasi & Batch Isolation -> diuji oleh: TC-013, TC-025, TC-026, TC-032
-Coverage mapping: 34 testcase telah dipetakan terhadap 10 area perubahan aplikasi (U-01 sampai U-10). Kelengkapan boundary condition, failure recovery, dan concurrency fencing telah disempurnakan berdasarkan temuan review V2.1.
+Coverage mapping: 34 testcase telah dipetakan terhadap 10 area perubahan aplikasi (U-01 sampai U-10). Seluruh batas toleransi waktu integer epoch, multi-instance concurrency fencing, dan prosedur idempotent recovery telah tervalidasi.
 Distribusi Pilar: Pilar 1 (4 TC), Pilar 2 (11 TC), Pilar 3 (7 TC), Pilar 4 (12 TC). Total: 34 TC.","","META","","Dibuat: 2026-11-26 | Revisi: Hardening V2.2 (Final Review Findings Applied) | PIC: QA SDET Team | SUT: drpulltelkomsel v2.0.0"
 "TC-001","Memastikan laporan status Delivered (D) dari Telkomsel berhasil diambil dan diteruskan ke kedua antrean hilir menggunakan identifikasi korelasi transaksi yang unik.","TC-001 — Pengambilan Status SMS Berhasil (Delivered) dan Penerusan Laporan Hilir","Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status
 And Konfigurasi kredensial mitra dan alamat endpoint Telkomsel V2 tersedia secara valid
@@ -34,8 +34,8 @@ And Tepat satu perintah SQL penyimpanan diteruskan ke antrean database executor 
 2. Konfigurasikan Mock Server untuk merespons HTTP 200 deliveryStatus='D' untuk provider_trxid='SAMPLE-D-001'.
 3. Jalankan siklus sweep worker drpulltelkomsel.
 4. Verifikasi MongoDB: status='RESOLVED', attempt=0, dr_published_at not null, sql_published_at not null.
-5. Cari pesan pada ActiveMQ jns.dr.drrealhandler yang berkorelasi dengan provider_trxid='SAMPLE-D-001' (tepat 1 pesan, memuat provider_status=D dan timestamp yyyyMMddHHmmss).
-6. Cari pesan pada ActiveMQ jns.db.deliveryreport yang berkorelasi dengan provider_trxid='SAMPLE-D-001' (tepat 1 pesan, memuat INSERT INTO delivery_reports_new(...) VALUES (...)).
+5. Cari pesan pada ActiveMQ jns.dr.drrealhandler yang memuat substring '&provider_trxid=SAMPLE-D-001&' (tepat 1 pesan, memuat provider_status=D dan timestamp yyyyMMddHHmmss).
+6. Cari pesan pada ActiveMQ jns.db.deliveryreport yang memuat query SQL dengan parameter 'SAMPLE-D-001' (tepat 1 pesan INSERT INTO delivery_reports_new).
 7. Teardown: Hapus dokumen provider_trxid='SAMPLE-D-001' dari MongoDB.","Dokumen MongoDB:
 {
   'provider_trxid': 'SAMPLE-D-001',
@@ -59,8 +59,8 @@ And Perintah SQL penyimpanan diteruskan ke antrean database executor dengan rinc
 2. Konfigurasikan Mock Server untuk merespons status ND dengan errorCode='061' untuk provider_trxid='MOCK-ND-002'.
 3. Jalankan worker drpulltelkomsel.
 4. Verifikasi MongoDB: status='RESOLVED', attempt=0, dr_published_at not null, sql_published_at not null.
-5. Cari pesan berkorelasi pada ActiveMQ jns.dr.drrealhandler: tepat 1 pesan membawa provider_status='ND:061' dan provider_err='061'.
-6. Cari pesan berkorelasi pada ActiveMQ jns.db.deliveryreport: tepat 1 pesan query INSERT menyertakan provider_status='ND:061' dan provider_err='061'.
+5. Cari pesan berkorelasi pada ActiveMQ jns.dr.drrealhandler yang memuat '&provider_trxid=MOCK-ND-002&': tepat 1 pesan membawa provider_status='ND:061' dan provider_err='061'.
+6. Cari pesan berkorelasi pada ActiveMQ jns.db.deliveryreport yang memuat parameter 'MOCK-ND-002': tepat 1 pesan query INSERT memuat provider_status='ND:061' dan provider_err='061'.
 7. Teardown: Hapus dokumen 'MOCK-ND-002' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-ND-002', status='PENDING'
 Mock response: HTTP 200, deliveryStatus='ND', errorCode='061'","1. MongoDB: status='RESOLVED', attempt=0.
 2. ActiveMQ jns.dr.drrealhandler: tepat 1 pesan berkorelasi membawa provider_status='ND:061' & provider_err='061'.
@@ -310,12 +310,13 @@ When Pemeriksaan mendalam dilakukan terhadap seluruh berkas log sistem yang terb
 Then Ditemukan nol baris yang memuat nilai kunci rahasia klien sebenarnya
 And Ditemukan nol baris yang memuat nilai tanda tangan enam puluh empat karakter aktual yang digunakan pada transaksi
 And Ditemukan nol baris yang membocorkan nilai nomor pengirim rahasia","P0","1. Jalankan transaksi uji menggunakan nilai unik: secret='SECRET-SUPER-TEST-999', sid='SENDER-PRIVATE-SECRET-888'.
-2. Ambil nilai header X-Signature aktual yang diterima oleh Mock Server (misal 'af938430b9d793c39a15aa177e3445b04e59f1db8bee7b71a0dca0a86e08ff19').
-3. Buka berkas bin/out-drpulltelkomsel.log dan bin/log/drpulltelkomsel.debug.log.
-4. Lakukan audit pencarian teks eksak: grep -c 'SECRET-SUPER-TEST-999' logfile (harus 0 baris).
-5. Lakukan audit pencarian teks eksak: grep -c 'SENDER-PRIVATE-SECRET-888' logfile (harus 0 baris).
-6. Lakukan audit pencarian teks eksak: grep -c '<nilai_signature_aktual>' logfile (harus 0 baris).
-7. Verifikasi bahwa log hanya mencatat nama transaksi, appsid, dan URL tujuan.","Berkas log: bin/out-drpulltelkomsel.log & bin/log/drpulltelkomsel.debug.log
+2. Ambil string nilai header X-Signature aktual yang diterima oleh Mock Server dari request SUT (misal 'af938430b9d793c39a15aa177e3445b04e59f1db8bee7b71a0dca0a86e08ff19').
+3. Pastikan buffer log SUT telah di-flush ke disk secara penuh setelah transaksi selesai.
+4. Buka berkas log SUT (bin/out-drpulltelkomsel.log dan bin/log/drpulltelkomsel.debug.log) termasuk file log rotasi jika ada.
+5. Lakukan audit pencarian teks eksak: grep -c 'SECRET-SUPER-TEST-999' logfile (harus 0 baris).
+6. Lakukan audit pencarian teks eksak: grep -c 'SENDER-PRIVATE-SECRET-888' logfile (harus 0 baris).
+7. Lakukan audit pencarian teks eksak: grep -c '<nilai_signature_aktual>' logfile (harus 0 baris).
+8. Asersi membuktikan tidak ditemukan baris yang membocorkan nilai kredensial maupun signature aktual pada file log yang diperiksa.","Berkas log: bin/out-drpulltelkomsel.log & bin/log/drpulltelkomsel.debug.log
 Target audit eksak: nilai secret unik, nilai sid rahasia unik, dan string nilai signature aktual","1. grep nilai secret menghasilkan 0 kecocokan.
 2. grep nilai sid rahasia menghasilkan 0 kecocokan.
 3. grep nilai signature aktual menghasilkan 0 kecocokan.
@@ -396,27 +397,27 @@ And Transaksi yang diperiksa diubah statusnya menjadi GIVE_UP karena ketiadaan k
 Dokumen MongoDB: provider_trxid='SAMPLE-NOKEYS-026'","1. SUT menyala normal tanpa crash fatal.
 2. MongoDB: status='GIVE_UP', last_error='client_secret not found'.
 3. [LOG CONTRACT]: Log SUT mencatat ketiadaan secret.","","","","Pilar-3, negative, configuration_safety"
-"TC-027","Memastikan penanda waktu permintaan (X-Timestamp) yang berada tepat pada batas toleransi plus tiga ratus detik dan minus tiga ratus detik berhasil diterima melalui pengendalian selisih jam server simulasi.","TC-027 — Validasi Batas Toleransi Waktu Tanda Tangan Tepat Plus Minus Tiga Ratus Detik Berhasil","Given Transaksi SMS siap dilakukan pemeriksaan status
+"TC-027","Memastikan penanda waktu permintaan (X-Timestamp) yang berada tepat pada batas toleransi plus 300 detik dan minus 300 detik berhasil diterima menggunakan presisi perbandingan integer epoch detik yang deterministik.","TC-027 — Validasi Batas Toleransi Waktu Tanda Tangan Tepat Plus Minus Tiga Ratus Detik Berhasil","Given Transaksi SMS siap dilakukan pemeriksaan status
 When Permintaan dikirimkan dan dievaluasi terhadap jam server simulasi yang diselisihkan tepat tiga ratus detik
 Then Server vendor Telkomsel menerima permintaan dan memvalidasi tanda tangan dengan sukses pada kedua arah batas
-And Transaksi berhasil diselesaikan dan statusnya diperbarui menjadi RESOLVED","P1","1. Skenario Uji Batas Atas (+300s): Jalankan Mock Server dengan simulasi clock skew offset -300 detik terhadap waktu aktual (membuat X-Timestamp DR Pull tampak berselisih tepat +300 detik).
-2. Tanam dokumen PENDING 'SAMPLE-TSBOUND-POS27', jalankan worker, dan verifikasi Mock menerima request dengan HTTP 200.
-3. Skenario Uji Batas Bawah (-300s): Jalankan Mock Server dengan simulasi clock skew offset +300 detik terhadap waktu aktual (membuat X-Timestamp berselisih tepat -300 detik).
-4. Tanam dokumen PENDING 'SAMPLE-TSBOUND-NEG27', jalankan worker, dan verifikasi Mock menerima request dengan HTTP 200.
-5. Verifikasi kedua dokumen pada MongoDB bertransisi ke 'RESOLVED'.
-6. Teardown: Hapus kedua dokumen uji dari MongoDB.","Mekanisme Waktu: Pengendalian clock skew offset pada Mock Server (--clock-offset +-300 detik)
-Dokumen MongoDB: provider_trxid='SAMPLE-TSBOUND-POS27' dan 'SAMPLE-TSBOUND-NEG27'","1. Mock Server menerima kedua request pada batas +300s dan -300s (HTTP 200, bukan 401).
+And Transaksi berhasil diselesaikan dan statusnya diperbarui menjadi RESOLVED","P1","1. Presisi Waktu Mock Server: Rumus evaluasi skew pada Mock Server dikunci pada presisi bilangan bulat epoch detik: skew = abs(int(time.time() + mock_clock_offset) - int(timestamp)), mengeliminasi pecahan float agar deterministik.
+2. Pengujian Batas Atas (+300s): Jalankan Mock Server dengan simulasi clock skew offset -300 detik integer. Tanam dokumen PENDING 'SAMPLE-TSBOUND-POS27', jalankan worker, dan verifikasi Mock menerima request dengan HTTP 200 (karena skew == 300 <= 300).
+3. Pengujian Batas Bawah (-300s): Jalankan Mock Server dengan simulasi clock skew offset +300 detik integer. Tanam dokumen PENDING 'SAMPLE-TSBOUND-NEG27', jalankan worker, dan verifikasi Mock menerima request dengan HTTP 200 (karena skew == 300 <= 300).
+4. Verifikasi kedua dokumen pada MongoDB bertransisi ke 'RESOLVED'.
+5. Teardown: Hapus kedua dokumen uji dari MongoDB.","Mekanisme Waktu: Mock Server V2 virtual integer clock offset deterministik: skew = abs(int(time.time() + offset) - int(timestamp))
+Batas yang diuji: offset = -300 detik (skew = 300s) dan offset = +300 detik (skew = 300s)
+Dokumen MongoDB: provider_trxid='SAMPLE-TSBOUND-POS27' dan 'SAMPLE-TSBOUND-NEG27'","1. Mock Server menerima kedua request pada batas presisi integer +300s dan -300s (HTTP 200, bukan 401).
 2. MongoDB: kedua dokumen bertransisi ke status='RESOLVED'.
 3. [LOG CONTRACT]: Log SUT mencatat keberhasilan publikasi DR.","","","","Pilar-2, security, timestamp_boundary"
-"TC-028","Memastikan penanda waktu permintaan (X-Timestamp) yang melampaui batas toleransi (selisih plus 301 detik dan minus 301 detik) ditolak sebagai kegagalan autentikasi 401 dan transaksi langsung dihentikan GIVE_UP.","TC-028 — Penolakan Transaksi Saat Penanda Waktu Melampaui Batas Toleransi Tiga Ratus Satu Detik","Given Transaksi SMS siap dilakukan pemeriksaan status
+"TC-028","Memastikan penanda waktu permintaan (X-Timestamp) yang melampaui batas toleransi (selisih plus 301 detik dan minus 301 detik) ditolak sebagai kegagalan autentikasi 401 dan transaksi langsung dihentikan GIVE_UP menggunakan presisi integer epoch detik.","TC-028 — Penolakan Transaksi Saat Penanda Waktu Melampaui Batas Toleransi Tiga Ratus Satu Detik","Given Transaksi SMS siap dilakukan pemeriksaan status
 When Permintaan dikirimkan dan dievaluasi terhadap jam server simulasi yang melampaui batas toleransi selisih tiga ratus satu detik
 Then Server vendor menolak permintaan dengan kode kesalahan 401 karena penanda waktu kedaluwarsa
-And Transaksi seketika diubah statusnya menjadi GIVE_UP secara permanen tanpa dicoba ulang","P1","1. Skenario Lewat Batas Atas (+301s): Konfigurasikan Mock Server dengan clock skew offset -301 detik (skew terdeteksi 301s > 300s).
-2. Tanam dokumen PENDING 'SAMPLE-TSEXP-POS28', jalankan worker, dan verifikasi Mock menolak dengan HTTP 401 ('Authentication Error').
-3. Skenario Lewat Batas Bawah (-301s): Konfigurasikan Mock Server dengan clock skew offset +301 detik.
-4. Tanam dokumen PENDING 'SAMPLE-TSEXP-NEG28', jalankan worker, dan verifikasi Mock menolak dengan HTTP 401.
-5. Verifikasi kedua dokumen pada MongoDB seketika menjadi 'GIVE_UP' tanpa retry.
-6. Teardown: Hapus kedua dokumen uji dari MongoDB.","Mekanisme Waktu: Pengendalian clock skew offset pada Mock Server (--clock-offset +-301 detik)
+And Transaksi seketika diubah statusnya menjadi GIVE_UP secara permanen tanpa dicoba ulang","P1","1. Presisi Waktu Mock Server: Evaluasi skew menggunakan presisi integer epoch detik: skew = abs(int(time.time() + mock_clock_offset) - int(timestamp)).
+2. Pengujian Lewat Batas Atas (+301s): Jalankan Mock Server dengan simulasi clock skew offset -301 detik integer. Tanam dokumen PENDING 'SAMPLE-TSEXP-POS28', jalankan worker, dan verifikasi Mock menolak dengan HTTP 401 (karena skew == 301 > 300).
+3. Pengujian Lewat Batas Bawah (-301s): Jalankan Mock Server dengan simulasi clock skew offset +301 detik integer. Tanam dokumen PENDING 'SAMPLE-TSEXP-NEG28', jalankan worker, dan verifikasi Mock menolak dengan HTTP 401 (karena skew == 301 > 300).
+4. Verifikasi kedua dokumen pada MongoDB seketika bertransisi ke 'GIVE_UP' permanen tanpa retry.
+5. Teardown: Hapus kedua dokumen uji dari MongoDB.","Mekanisme Waktu: Mock Server V2 virtual integer clock offset deterministik: skew = abs(int(time.time() + offset) - int(timestamp))
+Batas yang diuji: offset = -301 detik (skew = 301s) dan offset = +301 detik (skew = 301s)
 Dokumen MongoDB: provider_trxid='SAMPLE-TSEXP-POS28' dan 'SAMPLE-TSEXP-NEG28'","1. Mock Server menolak kedua request dengan HTTP 401 (Authentication Error).
 2. MongoDB: kedua dokumen bertransisi ke status='GIVE_UP' permanen tanpa retry.
 3. [LOG CONTRACT]: Log SUT mencatat AUTH_ERROR dan transisi ke GIVE_UP.","","","","Pilar-2, security, timestamp_boundary"
@@ -450,23 +451,28 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1.
 Mock response: HTTP 502 Bad Gateway","1. MongoDB: status='PENDING' (bukan GIVE_UP), attempt=1, next_pull_at dijadwalkan mundur.
 2. ActiveMQ: 0 pesan masuk ke kedua antrean hilir.
 3. [LOG CONTRACT]: Log SUT mencatat pemanggilan backoffOrGiveUp.","","","","Pilar-4, resilience, retry_backoff"
-"TC-031","Memastikan saat terjadi kegagalan parsial penerbitan antrean hilir (pesan DR terbit namun SQL gagal), dokumen tertahan di status PUBLISHING dan prosedur rekonsiliasi manual berhasil menyelesaikan tanpa duplikasi.","TC-031 — Penanganan Kegagalan Parsial Antrean Hilir dan Prosedur Rekonsiliasi Recovery Aman","Given Transaksi berhasil mendapatkan status akhir Delivered dari vendor Telkomsel
+"TC-031","Memastikan saat terjadi kegagalan parsial penerbitan antrean hilir (pesan DR terbit namun SQL gagal), dokumen tertahan di status PUBLISHING dan prosedur rekonsiliasi recovery manual berhasil menyelesaikan secara idempoten tanpa duplikasi laporan.","TC-031 — Penanganan Kegagalan Parsial Antrean Hilir dan Prosedur Rekonsiliasi Recovery Idempoten","Given Transaksi berhasil mendapatkan status akhir Delivered dari vendor Telkomsel
 When Penerbitan pesan laporan DR ke antrean pertama berhasil namun antrean database SQL mengalami gangguan
-Then Dokumen transaksi tetap tertahan pada status PUBLISHING untuk investigasi manual
-And Prosedur rekonsiliasi membuktikan hanya menerbitkan laporan SQL yang belum terbit tanpa menduplikasi pesan DR
-And Status akhir dokumen difinalisasi menjadi RESOLVED dengan total pesan tepat satu pada masing-masing antrean","P1","1. Tanam dokumen PENDING dengan provider_trxid='SAMPLE-QERR-031'.
-2. Simulasikan kegagalan penerbitan pada antrean kedua jns.db.deliveryreport (misal simulasi JmsException setelah antrean pertama jns.dr.drrealhandler terkirim).
+Then Dokumen transaksi tetap tertahan pada status PUBLISHING untuk investigasi manual operasional
+And Prosedur rekonsiliasi recovery membuktikan keberadaan pesan DR terlebih dahulu sebelum menerbitkan pesan SQL yang tertinggal
+And Status akhir dokumen difinalisasi menjadi RESOLVED secara idempoten tanpa menduplikasi pesan DR jika rekonsiliasi dijalankan ulang","P1","1. Tanam dokumen PENDING dengan provider_trxid='SAMPLE-QERR-031'.
+2. Simulasikan kegagalan penerbitan pada antrean kedua jns.db.deliveryreport (simulasi JmsException setelah antrean pertama jns.dr.drrealhandler berhasil terkirim).
 3. Jalankan worker drpulltelkomsel.
-4. Verifikasi kondisi parsial: pesan DR sudah terbit di jns.dr.drrealhandler, namun jns.db.deliveryreport belum ada pesan.
-5. Verifikasi MongoDB: status='PUBLISHING' (tidak menjadi RESOLVED dan tidak di-give-up).
-6. Jalankan prosedur rekonsiliasi pemulihan: rekonsiliasi mendeteksi pesan DR sudah ada, menerbitkan SQL yang kurang, dan memanggil finalizeResolved.
-7. Verifikasi akhir: status='RESOLVED', total pesan pada jns.dr.drrealhandler tepat 1 dan jns.db.deliveryreport tepat 1.
+4. Verifikasi Kondisi Tertahan: Dokumen di MongoDB berstatus 'PUBLISHING' (tidak menjadi RESOLVED dan tidak di-give-up), log mencatat 'doc tetap PUBLISHING (perlu investigasi manual)'.
+5. Prosedur Rekonsiliasi Recovery:
+   a) Reconciler memeriksa correlation key 'SAMPLE-QERR-031' pada downstream/antrean DR dan menemukan bukti pesan DR telah terkirim.
+   b) Reconciler HANYA mengirimkan pesan query SQL yang tertinggal ke antrean jns.db.deliveryreport (tidak mengirim ulang pesan DR).
+   c) Reconciler mengupdate MongoDB: status='RESOLVED', resolved_by='MANUAL_RECOVERY'.
+6. Uji Idempotensi Recovery: Jalankan prosedur rekonsiliasi untuk kedua kalinya pada dokumen yang sama. Buktikan rekonsiliasi mendeteksi status sudah RESOLVED dan langsung abort tanpa mengirim pesan apa pun.
+7. Verifikasi Akhir: Total pesan berkorelasi 'SAMPLE-QERR-031' pada jns.dr.drrealhandler tepat 1 pesan dan pada jns.db.deliveryreport tepat 1 pesan.
 8. Teardown: Hapus dokumen 'SAMPLE-QERR-031' dari MongoDB.","Dokumen MongoDB: provider_trxid='SAMPLE-QERR-031'
-Simulasi: Kegagalan JMS pada pengiriman pesan kedua (queueDbexecutor)","1. Tahap 1: Dokumen tertahan berstatus 'PUBLISHING' (sesuai PullWorker.java:116).
-2. Tahap 2: Log mencatat 'publish gagal... doc tetap PUBLISHING (perlu investigasi manual)'.
-3. Tahap 3: Rekonsiliasi menyelesaikan penerbitan SQL tanpa menduplikasi pesan DR.
-4. Total pesan akhir pada kedua antrean hilir tepat 1 pesan masing-masing.
-5. [LOG CONTRACT]: Log SUT mencatat 'publish gagal... doc tetap PUBLISHING'.","","","","Pilar-4, resilience, downstream_failure_handling"
+Kondisi: Simulasi kegagalan JMS pada antrean jns.db.deliveryreport setelah jns.dr.drrealhandler terkirim
+Mekanisme: Desain penanganan insiden operasional via status tertahan PUBLISHING + Idempotent Manual Reconciliation Procedure","1. Tahap 1: Dokumen tertahan berstatus 'PUBLISHING' (sesuai PullWorker.java:116) untuk mencegah auto-retry menduplikasi DR.
+2. Tahap 2: Log SUT mencatat 'publish gagal... doc tetap PUBLISHING (perlu investigasi manual)'.
+3. Tahap 3: Prosedur rekonsiliasi hanya menerbitkan pesan SQL yang tertinggal berdasarkan bukti keberadaan pesan DR.
+4. Tahap 4 (Idempotency): Eksekusi rekonsiliasi berulang tidak menghasilkan duplikasi pesan ke antrean mana pun.
+5. Total pesan akhir pada kedua antrean hilir tepat 1 pesan masing-masing.
+6. [LOG CONTRACT]: Log SUT mencatat 'publish gagal... doc tetap PUBLISHING'.","","","","Pilar-4, resilience, downstream_failure_handling"
 "TC-032","Memastikan pemrosesan batch sweep berisi beberapa transaksi sekaligus beroperasi secara terisolasi (kegagalan atau timeout pada satu transaksi tidak menghentikan transaksi lainnya dalam batch yang sama).","TC-032 — Isolasi Pemrosesan Transaksi dalam Satu Siklus Batch Pemindaian Bersama","Given Terdapat tiga transaksi SMS sekaligus dalam satu siklus pemindaian berkala yang sama
 And Transaksi kedua mengalami batas waktu koneksi sedangkan transaksi pertama dan ketiga normal
 When Sistem menjalankan pemindaian dan pemrosesan batch transaksi tersebut dalam satu siklus sweep
@@ -488,22 +494,24 @@ And Transaksi pertama dan transaksi ketiga berhasil diselesaikan hingga status R
 2. Dokumen 2: status='PENDING' (backoff).
 3. Dokumen 3: status='RESOLVED' (tidak terblokir oleh Dokumen 2).
 4. [LOG CONTRACT]: Log SUT mencatat pemrosesan seluruh item dalam batch.","","","","Pilar-4, resilience, batch_isolation"
-"TC-033","Memastikan mekanisme penguncian atomic pada tahap publikasi (Publishing Fence) mencegah terjadinya duplikasi laporan saat dua proses bersamaan mencoba mempublikasikan transaksi yang sudah berstatus PULLING.","TC-033 — Penguncian Atomic Tahap Publikasi (Publishing Fence) Mencegah Duplikasi Penerbitan Laporan","Given Terdapat transaksi pada database yang telah berada pada tahap PULLING dengan status akhir diperoleh
-When Dua instance worker mencoba melakukan klaim publikasi secara bersamaan pada transaksi tersebut
-Then Hanya satu worker yang berhasil memenangkan penguncian atomic claimPublishing
-And Tepat satu pesan laporan pengiriman yang diterbitkan ke antrean laporan DR
-And Tepat satu perintah SQL yang diterbitkan ke antrean database executor
-And Worker kedua membatalkan publikasi dan mencatat alasan jalur publikasi telah diklaim pihak lain","P0","1. Tanam dokumen pada MongoDB dengan status='PULLING', provider_trxid='MOCK-FENCE-PUB-033', lease_id='initial-lease-033'.
-2. Simulasikan dua thread worker yang mengeksekusi claimPublishing('MOCK-FENCE-PUB-033', 'initial-lease-033', newLeaseId) secara simultan.
-3. Verifikasi Worker 1 memenangkan atomic CAS update (matchedCount == 1), status menjadi PUBLISHING.
-4. Verifikasi Worker 2 gagal (matchedCount == 0) dan mencatat log: 'Skip publish, trxId=MOCK-FENCE-PUB-033, reason=push path already claimed'.
-5. Hitung total pesan berkorelasi pada antrean ActiveMQ jns.dr.drrealhandler (harus tepat 1 pesan).
-6. Hitung total pesan berkorelasi pada antrean ActiveMQ jns.db.deliveryreport (harus tepat 1 pesan).
-7. Teardown: Hapus dokumen 'MOCK-FENCE-PUB-033' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-FENCE-PUB-033', status='PULLING', lease_id='initial-lease-033'
-Operasi: claimPublishing(String providerTrxid, String leaseId, String publishingLeaseId)","1. Worker 1 memenangkan claimPublishing dan menerbitkan laporan.
-2. Worker 2 gagal dan membatalkan publikasi (zero double publish).
-3. Tepat 1 pesan di jns.dr.drrealhandler dan tepat 1 pesan di jns.db.deliveryreport.
-4. [LOG CONTRACT]: Worker 2 mencatat 'Skip publish, trxId=MOCK-FENCE-PUB-033, reason=push path already claimed'.","","","","Pilar-4, resilience, concurrency_fencing"
+"TC-033","Memastikan mekanisme penguncian atomic pada tahap publikasi (Publishing Fence) antar dua instance SUT terpisah mencegah duplikasi laporan saat dua instance bersamaan mempublikasikan transaksi yang sudah berstatus PULLING.","TC-033 — Penguncian Atomic Multi-Instance Tahap Publikasi (Publishing Fence) Mencegah Duplikasi Laporan","Given Terdapat transaksi pada database yang telah berada pada tahap PULLING dengan status akhir diperoleh
+When Dua instance aplikasi DR Pull terpisah mencoba melakukan klaim publikasi secara bersamaan pada transaksi tersebut
+Then Hanya instance pemenang yang berhasil memenangkan penguncian atomic claimPublishing
+And Instance pemenang mengeksekusi penerbitan laporan secara penuh ke kedua antrean hilir dan mengubah status menjadi RESOLVED
+And Instance kedua membatalkan publikasi serta tidak menerbitkan pesan apa pun ke sistem hilir
+And Jumlah pesan yang diterima pada masing-masing antrean hilir terbukti tepat satu pesan","P0","1. Tanam dokumen pada MongoDB dengan status='PULLING', provider_trxid='MOCK-FENCE-PUB-033', lease_id='initial-lease-033'.
+2. Jalankan dua proses instance SUT terpisah (Instance A dan Instance B) yang secara simultan mengeksekusi claimPublishing('MOCK-FENCE-PUB-033', 'initial-lease-033', newLeaseId).
+3. Verifikasi Instance Pemenang (Instance A): Berhasil memenangkan CAS update (matchedCount == 1), status dokumen berubah menjadi PUBLISHING, mengeksekusi penuh penerbitan 1 pesan DR ke jns.dr.drrealhandler, 1 perintah SQL ke jns.db.deliveryreport, dan memanggil finalizeResolved() hingga status menjadi RESOLVED.
+4. Verifikasi Instance Kalah (Instance B): Mengalami kegagalan CAS update (matchedCount == 0), membatalkan eksekusi publikasi, dan mencatat log: 'Skip publish, trxId=MOCK-FENCE-PUB-033, reason=push path already claimed'.
+5. Verifikasi bahwa Instance B sama sekali tidak memanggil JMS convertAndSend.
+6. Hitung total pesan berkorelasi provider_trxid='MOCK-FENCE-PUB-033' pada antrean ActiveMQ jns.dr.drrealhandler (tepat 1 pesan).
+7. Hitung total pesan berkorelasi provider_trxid='MOCK-FENCE-PUB-033' pada antrean ActiveMQ jns.db.deliveryreport (tepat 1 pesan).
+8. Teardown: Hapus dokumen 'MOCK-FENCE-PUB-033' dari MongoDB.","Lingkungan: Dua proses instance aplikasi SUT terpisah (Multi-Instance Isolation)
+Dokumen MongoDB: provider_trxid='MOCK-FENCE-PUB-033', status='PULLING', lease_id='initial-lease-033'
+Operasi yang diuji: claimPublishing(String providerTrxid, String leaseId, String publishingLeaseId) dilanjutkan full publication","1. Instance A memenangkan claimPublishing dan menyelesaikan penerbitan penuh ke kedua antrean hilir.
+2. Instance B gagal claimPublishing dan membatalkan publikasi (zero double publish).
+3. Total pesan berkorelasi tepat 1 pesan pada jns.dr.drrealhandler dan tepat 1 pesan pada jns.db.deliveryreport.
+4. [LOG CONTRACT]: Instance B mencatat 'Skip publish, trxId=MOCK-FENCE-PUB-033, reason=push path already claimed'.","","","","Pilar-4, resilience, concurrency_fencing"
 "TC-034","Memastikan respons kesalahan layanan dari Telkomsel dengan kode HTTP 503 Service Unavailable diperlakukan sebagai kesalahan sementara dengan penjadwalan retry.","TC-034 — Penanganan Gangguan Layanan Vendor 503 Service Unavailable Sebagai Kesalahan Sementara","Given Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memeriksa status dan layanan Telkomsel sedang tidak dapat melayani dengan kode 503 Service Unavailable
 Then Transaksi tidak dinyatakan gagal permanen melainkan tetap berstatus PENDING

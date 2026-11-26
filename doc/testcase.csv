@@ -1,5 +1,5 @@
-"Test Case ID","Description","Test Case","Test Scenario","Priority","Test Steps","Test Data/Precondition","Expected Result","Actual Output","Status","Log","Note/Description"
-"META-SUT","SUT Version & Update Traceability Matrix (V2.4 Deterministic Virtual Clock Baseline)","drpulltelkomsel v2.0.0 (prev: v1.2.0)","Baseline: v1.2.0 | Target: v2.0.0 | Ticket: PB172645152602YA","META","[U-01] Migrasi Endpoint Get Delivery Status ke Telkomsel API V2: Perubahan endpoint dari GET /bank/transaction-status (query string) menjadi POST /bank/v2/transaction-status dengan body JSON {""transaction_id"":""...""} sesuai IFA SMS Bulk Premium v5.0 Section E.iv & E.vi.
+Test Case ID,Description,Test Case,Test Scenario,Priority,Test Steps,Test Data/Precondition,Expected Result,Actual Output,Status,Log,Note/Description
+META-SUT,SUT Version & Update Traceability Matrix (V2.4 Deterministic Virtual Clock Baseline),drpulltelkomsel v2.0.0 (prev: v1.2.0),Baseline: v1.2.0 | Target: v2.0.0 | Ticket: PB172645152602YA,META,"[U-01] Migrasi Endpoint Get Delivery Status ke Telkomsel API V2: Perubahan endpoint dari GET /bank/transaction-status (query string) menjadi POST /bank/v2/transaction-status dengan body JSON {""transaction_id"":""...""} sesuai IFA SMS Bulk Premium v5.0 Section E.iv & E.vi.
 [U-02] Autentikasi HMAC-SHA256 & Signature Header: Implementasi HmacSignerUtil untuk menghitung X-Signature hex lowercase atas canonical string (POST\n<path>\n<appsid>\n<sid>\n<timestamp>\n<rawRequestBody>) dengan batas toleransi waktu X-Timestamp +-300 detik epoch detik.
 [U-03] Resolusi Hirarki 3 Tingkat Client Secret: Penghapusan penyimpanan secret dari dokumen MongoDB; resolusi dinamis dari apps_config dengan urutan prioritas: 1) appsid:sid -> 2) appsid -> 3) client_secret fallback tunggal.
 [U-04] Pemetaan Error Fail-Fast (Permanent Error): HTTP 400/2400 dan 405/2405 kini langsung transisi ke GIVE_UP permanen tanpa retry/backoff; 401/2401 tetap langsung GIVE_UP.
@@ -23,14 +23,14 @@ Dependency Environment: MongoDB (smsCore.dr_pull_telkomsel), ActiveMQ (jns.dr.dr
 [U-09] Kompatibilitas Kontrak Hilir Ganda -> diuji oleh: TC-001, TC-002, TC-011, TC-031
 [U-10] Validasi Startup, Sanitasi Konfigurasi & Batch Isolation -> diuji oleh: TC-013, TC-025, TC-026, TC-032
 Coverage mapping: 34 testcase telah dipetakan terhadap 10 area perubahan aplikasi (U-01 sampai U-10). Seluruh batas toleransi waktu deterministik (request-anchored virtual clock tanpa race detik fisik), multi-instance concurrency fencing, dan prosedur idempotent recovery telah tervalidasi.
-Distribusi Pilar: Pilar 1 (4 TC), Pilar 2 (11 TC), Pilar 3 (7 TC), Pilar 4 (12 TC). Total: 34 TC.","","META","","Dibuat: 2026-11-26 | Revisi: Hardening V2.2 (Final Review Findings Applied) | PIC: QA SDET Team | SUT: drpulltelkomsel v2.0.0"
-"TC-001","Memastikan laporan status Delivered (D) dari Telkomsel berhasil diambil dan diteruskan ke kedua antrean hilir menggunakan identifikasi korelasi transaksi yang unik.","TC-001 — Pengambilan Status SMS Berhasil (Delivered) dan Penerusan Laporan Hilir","Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status
+Distribusi Pilar: Pilar 1 (4 TC), Pilar 2 (11 TC), Pilar 3 (7 TC), Pilar 4 (12 TC). Total: 34 TC.",,META,,Dibuat: 2026-11-26 | Revisi: Hardening V2.2 (Final Review Findings Applied) | PIC: QA SDET Team | SUT: drpulltelkomsel v2.0.0
+TC-001,Memastikan laporan status Delivered (D) dari Telkomsel berhasil diambil dan diteruskan ke kedua antrean hilir menggunakan identifikasi korelasi transaksi yang unik.,TC-001 — Pengambilan Status SMS Berhasil (Delivered) dan Penerusan Laporan Hilir,"Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status
 And Konfigurasi kredensial mitra dan alamat endpoint Telkomsel V2 tersedia secara valid
 When Layanan DR Pull memeriksa status pengiriman ke Telkomsel V2
 Then Telkomsel merespons bahwa pesan berhasil diterima dengan status D
 And Transaksi pada database status diperbarui menjadi RESOLVED
 And Tepat satu pesan laporan pengiriman diteruskan ke antrean laporan DR untuk nomor transaksi tersebut
-And Tepat satu perintah SQL penyimpanan diteruskan ke antrean database executor untuk nomor transaksi tersebut","P0","1. Tanam dokumen PENDING dengan correlation key unik provider_trxid='SAMPLE-D-001', appsid='cp_sample', sid='sender_sample', next_pull_at <= now().
+And Tepat satu perintah SQL penyimpanan diteruskan ke antrean database executor untuk nomor transaksi tersebut",P0,"1. Tanam dokumen PENDING dengan correlation key unik provider_trxid='SAMPLE-D-001', appsid='cp_sample', sid='sender_sample', next_pull_at <= now().
 2. Konfigurasikan Mock Server untuk merespons HTTP 200 deliveryStatus='D' untuk provider_trxid='SAMPLE-D-001'.
 3. Jalankan siklus sweep worker drpulltelkomsel.
 4. Verifikasi MongoDB: status='RESOLVED', attempt=0, dr_published_at not null, sql_published_at not null.
@@ -48,14 +48,37 @@ And Tepat satu perintah SQL penyimpanan diteruskan ke antrean database executor 
 apps_config: client_secret='secret-sample-123', provider_status_url='http://mock:8089/bank/v2/transaction-status'","1. MongoDB: status='RESOLVED', attempt=0, last_error=null, dr_published_at dan sql_published_at terisi timestamp valid.
 2. ActiveMQ jns.dr.drrealhandler: tepat 1 pesan berkorelasi provider_trxid='SAMPLE-D-001' dengan provider_status='D'.
 3. ActiveMQ jns.db.deliveryreport: tepat 1 pesan berkorelasi provider_trxid='SAMPLE-D-001' berisi query INSERT INTO delivery_reports_new.
-4. [LOG CONTRACT]: Log SUT mencatat 'httpStatus=200', 'published provider_status=D', 'DR published', 'SQL insert published', dan zero ERROR.","","","","Pilar-1, e2e, happy_path"
-"TC-002","Memastikan laporan status Not Delivered (ND) dengan kode kesalahan dari Telkomsel berhasil diambil dan diteruskan ke kedua antrean hilir secara terisolasi.","TC-002 — Pengambilan Status SMS Gagal (Not Delivered) dengan Kode Kesalahan Vendor","Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status
+4. [LOG CONTRACT]: Log SUT mencatat 'httpStatus=200', 'published provider_status=D', 'DR published', 'SQL insert published', dan zero ERROR.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 5.44s | [SUT LOG] files=2 lines=20 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (10 baris) ---
+2026-11-26 14:04:44.773 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 14:04:44.856 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-D-001, PENDING -> PULLING, leaseId=bbcc4527-1aa2-4414-890c-a087e887fa6f
+2026-11-26 14:04:44.899 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-D-001 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:04:44.948 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-D-001 httpStatus=200
+2026-11-26 14:04:44.998 c.j.d.mongo.MongoService State change: trxId=SAMPLE-D-001, PULLING -> PUBLISHING
+2026-11-26 14:04:45.610 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-D-001, status=D
+2026-11-26 14:04:45.961 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-D-001
+2026-11-26 14:04:46.013 c.j.d.mongo.MongoService State change: trxId=SAMPLE-D-001, PUBLISHING -> RESOLVED
+2026-11-26 14:04:46.014 c.j.d.worker.PullWorker State change: trxId=SAMPLE-D-001, PUBLISHING -> RESOLVED
+2026-11-26 14:04:48.166 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (10 baris) ---
+14:04:44.773 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+14:04:44.856 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-D-001, PENDING -> PULLING, leaseId=bbcc4527-1aa2-4414-890c-a087e887fa6f
+14:04:44.899 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-D-001 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:04:44.948 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-D-001 httpStatus=200
+14:04:44.998 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-D-001, PULLING -> PUBLISHING
+14:04:45.610 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-D-001, status=D
+14:04:45.961 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-D-001
+14:04:46.013 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-D-001, PUBLISHING -> RESOLVED
+14:04:46.014 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-D-001, PUBLISHING -> RESOLVED
+14:04:48.166 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_140423/TC-001","Pilar-1, e2e, happy_path"
+TC-002,Memastikan laporan status Not Delivered (ND) dengan kode kesalahan dari Telkomsel berhasil diambil dan diteruskan ke kedua antrean hilir secara terisolasi.,TC-002 — Pengambilan Status SMS Gagal (Not Delivered) dengan Kode Kesalahan Vendor,"Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status
 And Konfigurasi kredensial mitra dan alamat endpoint Telkomsel V2 tersedia secara valid
 When Layanan DR Pull memeriksa status pengiriman ke Telkomsel V2
 Then Telkomsel merespons bahwa pesan gagal terkirim dengan status ND dan kode kesalahan 061
 And Transaksi pada database status diperbarui menjadi RESOLVED
 And Laporan pengiriman diteruskan ke antrean laporan DR membawa status komposit ND bertanda kode 061
-And Perintah SQL penyimpanan diteruskan ke antrean database executor dengan rincian kode kesalahan","P0","1. Tanam dokumen PENDING dengan correlation key unik provider_trxid='MOCK-ND-002', appsid='cp_sample', sid='sender_sample'.
+And Perintah SQL penyimpanan diteruskan ke antrean database executor dengan rincian kode kesalahan",P0,"1. Tanam dokumen PENDING dengan correlation key unik provider_trxid='MOCK-ND-002', appsid='cp_sample', sid='sender_sample'.
 2. Konfigurasikan Mock Server untuk merespons status ND dengan errorCode='061' untuk provider_trxid='MOCK-ND-002'.
 3. Jalankan worker drpulltelkomsel.
 4. Verifikasi MongoDB: status='RESOLVED', attempt=0, dr_published_at not null, sql_published_at not null.
@@ -65,13 +88,36 @@ And Perintah SQL penyimpanan diteruskan ke antrean database executor dengan rinc
 Mock response: HTTP 200, deliveryStatus='ND', errorCode='061'","1. MongoDB: status='RESOLVED', attempt=0.
 2. ActiveMQ jns.dr.drrealhandler: tepat 1 pesan berkorelasi membawa provider_status='ND:061' & provider_err='061'.
 3. ActiveMQ jns.db.deliveryreport: tepat 1 pesan berkorelasi memuat query INSERT dengan provider_status='ND:061' & provider_err='061'.
-4. [LOG CONTRACT]: Log SUT mencatat 'deliveryStatus=ND', 'published provider_status=ND:061', dan zero ERROR.","","","","Pilar-1, e2e, happy_path"
-"TC-003","Memastikan permintaan HTTP keluar mematuhi spesifikasi REST API V2 dan sensitivitas perhitungan HMAC-SHA256 (tanda tangan berubah saat komponen canonical string diubah).","TC-003 — Kepatuhan Protokol Permintaan Keluar dan Sensitivitas Perhitungan HMAC-SHA256","Given Layanan DR Pull siap melakukan pemeriksaan status ke vendor
+4. [LOG CONTRACT]: Log SUT mencatat 'deliveryStatus=ND', 'published provider_status=ND:061', dan zero ERROR.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 5.24s | [SUT LOG] files=2 lines=20 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (10 baris) ---
+2026-11-26 13:55:45.709 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:55:45.756 c.j.d.scheduler.SweepTask State change: trxId=MOCK-ND-002, PENDING -> PULLING, leaseId=b7ce9b43-b2bd-4e90-8676-853629f6f16d
+2026-11-26 13:55:45.757 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-ND-002 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:55:45.761 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-ND-002 httpStatus=200
+2026-11-26 13:55:45.818 c.j.d.mongo.MongoService State change: trxId=MOCK-ND-002, PULLING -> PUBLISHING
+2026-11-26 13:55:46.175 c.j.d.publish.ResultPublisher DR published, trxId=MOCK-ND-002, status=ND:061
+2026-11-26 13:55:46.533 c.j.d.publish.ResultPublisher SQL insert published, trxId=MOCK-ND-002
+2026-11-26 13:55:46.596 c.j.d.mongo.MongoService State change: trxId=MOCK-ND-002, PUBLISHING -> RESOLVED
+2026-11-26 13:55:46.596 c.j.d.worker.PullWorker State change: trxId=MOCK-ND-002, PUBLISHING -> RESOLVED
+2026-11-26 13:55:48.811 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (10 baris) ---
+13:55:45.709 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:55:45.756 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-ND-002, PENDING -> PULLING, leaseId=b7ce9b43-b2bd-4e90-8676-853629f6f16d
+13:55:45.757 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-ND-002 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:55:45.761 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-ND-002 httpStatus=200
+13:55:45.818 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-ND-002, PULLING -> PUBLISHING
+13:55:46.175 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=MOCK-ND-002, status=ND:061
+13:55:46.533 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=MOCK-ND-002
+13:55:46.596 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-ND-002, PUBLISHING -> RESOLVED
+13:55:46.596 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=MOCK-ND-002, PUBLISHING -> RESOLVED
+13:55:48.811 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-002","Pilar-1, e2e, happy_path"
+TC-003,Memastikan permintaan HTTP keluar mematuhi spesifikasi REST API V2 dan sensitivitas perhitungan HMAC-SHA256 (tanda tangan berubah saat komponen canonical string diubah).,TC-003 — Kepatuhan Protokol Permintaan Keluar dan Sensitivitas Perhitungan HMAC-SHA256,"Given Layanan DR Pull siap melakukan pemeriksaan status ke vendor
 And Transaksi memiliki data nomor referensi transaksi yang valid
 When Permintaan status dikirimkan oleh sistem ke endpoint Telkomsel
 Then Permintaan menggunakan metode POST ke path V2 tanpa parameter pada query string URL
 And Permintaan menyertakan header Content-Type, appsid, sid, X-Timestamp, dan X-Signature yang valid
-And Tanda tangan terbukti sensitif terhadap perubahan komponen teks kanonikal (body, path, timestamp, dan secret)","P0","1. Reset log capture pada Mock Server Telkomsel V2.
+And Tanda tangan terbukti sensitif terhadap perubahan komponen teks kanonikal (body, path, timestamp, dan secret)",P0,"1. Reset log capture pada Mock Server Telkomsel V2.
 2. Tanam dokumen PENDING dengan provider_trxid='MOCK-PROTO-003'.
 3. Jalankan worker drpulltelkomsel.
 4. Periksa data request yang ditangkap Mock Server.
@@ -83,13 +129,36 @@ And Tanda tangan terbukti sensitif terhadap perubahan komponen teks kanonikal (b
 Dokumen MongoDB: provider_trxid='MOCK-PROTO-003', appsid='cp_sample', sid='sender_sample'","1. Mock capture memvalidasi method=POST, path=/bank/v2/transaction-status, query string kosong.
 2. Header X-Signature persis cocok dengan kalkulasi HMAC-SHA256(canonical_string, client_secret).
 3. Perubahan pada body/secret/timestamp terbukti mengubah nilai signature (sensitivitas terbukti).
-4. [LOG CONTRACT]: Log SUT mencatat pemanggilan endpoint V2 tanpa membocorkan nilai signature.","","","","Pilar-2, security, protocol_conformance"
-"TC-004","Memastikan transaksi yang belum ditemukan statusnya di Telkomsel (HTTP 404 pada attempt 0) tidak langsung digagalkan melainkan dijadwalkan periksa ulang 30 menit kemudian.","TC-004 — Penjadwalan Ulang Pemeriksaan Status Saat Transaksi Belum Ditemukan di Vendor","Given Terdapat transaksi SMS berstatus PENDING dengan riwayat percobaan nol
+4. [LOG CONTRACT]: Log SUT mencatat pemanggilan endpoint V2 tanpa membocorkan nilai signature.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 4.14s | [SUT LOG] files=2 lines=20 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (10 baris) ---
+2026-11-26 13:55:52.925 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:55:52.992 c.j.d.scheduler.SweepTask State change: trxId=MOCK-PROTO-003, PENDING -> PULLING, leaseId=7beaf492-d5da-4054-8dd7-9e1a63fc150d
+2026-11-26 13:55:52.994 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-PROTO-003 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:55:53.002 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-PROTO-003 httpStatus=200
+2026-11-26 13:55:53.059 c.j.d.mongo.MongoService State change: trxId=MOCK-PROTO-003, PULLING -> PUBLISHING
+2026-11-26 13:55:53.551 c.j.d.publish.ResultPublisher DR published, trxId=MOCK-PROTO-003, status=D
+2026-11-26 13:55:53.894 c.j.d.publish.ResultPublisher SQL insert published, trxId=MOCK-PROTO-003
+2026-11-26 13:55:53.954 c.j.d.mongo.MongoService State change: trxId=MOCK-PROTO-003, PUBLISHING -> RESOLVED
+2026-11-26 13:55:53.954 c.j.d.worker.PullWorker State change: trxId=MOCK-PROTO-003, PUBLISHING -> RESOLVED
+2026-11-26 13:55:56.108 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (10 baris) ---
+13:55:52.925 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:55:52.992 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-PROTO-003, PENDING -> PULLING, leaseId=7beaf492-d5da-4054-8dd7-9e1a63fc150d
+13:55:52.994 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-PROTO-003 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:55:53.002 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-PROTO-003 httpStatus=200
+13:55:53.059 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-PROTO-003, PULLING -> PUBLISHING
+13:55:53.551 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=MOCK-PROTO-003, status=D
+13:55:53.894 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=MOCK-PROTO-003
+13:55:53.954 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-PROTO-003, PUBLISHING -> RESOLVED
+13:55:53.954 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=MOCK-PROTO-003, PUBLISHING -> RESOLVED
+13:55:56.108 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-003","Pilar-2, security, protocol_conformance"
+TC-004,Memastikan transaksi yang belum ditemukan statusnya di Telkomsel (HTTP 404 pada attempt 0) tidak langsung digagalkan melainkan dijadwalkan periksa ulang 30 menit kemudian.,TC-004 — Penjadwalan Ulang Pemeriksaan Status Saat Transaksi Belum Ditemukan di Vendor,"Given Terdapat transaksi SMS berstatus PENDING dengan riwayat percobaan nol
 When Sistem menanyakan status transaksi ke Telkomsel dan Telkomsel menjawab status belum ditemukan 404
 Then Transaksi tetap berstatus PENDING untuk diperiksa kembali nanti
 And Jumlah percobaan bertambah menjadi satu
 And Waktu pemeriksaan berikutnya dijadwalkan mundur tiga puluh menit sesuai aturan penundaan
-And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-404-004', attempt=0, next_pull_at <= now().
+And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir",P1,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-404-004', attempt=0, next_pull_at <= now().
 2. Konfigurasikan Mock Server untuk menjawab HTTP 404 dengan error_code 2404 ('Transaction Not Found').
 3. Jalankan sweep worker drpulltelkomsel.
 4. Ambil dokumen dari MongoDB dan periksa status, attempt, next_pull_at, dan last_error.
@@ -97,13 +166,30 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1.
 6. Teardown: Hapus dokumen 'MOCK-404-004' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-404-004', attempt=0, status='PENDING'
 Mock response: HTTP 404, {""error"": true, ""error_code"": 2404, ""message"": ""Transaction Not Found""}","1. MongoDB: status='PENDING', attempt=1, next_pull_at >= now + 29 menit, last_error memuat '2404'.
 2. ActiveMQ: 0 pesan masuk ke kedua antrean hilir untuk ID tersebut.
-3. [LOG CONTRACT]: Log SUT mencatat 'httpStatus=404' dan memanggil transisi backoffOrGiveUp.","","","","Pilar-4, resilience, retry_backoff"
-"TC-005","Memastikan transaksi yang berulang kali gagal ditemukan hingga mencapai batas maksimum percobaan (attempt ke-5) dihentikan secara permanen menjadi GIVE_UP.","TC-005 — Penghentian Permanen Transaksi yang Telah Melampaui Batas Maksimum Percobaan","Given Terdapat transaksi SMS berstatus PENDING yang telah mengalami empat kali kegagalan sebelumnya
+3. [LOG CONTRACT]: Log SUT mencatat 'httpStatus=404' dan memanggil transisi backoffOrGiveUp.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 6.27s | [SUT LOG] files=2 lines=14 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (7 baris) ---
+2026-11-26 13:55:58.173 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:55:58.228 c.j.d.scheduler.SweepTask State change: trxId=MOCK-404-004, PENDING -> PULLING, leaseId=333c44b4-935b-4115-9615-7d152ce28065
+2026-11-26 13:55:58.230 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-404-004 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:55:58.239 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-404-004 httpStatus=404
+2026-11-26 13:55:58.291 c.j.d.mongo.MongoService State change: trxId=MOCK-404-004, PULLING -> PENDING (backoff, attempt=1)
+2026-11-26 13:56:00.452 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:56:02.512 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (7 baris) ---
+13:55:58.173 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:55:58.228 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-404-004, PENDING -> PULLING, leaseId=333c44b4-935b-4115-9615-7d152ce28065
+13:55:58.230 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-404-004 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:55:58.239 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-404-004 httpStatus=404
+13:55:58.291 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-404-004, PULLING -> PENDING (backoff, attempt=1)
+13:56:00.452 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:56:02.512 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-004","Pilar-4, resilience, retry_backoff"
+TC-005,Memastikan transaksi yang berulang kali gagal ditemukan hingga mencapai batas maksimum percobaan (attempt ke-5) dihentikan secara permanen menjadi GIVE_UP.,TC-005 — Penghentian Permanen Transaksi yang Telah Melampaui Batas Maksimum Percobaan,"Given Terdapat transaksi SMS berstatus PENDING yang telah mengalami empat kali kegagalan sebelumnya
 When Sistem mencoba memeriksa status untuk kelima kalinya dan Telkomsel tetap menjawab 404
 Then Transaksi diubah statusnya secara permanen menjadi GIVE_UP
 And Nilai riwayat percobaan tetap tercatat empat dan catatan kesalahan menyebutkan batas maksimum terlampaui
 And Sistem tidak lagi menjadwalkan pemeriksaan ulang terhadap transaksi tersebut
-And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-404-005', attempt=4 (artinya sudah 4x gagal, sweep ini adalah percobaan ke-5), next_pull_at <= now().
+And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir",P1,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-404-005', attempt=4 (artinya sudah 4x gagal, sweep ini adalah percobaan ke-5), next_pull_at <= now().
 2. Konfigurasikan Mock Server untuk menjawab HTTP 404.
 3. Jalankan sweep worker drpulltelkomsel (nextAttempt menjadi 4 + 1 = 5, memenuhi kondisi nextAttempt >= maxAttempt).
 4. Ambil dokumen MongoDB dan pastikan status='GIVE_UP', attempt=4, last_error='max attempt reached'.
@@ -111,12 +197,29 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1.
 6. Teardown: Hapus dokumen 'MOCK-404-005' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-404-005', attempt=4, status='PENDING'
 Konfigurasi SUT: max_attempt=5 (5 total attempts allowed: attempt 0, 1, 2, 3, 4)","1. MongoDB: status='GIVE_UP', attempt=4, last_error='max attempt reached'.
 2. ActiveMQ: 0 pesan masuk ke kedua antrean hilir.
-3. [LOG CONTRACT]: Log SUT mencatat transisi status: 'PULLING -> GIVE_UP, reason=max attempt reached'.","","","","Pilar-4, resilience, max_attempt"
-"TC-006","Memastikan gangguan internal pada server Telkomsel (HTTP 500) diperlakukan sebagai kesalahan sementara dan dijadwalkan untuk dicoba kembali.","TC-006 — Penanganan Gangguan Server Vendor 500 Sebagai Kesalahan Sementara","Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status
+3. [LOG CONTRACT]: Log SUT mencatat transisi status: 'PULLING -> GIVE_UP, reason=max attempt reached'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 6.28s | [SUT LOG] files=2 lines=14 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (7 baris) ---
+2026-11-26 13:56:06.620 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:56:06.675 c.j.d.scheduler.SweepTask State change: trxId=MOCK-404-005, PENDING -> PULLING, leaseId=3c6c3064-2d7c-4c28-aa0c-0f04d69617c1
+2026-11-26 13:56:06.678 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-404-005 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:56:06.686 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-404-005 httpStatus=404
+2026-11-26 13:56:06.739 c.j.d.mongo.MongoService State change: trxId=MOCK-404-005, PULLING -> GIVE_UP, reason=max attempt reached
+2026-11-26 13:56:08.899 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:56:10.957 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (7 baris) ---
+13:56:06.620 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:56:06.675 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-404-005, PENDING -> PULLING, leaseId=3c6c3064-2d7c-4c28-aa0c-0f04d69617c1
+13:56:06.678 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-404-005 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:56:06.686 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-404-005 httpStatus=404
+13:56:06.739 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-404-005, PULLING -> GIVE_UP, reason=max attempt reached
+13:56:08.899 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:56:10.957 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-005","Pilar-4, resilience, max_attempt"
+TC-006,Memastikan gangguan internal pada server Telkomsel (HTTP 500) diperlakukan sebagai kesalahan sementara dan dijadwalkan untuk dicoba kembali.,TC-006 — Penanganan Gangguan Server Vendor 500 Sebagai Kesalahan Sementara,"Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status
 When Sistem memeriksa status dan server Telkomsel mengalami gangguan internal dengan kode 500
 Then Transaksi tidak dinyatakan gagal permanen melainkan tetap berstatus PENDING
 And Jumlah riwayat percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
-And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-500-006', attempt=0.
+And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir",P1,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-500-006', attempt=0.
 2. Konfigurasikan Mock Server untuk menjawab HTTP 500 Internal Server Error.
 3. Jalankan sweep worker drpulltelkomsel.
 4. Ambil dokumen MongoDB dan pastikan status='PENDING', attempt=1, last_error memuat '500'.
@@ -124,13 +227,32 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1.
 6. Teardown: Hapus dokumen 'MOCK-500-006' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-500-006', attempt=0, status='PENDING'
 Mock response: HTTP 500, {""error"": true, ""error_code"": 500, ""message"": ""internal server error""}","1. MongoDB: status='PENDING' (bukan GIVE_UP), attempt=1, next_pull_at dijadwalkan ulang.
 2. ActiveMQ: 0 pesan masuk ke antrean hilir.
-3. [LOG CONTRACT]: Log SUT mencatat respons 500 dan memanggil transisi backoffOrGiveUp.","","","","Pilar-4, resilience, retry_backoff"
-"TC-007","Memastikan penanganan batas waktu koneksi (read timeout 30 detik) berfungsi dengan baik saat vendor tidak merespons tanpa menghentikan kelangsungan pemrosesan sistem.","TC-007 — Penanganan Batas Waktu Koneksi Tiga Puluh Detik Secara Mandiri","Given Layanan DR Pull dikonfigurasi dengan batas waktu pembacaan soket (read timeout) tiga puluh detik
+3. [LOG CONTRACT]: Log SUT mencatat respons 500 dan memanggil transisi backoffOrGiveUp.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 6.24s | [SUT LOG] files=2 lines=16 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (8 baris) ---
+2026-11-26 13:56:13.033 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:56:15.093 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:56:15.147 c.j.d.scheduler.SweepTask State change: trxId=MOCK-500-006, PENDING -> PULLING, leaseId=560a4f78-c674-4779-8e54-0984878b33aa
+2026-11-26 13:56:15.149 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-500-006 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:56:15.157 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-500-006 httpStatus=500
+2026-11-26 13:56:15.220 c.j.d.mongo.MongoService State change: trxId=MOCK-500-006, PULLING -> PENDING (backoff, attempt=1)
+2026-11-26 13:56:17.380 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:56:19.436 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (8 baris) ---
+13:56:13.033 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:56:15.093 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:56:15.147 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-500-006, PENDING -> PULLING, leaseId=560a4f78-c674-4779-8e54-0984878b33aa
+13:56:15.149 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-500-006 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:56:15.157 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-500-006 httpStatus=500
+13:56:15.220 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-500-006, PULLING -> PENDING (backoff, attempt=1)
+13:56:17.380 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:56:19.436 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-006","Pilar-4, resilience, retry_backoff"
+TC-007,Memastikan penanganan batas waktu koneksi (read timeout 30 detik) berfungsi dengan baik saat vendor tidak merespons tanpa menghentikan kelangsungan pemrosesan sistem.,TC-007 — Penanganan Batas Waktu Koneksi Tiga Puluh Detik Secara Mandiri,"Given Layanan DR Pull dikonfigurasi dengan batas waktu pembacaan soket (read timeout) tiga puluh detik
 And Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memanggil Telkomsel dan Telkomsel tidak merespons dalam tiga puluh detik
 Then Sistem memutus koneksi tepat pada batas waktu pembacaan soket tiga puluh detik
 And Transaksi dijadwalkan untuk dicoba kembali dengan status PENDING
-And Proses pemeriksaan transaksi lainnya tetap berjalan lancar tanpa mengalami kemacetan","P1","1. Pastikan timeout_seconds=30 di konfigurasi apps_config (dikonfigurasi pada OkHttpClient readTimeout).
+And Proses pemeriksaan transaksi lainnya tetap berjalan lancar tanpa mengalami kemacetan",P1,"1. Pastikan timeout_seconds=30 di konfigurasi apps_config (dikonfigurasi pada OkHttpClient readTimeout).
 2. Tanam dokumen PENDING dengan provider_trxid='MOCK-TIMEOUT-007', attempt=0.
 3. Konfigurasikan Mock Server untuk menunda respons selama 35 detik (melebihi batas read timeout 30s).
 4. Jalankan sweep worker dan ukur durasi pemutusan koneksi.
@@ -140,12 +262,25 @@ And Proses pemeriksaan transaksi lainnya tetap berjalan lancar tanpa mengalami k
 Dokumen MongoDB: provider_trxid='MOCK-TIMEOUT-007', attempt=0","1. SUT memutus koneksi pada +-30 detik (SocketTimeoutException tercatat di log WARN).
 2. MongoDB: status='PENDING', attempt=1, next_pull_at dijadwalkan mundur.
 3. Thread sweep tidak membeku dan siap memproses transaksi berikutnya.
-4. [LOG CONTRACT]: Log SUT mencatat peringatan timeout/IO error.","","","","Pilar-4, resilience, timeout_handling"
-"TC-008","Memastikan respons sukses HTTP 200 dengan format isi yang rusak (bukan JSON atau JSON tanpa struktur status yang valid) ditangani secara aman dengan pemotongan teks kesalahan maksimal 160 karakter.","TC-008 — Penanganan Format Isi Respons Rusak dengan Sanitasi Batas Karakter","Given Terdapat transaksi SMS berstatus PENDING pada database
+4. [LOG CONTRACT]: Log SUT mencatat peringatan timeout/IO error.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 32.26s | [SUT LOG] files=2 lines=10 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (5 baris) ---
+2026-11-26 13:56:21.494 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:56:21.551 c.j.d.scheduler.SweepTask State change: trxId=MOCK-TIMEOUT-007, PENDING -> PULLING, leaseId=2d2f5029-90a8-4f0f-9615-8835f32837dc
+2026-11-26 13:56:21.553 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-TIMEOUT-007 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:56:51.570 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] timeout/IO error trx=MOCK-TIMEOUT-007: timeout
+2026-11-26 13:56:51.628 c.j.d.mongo.MongoService State change: trxId=MOCK-TIMEOUT-007, PULLING -> PENDING (backoff, attempt=1)
+--- out-drpulltelkomsel.log (5 baris) ---
+13:56:21.494 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:56:21.551 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-TIMEOUT-007, PENDING -> PULLING, leaseId=2d2f5029-90a8-4f0f-9615-8835f32837dc
+13:56:21.553 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-TIMEOUT-007 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:56:51.570 [pool-1-thread-1] WARN  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] timeout/IO error trx=MOCK-TIMEOUT-007: timeout
+13:56:51.628 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-TIMEOUT-007, PULLING -> PENDING (backoff, attempt=1)
+artifact=results/logs/20261126_135518/TC-007","Pilar-4, resilience, timeout_handling"
+TC-008,Memastikan respons sukses HTTP 200 dengan format isi yang rusak (bukan JSON atau JSON tanpa struktur status yang valid) ditangani secara aman dengan pemotongan teks kesalahan maksimal 160 karakter.,TC-008 — Penanganan Format Isi Respons Rusak dengan Sanitasi Batas Karakter,"Given Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memeriksa status dan Telkomsel menjawab status 200 namun isi pesan bukan format JSON yang benar atau format struktur status hilang
 Then Transaksi dijadwalkan untuk diperiksa ulang dengan status PENDING
 And Catatan kesalahan pada database dibatasi maksimal seratus enam puluh karakter untuk menjaga integritas data
-And Sistem tidak mengalami kesalahan fatal dan dapat melanjutkan pemrosesan berikutnya","P1","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-MALFORMED-008', attempt=0.
+And Sistem tidak mengalami kesalahan fatal dan dapat melanjutkan pemrosesan berikutnya",P1,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-MALFORMED-008', attempt=0.
 2. Uji 2 variasi respons malformed: a) HTML non-JSON panjang > 200 karakter, b) JSON valid tetapi tanpa field deliveryStatus.
 3. Jalankan sweep worker drpulltelkomsel.
 4. Ambil dokumen MongoDB dan pastikan status='PENDING', attempt=1.
@@ -154,12 +289,27 @@ And Sistem tidak mengalami kesalahan fatal dan dapat melanjutkan pemrosesan beri
 Mock response: HTTP 200, Body: '<html><body><h1>Bad Gateway</h1>' + ('x' * 250) + '</body></html>'","1. MongoDB: status='PENDING', attempt=1.
 2. Field last_error diawali 'body malformed: ' dan panjang string <= 160 karakter.
 3. Tidak ada unhandled exception yang mematikan thread sweep.
-4. [LOG CONTRACT]: Log SUT mencatat peringatan 'body malformed'.","","","","Pilar-4, resilience, data_sanitization"
-"TC-009","Memastikan pencarian kunci rahasia tingkat kedua (berdasarkan appsid saja) berhasil digunakan saat kunci khusus pasangan appsid:sid tidak terdaftar.","TC-009 — Resolusi Kunci Rahasia Berdasarkan Appsid Saat Pasangan Lengkap Tidak Tersedia","Given Konfigurasi database memuat kunci khusus appsid tanpa pasangan sid
+4. [LOG CONTRACT]: Log SUT mencatat peringatan 'body malformed'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 4.27s | [SUT LOG] files=2 lines=12 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (6 baris) ---
+2026-11-26 13:56:55.862 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:56:55.895 c.j.d.scheduler.SweepTask State change: trxId=MOCK-MALFORMED-008, PENDING -> PULLING, leaseId=a632df5c-1676-40c9-b125-80ff8272e27d
+2026-11-26 13:56:55.896 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-MALFORMED-008 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:56:55.899 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-MALFORMED-008 httpStatus=200
+2026-11-26 13:56:55.957 c.j.d.mongo.MongoService State change: trxId=MOCK-MALFORMED-008, PULLING -> PENDING (backoff, attempt=1)
+2026-11-26 13:56:58.100 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (6 baris) ---
+13:56:55.862 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:56:55.895 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-MALFORMED-008, PENDING -> PULLING, leaseId=a632df5c-1676-40c9-b125-80ff8272e27d
+13:56:55.896 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-MALFORMED-008 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:56:55.899 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-MALFORMED-008 httpStatus=200
+13:56:55.957 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-MALFORMED-008, PULLING -> PENDING (backoff, attempt=1)
+13:56:58.100 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-008","Pilar-4, resilience, data_sanitization"
+TC-009,Memastikan pencarian kunci rahasia tingkat kedua (berdasarkan appsid saja) berhasil digunakan saat kunci khusus pasangan appsid:sid tidak terdaftar.,TC-009 — Resolusi Kunci Rahasia Berdasarkan Appsid Saat Pasangan Lengkap Tidak Tersedia,"Given Konfigurasi database memuat kunci khusus appsid tanpa pasangan sid
 And Terdapat transaksi yang memiliki appsid tersebut dengan sid sembarang
 When Sistem mencari kunci rahasia untuk menandatangani permintaan
 Then Kunci rahasia berdasarkan appsid berhasil ditemukan dan digunakan
-And Permintaan berhasil diverifikasi dan diterima oleh vendor Telkomsel","P1","1. Konfigurasikan apps_config.jns_config: client_secrets_json='{""cp_prio:sid_prio"": ""secret-A"", ""cp_tier2"": ""secret-B""}', client_secret='secret-C'.
+And Permintaan berhasil diverifikasi dan diterima oleh vendor Telkomsel",P1,"1. Konfigurasikan apps_config.jns_config: client_secrets_json='{""cp_prio:sid_prio"": ""secret-A"", ""cp_tier2"": ""secret-B""}', client_secret='secret-C'.
 2. Jalankan Mock Server dengan --secret 'secret-B'.
 3. Tanam dokumen PENDING dengan appsid='cp_tier2', sid='any_unmapped_sender', provider_trxid='SAMPLE-TIER2-009'.
 4. Jalankan worker drpulltelkomsel.
@@ -169,12 +319,35 @@ And Permintaan berhasil diverifikasi dan diterima oleh vendor Telkomsel","P1","1
 Dokumen MongoDB: appsid='cp_tier2', sid='any_unmapped_sender', provider_trxid='SAMPLE-TIER2-009'","1. SUT berhasil memilih secret tingkat 2 'secret-B' (prioritas appsid).
 2. Autentikasi Mock Server berhasil (HTTP 200, bukan 401).
 3. MongoDB bertransisi ke 'RESOLVED'.
-4. [LOG CONTRACT]: Log SUT mencatat httpStatus=200 tanpa mencatat isi secret.","","","","Pilar-2, security, secret_resolution"
-"TC-010","Memastikan pencarian kunci rahasia tingkat ketiga (fallback client_secret default) berhasil digunakan saat appsid maupun pasangan appsid:sid tidak ditemukan pada JSON map.","TC-010 — Penggunaan Kunci Rahasia Cadangan Default Saat Pasangan Khusus Tidak Terdaftar","Given Konfigurasi memuat daftar kunci khusus untuk mitra lain namun tidak untuk mitra yang sedang diproses
+4. [LOG CONTRACT]: Log SUT mencatat httpStatus=200 tanpa mencatat isi secret.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 4.58s | [SUT LOG] files=2 lines=20 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (10 baris) ---
+2026-11-26 13:57:00.145 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:02.232 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:57:02.292 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-TIER2-009, PENDING -> PULLING, leaseId=82c817eb-94cd-4185-acab-80d498e9a1ff
+2026-11-26 13:57:02.294 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-TIER2-009 appsid=app_tier2_only endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:57:02.304 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-TIER2-009 httpStatus=200
+2026-11-26 13:57:02.577 c.j.d.mongo.MongoService State change: trxId=SAMPLE-TIER2-009, PULLING -> PUBLISHING
+2026-11-26 13:57:02.913 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-TIER2-009, status=D
+2026-11-26 13:57:04.552 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-TIER2-009
+2026-11-26 13:57:04.622 c.j.d.mongo.MongoService Lease no longer valid, trxId=SAMPLE-TIER2-009, abandon
+2026-11-26 13:57:04.623 c.j.d.worker.PullWorker Finalize failed after successful publish, trxId=SAMPLE-TIER2-009, requires manual investigation
+--- out-drpulltelkomsel.log (10 baris) ---
+13:57:00.145 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:02.232 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:57:02.292 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-TIER2-009, PENDING -> PULLING, leaseId=82c817eb-94cd-4185-acab-80d498e9a1ff
+13:57:02.294 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-TIER2-009 appsid=app_tier2_only endpoint=http://localhost:8089/bank/v2/transaction-status
+13:57:02.304 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-TIER2-009 httpStatus=200
+13:57:02.577 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-TIER2-009, PULLING -> PUBLISHING
+13:57:02.913 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-TIER2-009, status=D
+13:57:04.552 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-TIER2-009
+13:57:04.622 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - Lease no longer valid, trxId=SAMPLE-TIER2-009, abandon
+13:57:04.623 [pool-1-thread-1] WARN  c.j.d.worker.PullWorker - Finalize failed after successful publish, trxId=SAMPLE-TIER2-009, requires manual investigation
+artifact=results/logs/20261126_135518/TC-009","Pilar-2, security, secret_resolution"
+TC-010,Memastikan pencarian kunci rahasia tingkat ketiga (fallback client_secret default) berhasil digunakan saat appsid maupun pasangan appsid:sid tidak ditemukan pada JSON map.,TC-010 — Penggunaan Kunci Rahasia Cadangan Default Saat Pasangan Khusus Tidak Terdaftar,"Given Konfigurasi memuat daftar kunci khusus untuk mitra lain namun tidak untuk mitra yang sedang diproses
 And Konfigurasi kunci rahasia cadangan default terisi dengan nilai yang valid
 When Sistem memeriksa transaksi milik mitra yang tidak terdaftar pada daftar khusus
 Then Sistem otomatis beralih menggunakan kunci rahasia cadangan default
-And Permintaan berhasil diverifikasi dan diterima dengan sukses oleh vendor Telkomsel","P1","1. Konfigurasikan apps_config.jns_config: client_secrets_json='{""cp_prio:sid_prio"": ""secret-A"", ""cp_tier2"": ""secret-B""}', client_secret='secret-C'.
+And Permintaan berhasil diverifikasi dan diterima dengan sukses oleh vendor Telkomsel",P1,"1. Konfigurasikan apps_config.jns_config: client_secrets_json='{""cp_prio:sid_prio"": ""secret-A"", ""cp_tier2"": ""secret-B""}', client_secret='secret-C'.
 2. Jalankan Mock Server dengan --secret 'secret-C'.
 3. Tanam dokumen PENDING dengan appsid='cp_unregistered', sid='sender_unknown', provider_trxid='SAMPLE-TIER3-010'.
 4. Jalankan worker drpulltelkomsel.
@@ -184,11 +357,36 @@ And Permintaan berhasil diverifikasi dan diterima dengan sukses oleh vendor Telk
 Dokumen MongoDB: appsid='cp_unregistered', sid='sender_unknown', provider_trxid='SAMPLE-TIER3-010'","1. SUT otomatis fallback ke client_secret default 'secret-C'.
 2. Autentikasi Mock Server berhasil (HTTP 200).
 3. MongoDB bertransisi ke 'RESOLVED'.
-4. [LOG CONTRACT]: Log SUT mencatat penerbitan DR dengan sukses.","","","","Pilar-2, security, secret_fallback"
-"TC-011","Memastikan format pesan laporan pengiriman ke antrean DR dan perintah penyimpanan ke antrean database executor 100% kompatibel dengan kontrak versi sebelumnya.","TC-011 — Kompatibilitas Penuh Format Pesan Laporan Pengiriman Hilir","Given Transaksi berhasil mendapatkan status pengiriman dari Telkomsel
+4. [LOG CONTRACT]: Log SUT mencatat penerbitan DR dengan sukses.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 5.81s | [SUT LOG] files=2 lines=22 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (11 baris) ---
+2026-11-26 13:57:06.781 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:57:06.847 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-TIER3-010, PENDING -> PULLING, leaseId=882376c3-cbb5-49df-bfe0-69ef2203bbc3
+2026-11-26 13:57:06.849 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-TIER3-010 appsid=tier3_fallback_app endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:57:06.863 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-TIER3-010 httpStatus=200
+2026-11-26 13:57:06.916 c.j.d.mongo.MongoService State change: trxId=SAMPLE-TIER3-010, PULLING -> PUBLISHING
+2026-11-26 13:57:07.253 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-TIER3-010, status=D
+2026-11-26 13:57:07.713 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-TIER3-010
+2026-11-26 13:57:07.761 c.j.d.mongo.MongoService State change: trxId=SAMPLE-TIER3-010, PUBLISHING -> RESOLVED
+2026-11-26 13:57:07.761 c.j.d.worker.PullWorker State change: trxId=SAMPLE-TIER3-010, PUBLISHING -> RESOLVED
+2026-11-26 13:57:09.920 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:11.972 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (11 baris) ---
+13:57:06.781 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:57:06.847 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-TIER3-010, PENDING -> PULLING, leaseId=882376c3-cbb5-49df-bfe0-69ef2203bbc3
+13:57:06.849 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-TIER3-010 appsid=tier3_fallback_app endpoint=http://localhost:8089/bank/v2/transaction-status
+13:57:06.863 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-TIER3-010 httpStatus=200
+13:57:06.916 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-TIER3-010, PULLING -> PUBLISHING
+13:57:07.253 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-TIER3-010, status=D
+13:57:07.713 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-TIER3-010
+13:57:07.761 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-TIER3-010, PUBLISHING -> RESOLVED
+13:57:07.761 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-TIER3-010, PUBLISHING -> RESOLVED
+13:57:09.920 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:11.972 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-010","Pilar-2, security, secret_fallback"
+TC-011,Memastikan format pesan laporan pengiriman ke antrean DR dan perintah penyimpanan ke antrean database executor 100% kompatibel dengan kontrak versi sebelumnya.,TC-011 — Kompatibilitas Penuh Format Pesan Laporan Pengiriman Hilir,"Given Transaksi berhasil mendapatkan status pengiriman dari Telkomsel
 When Sistem menyusun dan meneruskan laporan ke sistem hilir
 Then Format pesan pada antrean laporan DR memuat parameter URL-encoded yang lengkap dan sesuai standar
-And Format perintah SQL pada antrean database executor sesuai dengan struktur tabel riwayat pelaporan","P0","1. Jalankan penarikan status Delivered pada transaksi 'SAMPLE-D-011'.
+And Format perintah SQL pada antrean database executor sesuai dengan struktur tabel riwayat pelaporan",P0,"1. Jalankan penarikan status Delivered pada transaksi 'SAMPLE-D-011'.
 2. Konsumsi pesan berkorelasi dari antrean ActiveMQ jns.dr.drrealhandler.
 3. Validasi struktur pesan: memuat provider_trxid, provider_status=D, provider_status_received (format yyyyMMddHHmmss), provider_name, provider_id, without_dr, dan provider_err.
 4. Konsumsi pesan berkorelasi dari antrean ActiveMQ jns.db.deliveryreport.
@@ -196,12 +394,37 @@ And Format perintah SQL pada antrean database executor sesuai dengan struktur ta
 6. Teardown: Hapus dokumen 'SAMPLE-D-011' dari MongoDB.","Baseline kontrak v1.2.0 vs v2.0.0 target
 Dokumen MongoDB: provider_trxid='SAMPLE-D-011', appsid='cp_sample', sid='sender_sample'","1. ActiveMQ jns.dr.drrealhandler: struktur URL-encoded identik 100% dengan v1.2.0.
 2. ActiveMQ jns.db.deliveryreport: format query INSERT INTO identik 100% dengan v1.2.0.
-3. [LOG CONTRACT]: Log SUT mencatat 'DR published' dan 'SQL insert published'.","","","","Pilar-1, e2e, downstream_contract"
-"TC-012","Memastikan mekanisme penguncian atomic pada tahap pengambilan transaksi (Pulling Fence) mencegah dua worker mengambil transaksi yang sama dari antrean pemindaian.","TC-012 — Penguncian Atomic Tahap Pengambilan Transaksi (Pulling Fence) Mencegah Pemrosesan Ganda","Given Terdapat transaksi SMS berstatus PENDING pada database yang siap diproses
+3. [LOG CONTRACT]: Log SUT mencatat 'DR published' dan 'SQL insert published'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 5.89s | [SUT LOG] files=2 lines=22 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (11 baris) ---
+2026-11-26 13:57:14.024 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:57:14.071 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-D-011, PENDING -> PULLING, leaseId=81f318a8-e03a-468a-8cbd-36e1e32330b3
+2026-11-26 13:57:14.072 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-D-011 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:57:14.081 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-D-011 httpStatus=200
+2026-11-26 13:57:14.139 c.j.d.mongo.MongoService State change: trxId=SAMPLE-D-011, PULLING -> PUBLISHING
+2026-11-26 13:57:14.539 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-D-011, status=D
+2026-11-26 13:57:14.958 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-D-011
+2026-11-26 13:57:15.006 c.j.d.mongo.MongoService State change: trxId=SAMPLE-D-011, PUBLISHING -> RESOLVED
+2026-11-26 13:57:15.007 c.j.d.worker.PullWorker State change: trxId=SAMPLE-D-011, PUBLISHING -> RESOLVED
+2026-11-26 13:57:17.163 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:19.221 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (11 baris) ---
+13:57:14.024 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:57:14.071 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-D-011, PENDING -> PULLING, leaseId=81f318a8-e03a-468a-8cbd-36e1e32330b3
+13:57:14.072 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-D-011 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:57:14.081 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-D-011 httpStatus=200
+13:57:14.139 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-D-011, PULLING -> PUBLISHING
+13:57:14.539 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-D-011, status=D
+13:57:14.958 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-D-011
+13:57:15.006 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-D-011, PUBLISHING -> RESOLVED
+13:57:15.007 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-D-011, PUBLISHING -> RESOLVED
+13:57:17.163 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:19.221 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-011","Pilar-1, e2e, downstream_contract"
+TC-012,Memastikan mekanisme penguncian atomic pada tahap pengambilan transaksi (Pulling Fence) mencegah dua worker mengambil transaksi yang sama dari antrean pemindaian.,TC-012 — Penguncian Atomic Tahap Pengambilan Transaksi (Pulling Fence) Mencegah Pemrosesan Ganda,"Given Terdapat transaksi SMS berstatus PENDING pada database yang siap diproses
 When Dua instance worker melakukan pemindaian dan mencoba mengambil transaksi tersebut secara bersamaan
 Then Hanya satu worker yang berhasil memenangkan penguncian atomic status PENDING menjadi PULLING
 And Worker kedua gagal mendapatkan penguncian dan membatalkan pemrosesan transaksi tersebut di tahap awal
-And Worker kedua tidak melakukan panggilan HTTP keluar ke vendor untuk transaksi tersebut","P0","1. Tanam 1 dokumen PENDING dengan provider_trxid='MOCK-FENCE-PULL-012'.
+And Worker kedua tidak melakukan panggilan HTTP keluar ke vendor untuk transaksi tersebut",P0,"1. Tanam 1 dokumen PENDING dengan provider_trxid='MOCK-FENCE-PULL-012'.
 2. Simulasikan dua thread worker yang mengeksekusi claimPulling(id, leaseId) secara bersamaan pada dokumen yang sama.
 3. Verifikasi Worker 1 mengembalikan true (matchedCount == 1), status dokumen berubah PULLING.
 4. Verifikasi Worker 2 mengembalikan false (matchedCount == 0), transaksi dilewati.
@@ -210,12 +433,17 @@ And Worker kedua tidak melakukan panggilan HTTP keluar ke vendor untuk transaksi
 Operasi: claimPulling(ObjectId id, String leaseId)","1. Worker 1 memenangkan claimPulling (return true).
 2. Worker 2 gagal claimPulling (return false) dan langsung abandon transaksi.
 3. Total HTTP call ke mock tepat 1 kali.
-4. [LOG CONTRACT]: Log SUT mencatat transisi 'PENDING -> PULLING' tepat satu kali.","","","","Pilar-4, resilience, concurrency_fencing"
-"TC-013","Memastikan file biner aplikasi yang dijalankan adalah versi 2.0.0, scheduler aktif dan mampu memproses transaksi uji, serta inisialisasi startup berjalan bersih.","TC-013 — Verifikasi Versi Aplikasi 2.0.0, Kesiapan Inisialisasi Layanan dan Keaktifan Scheduler","Given File biner drpulltelkomsel versi 2.0.0 terpasang pada folder bin server
+4. [LOG CONTRACT]: Log SUT mencatat transisi 'PENDING -> PULLING' tepat satu kali.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 1.31s | [SUT LOG] files=2 lines=2 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (1 baris) ---
+2026-11-26 13:57:21.275 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (1 baris) ---
+13:57:21.275 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-012","Pilar-4, resilience, concurrency_fencing"
+TC-013,"Memastikan file biner aplikasi yang dijalankan adalah versi 2.0.0, scheduler aktif dan mampu memproses transaksi uji, serta inisialisasi startup berjalan bersih.","TC-013 — Verifikasi Versi Aplikasi 2.0.0, Kesiapan Inisialisasi Layanan dan Keaktifan Scheduler","Given File biner drpulltelkomsel versi 2.0.0 terpasang pada folder bin server
 When Layanan dijalankan menggunakan skrip start aplikasi
 Then Aplikasi berjalan dengan benar menampilkan identitas versi 2.0.0
 And Catatan inisialisasi pada log bersih dari kesalahan fatal maupun peringatan konfigurasi
-And Komponen scheduler terbukti aktif memindai dan memproses transaksi uji secara normal","P0","1. Pastikan hanya jar drpulltelkomsel-2.0.0.jar yang ada di folder bin/.
+And Komponen scheduler terbukti aktif memindai dan memproses transaksi uji secara normal",P0,"1. Pastikan hanya jar drpulltelkomsel-2.0.0.jar yang ada di folder bin/.
 2. Pastikan apps_config memuat provider_status_url dengan path /bank/v2/transaction-status.
 3. Jalankan start.sh start.
 4. Periksa proses sistem: ps aux | grep drpulltelkomsel-2.0.0.
@@ -225,12 +453,17 @@ And Komponen scheduler terbukti aktif memindai dan memproses transaksi uji secar
 Config: provider_status_url='http://mock:8089/bank/v2/transaction-status'","1. Proses aplikasi aktif menggunakan drpulltelkomsel-2.0.0.jar.
 2. Log inisialisasi bersih dari ERROR/Exception.
 3. Scheduler terbukti aktif memproses transaksi uji.
-4. [LOG CONTRACT]: Log SUT mencatat inisialisasi sukses dan sweep task berjalan.","","","","Pilar-1, architecture, artifact_verification"
-"TC-014","Memastikan respons kesalahan format dari Telkomsel (HTTP 400 / kode 2400) langsung menghentikan transaksi secara permanen (GIVE_UP) tanpa melakukan percobaan ulang.","TC-014 — Penghentian Permanen Langsung Saat Permintaan Ditolak dengan Kesalahan 400","Given Terdapat transaksi SMS berstatus PENDING pada database
+4. [LOG CONTRACT]: Log SUT mencatat inisialisasi sukses dan sweep task berjalan.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 0.75s | [SUT LOG] files=2 lines=2 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (1 baris) ---
+2026-11-26 13:57:23.334 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (1 baris) ---
+13:57:23.334 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-013","Pilar-1, architecture, artifact_verification"
+TC-014,Memastikan respons kesalahan format dari Telkomsel (HTTP 400 / kode 2400) langsung menghentikan transaksi secara permanen (GIVE_UP) tanpa melakukan percobaan ulang.,TC-014 — Penghentian Permanen Langsung Saat Permintaan Ditolak dengan Kesalahan 400,"Given Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memeriksa status dan Telkomsel menolak permintaan dengan kode kesalahan 400 Bad Request
 Then Transaksi pada database seketika diubah statusnya menjadi GIVE_UP secara permanen
 And Riwayat jumlah percobaan tidak bertambah serta tidak ada jadwal pemeriksaan ulang
-And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P0","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-400-014', attempt=0.
+And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir",P0,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-400-014', attempt=0.
 2. Konfigurasikan Mock Server untuk menjawab HTTP 400 dengan error_code 2400 ('Invalid Request').
 3. Jalankan sweep worker drpulltelkomsel.
 4. Ambil dokumen MongoDB: pastikan status='GIVE_UP' secara instan.
@@ -239,12 +472,31 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P0","1.
 7. Teardown: Hapus dokumen 'MOCK-400-014' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-400-014', status='PENDING', attempt=0
 Mock response: HTTP 400, {""error"": true, ""error_code"": 2400, ""message"": ""Invalid Request""}","1. MongoDB: status='GIVE_UP' (bukan PENDING), attempt=0, last_error memuat '2400'.
 2. Zero pesan masuk ke kedua antrean hilir.
-3. [LOG CONTRACT]: Log SUT mencatat PERMANENT_ERROR dan transisi 'PULLING -> GIVE_UP'.","","","","Pilar-3, negative, fail_fast"
-"TC-015","Memastikan respons metode ditolak dari Telkomsel (HTTP 405 / kode 2405) langsung menghentikan transaksi secara permanen (GIVE_UP) tanpa melakukan percobaan ulang.","TC-015 — Penghentian Permanen Langsung Saat Metode Ditolak dengan Kode 405","Given Terdapat transaksi SMS berstatus PENDING pada database
+3. [LOG CONTRACT]: Log SUT mencatat PERMANENT_ERROR dan transisi 'PULLING -> GIVE_UP'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 6.26s | [SUT LOG] files=2 lines=16 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (8 baris) ---
+2026-11-26 13:57:25.390 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:27.494 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:57:27.548 c.j.d.scheduler.SweepTask State change: trxId=MOCK-400-014, PENDING -> PULLING, leaseId=26bc7512-179c-4e55-927b-f97f7b3ae00e
+2026-11-26 13:57:27.548 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-400-014 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:57:27.551 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-400-014 httpStatus=400
+2026-11-26 13:57:27.586 c.j.d.worker.PullWorker State change: trxId=MOCK-400-014, PULLING -> GIVE_UP, reason=permanent error HTTP 400 (2400)
+2026-11-26 13:57:29.755 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:31.831 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (8 baris) ---
+13:57:25.390 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:27.494 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:57:27.548 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-400-014, PENDING -> PULLING, leaseId=26bc7512-179c-4e55-927b-f97f7b3ae00e
+13:57:27.548 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-400-014 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:57:27.551 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-400-014 httpStatus=400
+13:57:27.586 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=MOCK-400-014, PULLING -> GIVE_UP, reason=permanent error HTTP 400 (2400)
+13:57:29.755 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:31.831 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-014","Pilar-3, negative, fail_fast"
+TC-015,Memastikan respons metode ditolak dari Telkomsel (HTTP 405 / kode 2405) langsung menghentikan transaksi secara permanen (GIVE_UP) tanpa melakukan percobaan ulang.,TC-015 — Penghentian Permanen Langsung Saat Metode Ditolak dengan Kode 405,"Given Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memeriksa status dan Telkomsel menolak dengan kode kesalahan 405 Method Not Allowed
 Then Transaksi pada database seketika diubah statusnya menjadi GIVE_UP secara permanen
 And Sistem tidak melakukan penjadwalan ulang terhadap transaksi tersebut
-And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P0","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-405-015', attempt=0.
+And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir",P0,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-405-015', attempt=0.
 2. Konfigurasikan Mock Server untuk menjawab HTTP 405 dengan error_code 2405 ('Use POST').
 3. Jalankan sweep worker drpulltelkomsel.
 4. Ambil dokumen MongoDB: pastikan status='GIVE_UP', attempt=0, last_error memuat '2405'.
@@ -252,12 +504,29 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P0","1.
 6. Teardown: Hapus dokumen 'MOCK-405-015' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-405-015'
 Mock response: HTTP 405, {""error"": true, ""error_code"": 2405, ""message"": ""Use POST""}","1. MongoDB: status='GIVE_UP', attempt=0, last_error memuat '2405'.
 2. Tidak ada retry/backoff.
-3. [LOG CONTRACT]: Log SUT mencatat PERMANENT_ERROR dan transisi ke GIVE_UP.","","","","Pilar-3, negative, fail_fast"
-"TC-016","Memastikan respons kegagalan autentikasi dari Telkomsel (HTTP 401 / kode 2401) langsung menghentikan transaksi secara permanen (GIVE_UP) tanpa melakukan percobaan ulang.","TC-016 — Penghentian Permanen Langsung Saat Autentikasi Ditolak dengan Kode 401","Given Terdapat transaksi SMS berstatus PENDING pada database
+3. [LOG CONTRACT]: Log SUT mencatat PERMANENT_ERROR dan transisi ke GIVE_UP.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 6.13s | [SUT LOG] files=2 lines=14 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (7 baris) ---
+2026-11-26 13:57:33.913 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:57:33.967 c.j.d.scheduler.SweepTask State change: trxId=MOCK-405-015, PENDING -> PULLING, leaseId=35b4121e-0c62-4274-b3aa-cf3b8e2d7d4c
+2026-11-26 13:57:33.969 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-405-015 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:57:33.976 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-405-015 httpStatus=405
+2026-11-26 13:57:34.020 c.j.d.worker.PullWorker State change: trxId=MOCK-405-015, PULLING -> GIVE_UP, reason=permanent error HTTP 405 (2405)
+2026-11-26 13:57:36.179 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:38.238 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (7 baris) ---
+13:57:33.913 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:57:33.967 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-405-015, PENDING -> PULLING, leaseId=35b4121e-0c62-4274-b3aa-cf3b8e2d7d4c
+13:57:33.969 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-405-015 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:57:33.976 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-405-015 httpStatus=405
+13:57:34.020 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=MOCK-405-015, PULLING -> GIVE_UP, reason=permanent error HTTP 405 (2405)
+13:57:36.179 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:38.238 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-015","Pilar-3, negative, fail_fast"
+TC-016,Memastikan respons kegagalan autentikasi dari Telkomsel (HTTP 401 / kode 2401) langsung menghentikan transaksi secara permanen (GIVE_UP) tanpa melakukan percobaan ulang.,TC-016 — Penghentian Permanen Langsung Saat Autentikasi Ditolak dengan Kode 401,"Given Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memeriksa status dan Telkomsel menolak autentikasi dengan kode kesalahan 401
 Then Transaksi pada database seketika diubah statusnya menjadi GIVE_UP secara permanen
 And Catatan kesalahan menunjukkan kegagalan kredensial autentikasi pada vendor
-And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P0","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-401-016', attempt=0.
+And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir",P0,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-401-016', attempt=0.
 2. Konfigurasikan Mock Server untuk menjawab HTTP 401 dengan error_code 2401 ('Authentication Error').
 3. Jalankan sweep worker drpulltelkomsel.
 4. Ambil dokumen MongoDB: pastikan status='GIVE_UP', last_error memuat 'credential wrong, give up (telkomsel 401)'.
@@ -265,37 +534,80 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P0","1.
 6. Teardown: Hapus dokumen 'MOCK-401-016' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-401-016'
 Mock response: HTTP 401, {""error"": true, ""error_code"": 2401, ""message"": ""Authentication Error""}","1. MongoDB: status='GIVE_UP', last_error='credential wrong, give up (telkomsel 401)'.
 2. Zero pesan masuk ke kedua antrean hilir.
-3. [LOG CONTRACT]: Log SUT mencatat AUTH_ERROR dan transisi 'PULLING -> GIVE_UP'.","","","","Pilar-3, negative, fail_fast"
-"TC-017","Memastikan transaksi yang tidak memiliki data identitas aplikasi (appsid kosong namun sid ada) langsung dinyatakan GIVE_UP tanpa mengirimkan permintaan HTTP keluar sama sekali.","TC-017 — Penghentian Transaksi Tanpa Identitas Appsid Tanpa Melakukan Panggilan Jaringan","Given Dokumen transaksi pada database memiliki sid namun field identitas appsid tidak terisi
+3. [LOG CONTRACT]: Log SUT mencatat AUTH_ERROR dan transisi 'PULLING -> GIVE_UP'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 6.24s | [SUT LOG] files=2 lines=14 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (7 baris) ---
+2026-11-26 13:57:42.362 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:57:42.407 c.j.d.scheduler.SweepTask State change: trxId=MOCK-401-016, PENDING -> PULLING, leaseId=68074772-0e8d-406f-8e16-4392c95dc83b
+2026-11-26 13:57:42.407 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-401-016 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:57:42.410 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-401-016 httpStatus=401
+2026-11-26 13:57:42.465 c.j.d.worker.PullWorker State change: trxId=MOCK-401-016, PULLING -> GIVE_UP, reason=credential wrong, give up (telkomsel 401)
+2026-11-26 13:57:44.617 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:46.675 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (7 baris) ---
+13:57:42.362 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:57:42.407 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-401-016, PENDING -> PULLING, leaseId=68074772-0e8d-406f-8e16-4392c95dc83b
+13:57:42.407 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-401-016 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:57:42.410 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-401-016 httpStatus=401
+13:57:42.465 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=MOCK-401-016, PULLING -> GIVE_UP, reason=credential wrong, give up (telkomsel 401)
+13:57:44.617 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:46.675 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-016","Pilar-3, negative, fail_fast"
+TC-017,Memastikan transaksi yang tidak memiliki data identitas aplikasi (appsid kosong namun sid ada) langsung dinyatakan GIVE_UP tanpa mengirimkan permintaan HTTP keluar sama sekali.,TC-017 — Penghentian Transaksi Tanpa Identitas Appsid Tanpa Melakukan Panggilan Jaringan,"Given Dokumen transaksi pada database memiliki sid namun field identitas appsid tidak terisi
 When Sistem melakukan pemindaian terhadap transaksi tidak lengkap tersebut
 Then Transaksi seketika diubah statusnya menjadi GIVE_UP
 And Catatan kesalahan menyebutkan kredensial tidak ditemukan pada dokumen
-And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor","P0","1. Reset counter panggilan HTTP pada Mock Server Telkomsel V2.
+And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor",P0,"1. Reset counter panggilan HTTP pada Mock Server Telkomsel V2.
 2. Tanam dokumen PENDING dengan sid='sender_valid' namun appsid=null (atau string kosong), provider_trxid='SAMPLE-NOAPP-017'.
 3. Jalankan worker drpulltelkomsel.
 4. Ambil dokumen MongoDB: pastikan status='GIVE_UP' dan last_error='credential not found in doc'.
 5. Periksa hit counter Mock Server (wajib bertambah 0, artinya zero outgoing call).
 6. Teardown: Hapus dokumen 'SAMPLE-NOAPP-017' dari MongoDB.","Dokumen MongoDB: provider_trxid='SAMPLE-NOAPP-017', sid='sender_valid', appsid=null, status='PENDING'","1. MongoDB: status='GIVE_UP', last_error='credential not found in doc'.
 2. Mock Server: hit counter bertambah 0 (tidak ada panggilan HTTP keluar).
-3. [LOG CONTRACT]: Log SUT mencatat 'credential not found in doc'.","","","","Pilar-3, negative, zero_http_call"
-"TC-018","Memastikan transaksi yang tidak memiliki data nomor pengirim (sid kosong namun appsid ada) langsung dinyatakan GIVE_UP tanpa mengirimkan permintaan HTTP keluar sama sekali.","TC-018 — Penghentian Transaksi Tanpa Identitas SID Tanpa Melakukan Panggilan Jaringan","Given Dokumen transaksi pada database memiliki appsid namun field identitas sid tidak terisi
+3. [LOG CONTRACT]: Log SUT mencatat 'credential not found in doc'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 4.20s | [SUT LOG] files=2 lines=10 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (5 baris) ---
+2026-11-26 13:57:48.721 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:57:48.778 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-NOAPP-017, PENDING -> PULLING, leaseId=896321da-fce4-49aa-ab8f-88b3c9ca638a
+2026-11-26 13:57:48.825 c.j.d.worker.PullWorker State change: trxId=SAMPLE-NOAPP-017, PULLING -> GIVE_UP, reason=credential not found in doc
+2026-11-26 13:57:50.972 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:53.025 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (5 baris) ---
+13:57:48.721 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:57:48.778 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-NOAPP-017, PENDING -> PULLING, leaseId=896321da-fce4-49aa-ab8f-88b3c9ca638a
+13:57:48.825 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-NOAPP-017, PULLING -> GIVE_UP, reason=credential not found in doc
+13:57:50.972 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:53.025 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-017","Pilar-3, negative, zero_http_call"
+TC-018,Memastikan transaksi yang tidak memiliki data nomor pengirim (sid kosong namun appsid ada) langsung dinyatakan GIVE_UP tanpa mengirimkan permintaan HTTP keluar sama sekali.,TC-018 — Penghentian Transaksi Tanpa Identitas SID Tanpa Melakukan Panggilan Jaringan,"Given Dokumen transaksi pada database memiliki appsid namun field identitas sid tidak terisi
 When Sistem melakukan pemindaian terhadap transaksi tidak lengkap tersebut
 Then Transaksi seketika diubah statusnya menjadi GIVE_UP
 And Catatan kesalahan menyebutkan kredensial tidak ditemukan pada dokumen
-And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor","P0","1. Reset counter panggilan HTTP pada Mock Server Telkomsel V2.
+And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor",P0,"1. Reset counter panggilan HTTP pada Mock Server Telkomsel V2.
 2. Tanam dokumen PENDING dengan appsid='cp_valid' namun sid=null (atau string kosong), provider_trxid='SAMPLE-NOSID-018'.
 3. Jalankan worker drpulltelkomsel.
 4. Ambil dokumen MongoDB: pastikan status='GIVE_UP' dan last_error='credential not found in doc'.
 5. Periksa hit counter Mock Server (wajib bertambah 0).
 6. Teardown: Hapus dokumen 'SAMPLE-NOSID-018' dari MongoDB.","Dokumen MongoDB: provider_trxid='SAMPLE-NOSID-018', appsid='cp_valid', sid=null, status='PENDING'","1. MongoDB: status='GIVE_UP', last_error='credential not found in doc'.
 2. Mock Server: hit counter bertambah 0.
-3. [LOG CONTRACT]: Log SUT mencatat 'credential not found in doc'.","","","","Pilar-3, negative, zero_http_call"
-"TC-019","Memastikan transaksi dengan kredensial mitra yang kunci rahasianya tidak terdaftar pada konfigurasi database langsung dinyatakan GIVE_UP tanpa panggilan HTTP.","TC-019 — Penghentian Transaksi Tanpa Kunci Rahasia Terdaftar Tanpa Melakukan Panggilan Jaringan","Given Transaksi memiliki appsid dan sid lengkap namun tidak terdaftar pada konfigurasi kunci rahasia
+3. [LOG CONTRACT]: Log SUT mencatat 'credential not found in doc'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 6.18s | [SUT LOG] files=2 lines=10 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (5 baris) ---
+2026-11-26 13:57:55.071 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:57:55.126 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-NOSID-018, PENDING -> PULLING, leaseId=f2acf668-f828-4b20-aa15-b77b907966a7
+2026-11-26 13:57:55.201 c.j.d.worker.PullWorker State change: trxId=SAMPLE-NOSID-018, PULLING -> GIVE_UP, reason=credential not found in doc
+2026-11-26 13:57:57.356 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:57:59.420 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (5 baris) ---
+13:57:55.071 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:57:55.126 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-NOSID-018, PENDING -> PULLING, leaseId=f2acf668-f828-4b20-aa15-b77b907966a7
+13:57:55.201 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-NOSID-018, PULLING -> GIVE_UP, reason=credential not found in doc
+13:57:57.356 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:57:59.420 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-018","Pilar-3, negative, zero_http_call"
+TC-019,Memastikan transaksi dengan kredensial mitra yang kunci rahasianya tidak terdaftar pada konfigurasi database langsung dinyatakan GIVE_UP tanpa panggilan HTTP.,TC-019 — Penghentian Transaksi Tanpa Kunci Rahasia Terdaftar Tanpa Melakukan Panggilan Jaringan,"Given Transaksi memiliki appsid dan sid lengkap namun tidak terdaftar pada konfigurasi kunci rahasia
 And Konfigurasi kunci rahasia cadangan default dalam kondisi kosong
 When Sistem mencoba memproses transaksi tersebut
 Then Transaksi seketika diubah statusnya menjadi GIVE_UP
 And Catatan kesalahan menyebutkan kunci rahasia klien tidak ditemukan
-And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor","P0","1. Pastikan apps_config tidak memiliki secret untuk 'cp_unregistered' dan client_secret default null.
+And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor",P0,"1. Pastikan apps_config tidak memiliki secret untuk 'cp_unregistered' dan client_secret default null.
 2. Reset counter panggilan HTTP pada Mock Server.
 3. Tanam dokumen PENDING dengan appsid='cp_unregistered', sid='sender_x', provider_trxid='SAMPLE-NOKEY-019'.
 4. Jalankan worker drpulltelkomsel.
@@ -304,12 +616,85 @@ And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke serv
 7. Teardown: Hapus dokumen 'SAMPLE-NOKEY-019' dari MongoDB.","apps_config: client_secrets_json tanpa entri cp_unregistered, client_secret=null
 Dokumen MongoDB: appsid='cp_unregistered', sid='sender_x', provider_trxid='SAMPLE-NOKEY-019'","1. MongoDB: status='GIVE_UP', last_error='client_secret not found'.
 2. Mock Server: hit counter bertambah 0.
-3. [LOG CONTRACT]: Log SUT mencatat 'client_secret not found'.","","","","Pilar-3, negative, zero_http_call"
-"TC-020","Memastikan audit keamanan berkas log SUT terbebas dari kebocoran nilai kredensial sensitif spesifik (nilai kunci rahasia, nomor pengirim rahasia, dan nilai tanda tangan 64-karakter aktual yang digunakan).","TC-020 — Audit Kerahasiaan Kredensial Sensitif pada Seluruh Berkas Log Sistem","Given Seluruh rangkaian pengujian penarikan status telah selesai dijalankan
+3. [LOG CONTRACT]: Log SUT mencatat 'client_secret not found'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 50.67s | [SUT LOG] files=2 lines=70 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (49 baris) ---
+2026-11-26 13:58:02.572 o.s.o.j.LocalContainerEntityManagerFactoryBean Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 13:58:02.575 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown initiated...
+2026-11-26 13:58:02.586 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown completed.
+2026-11-26 13:58:10.830 c.j.d.DrPullTelkomselApplication Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 585048 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+2026-11-26 13:58:10.833 c.j.d.DrPullTelkomselApplication No active profile set, falling back to 1 default profile: ""default""
+2026-11-26 13:58:11.429 o.s.d.r.c.RepositoryConfigurationDelegate Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-26 13:58:11.490 o.s.d.r.c.RepositoryConfigurationDelegate Finished Spring Data repository scanning in 49 ms. Found 1 JPA repository interfaces.
+2026-11-26 13:58:12.092 o.h.jpa.internal.util.LogHelper HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-26 13:58:12.164 org.hibernate.Version HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-11-26 13:58:12.396 o.h.annotations.common.Version HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-11-26 13:58:12.526 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Starting...
+2026-11-26 13:58:13.111 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Start completed.
+2026-11-26 13:58:13.165 org.hibernate.dialect.Dialect HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+2026-11-26 13:58:13.772 o.h.e.t.j.p.i.JtaPlatformInitiator HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-11-26 13:58:13.787 o.s.o.j.LocalContainerEntityManagerFactoryBean Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 13:58:14.713 c.j.d.config.ConfigLoader [ConfigLoader] 24 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+2026-11-26 13:58:15.431 c.j.d.DrPullTelkomselApplication Started DrPullTelkomselApplication in 5.246 seconds (JVM running for 5.739)
+2026-11-26 13:58:15.909 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:17.962 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:20.011 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:22.070 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:24.131 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:26.209 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:58:26.295 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-NOKEY-019, PENDING -> PULLING, leaseId=189b26c3-e8c8-4e97-8932-7e4d00e44231
+2026-11-26 13:58:26.361 c.j.d.worker.PullWorker State change: trxId=SAMPLE-NOKEY-019, PULLING -> GIVE_UP, reason=client_secret not found
+2026-11-26 13:58:28.512 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:29.427 o.s.o.j.LocalContainerEntityManagerFactoryBean Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 13:58:29.429 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown initiated...
+2026-11-26 13:58:29.437 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown completed.
+2026-11-26 13:58:37.728 c.j.d.DrPullTelkomselApplication Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 585304 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+2026-11-26 13:58:37.731 c.j.d.DrPullTelkomselApplication No active profile set, falling back to 1 default profile: ""default""
+2026-11-26 13:58:38.301 o.s.d.r.c.RepositoryConfigurationDelegate Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-26 13:58:38.367 o.s.d.r.c.RepositoryConfigurationDelegate Finished Spring Data repository scanning in 54 ms. Found 1 JPA repository interfaces.
+2026-11-26 13:58:39.087 o.h.jpa.internal.util.LogHelper HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-26 13:58:39.164 org.hibernate.Version HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-11-26 13:58:39.394 o.h.annotations.common.Version HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-11-26 13:58:39.534 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Starting...
+2026-11-26 13:58:40.141 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Start completed.
+2026-11-26 13:58:40.199 org.hibernate.dialect.Dialect HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+2026-11-26 13:58:40.807 o.h.e.t.j.p.i.JtaPlatformInitiator HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-11-26 13:58:40.820 o.s.o.j.LocalContainerEntityManagerFactoryBean Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 13:58:41.804 c.j.d.config.ConfigLoader [ConfigLoader] 24 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+2026-11-26 13:58:42.375 c.j.d.DrPullTelkomselApplication Started DrPullTelkomselApplication in 5.313 seconds (JVM running for 5.83)
+2026-11-26 13:58:42.980 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:45.038 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:47.099 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:49.151 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:51.212 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:53.269 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (21 baris) [ROTATED] ---
+.   ____          _            __ _ _ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \ ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \ \\/  ___)| |_)| | | | | || (_| |  ) ) ) ) '  |____| .__|_| |_|_| |_\__, | / / / / =========|_|==============|___/=/_/_/_/ :: Spring Boot ::               (v2.7.18)
+13:58:37.728 [main] INFO  c.j.d.DrPullTelkomselApplication - Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 585304 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+13:58:37.731 [main] INFO  c.j.d.DrPullTelkomselApplication - No active profile set, falling back to 1 default profile: ""default""
+13:58:38.301 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+13:58:38.367 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 54 ms. Found 1 JPA repository interfaces.
+13:58:39.087 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+13:58:39.164 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.6.15.Final
+13:58:39.394 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+13:58:39.534 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+13:58:40.141 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+13:58:40.199 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+13:58:40.807 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+13:58:40.820 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+13:58:41.804 [main] INFO  c.j.d.config.ConfigLoader - [ConfigLoader] 24 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+13:58:42.375 [main] INFO  c.j.d.DrPullTelkomselApplication - Started DrPullTelkomselApplication in 5.313 seconds (JVM running for 5.83)
+13:58:42.980 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:58:45.038 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:58:47.099 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:58:49.151 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:58:51.212 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:58:53.269 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-019","Pilar-3, negative, zero_http_call"
+TC-020,"Memastikan audit keamanan berkas log SUT terbebas dari kebocoran nilai kredensial sensitif spesifik (nilai kunci rahasia, nomor pengirim rahasia, dan nilai tanda tangan 64-karakter aktual yang digunakan).",TC-020 — Audit Kerahasiaan Kredensial Sensitif pada Seluruh Berkas Log Sistem,"Given Seluruh rangkaian pengujian penarikan status telah selesai dijalankan
 When Pemeriksaan mendalam dilakukan terhadap seluruh berkas log sistem yang terbentuk
 Then Ditemukan nol baris yang memuat nilai kunci rahasia klien sebenarnya
 And Ditemukan nol baris yang memuat nilai tanda tangan enam puluh empat karakter aktual yang digunakan pada transaksi
-And Ditemukan nol baris yang membocorkan nilai nomor pengirim rahasia","P0","1. Jalankan transaksi uji menggunakan nilai unik: secret='SECRET-SUPER-TEST-999', sid='SENDER-PRIVATE-SECRET-888'.
+And Ditemukan nol baris yang membocorkan nilai nomor pengirim rahasia",P0,"1. Jalankan transaksi uji menggunakan nilai unik: secret='SECRET-SUPER-TEST-999', sid='SENDER-PRIVATE-SECRET-888'.
 2. Ambil string nilai header X-Signature aktual yang diterima oleh Mock Server dari request SUT (misal 'af938430b9d793c39a15aa177e3445b04e59f1db8bee7b71a0dca0a86e08ff19').
 3. Pastikan buffer log SUT telah di-flush ke disk secara penuh setelah transaksi selesai.
 4. Buka berkas log SUT (bin/out-drpulltelkomsel.log dan bin/log/drpulltelkomsel.debug.log) termasuk file log rotasi jika ada.
@@ -320,11 +705,18 @@ And Ditemukan nol baris yang membocorkan nilai nomor pengirim rahasia","P0","1. 
 Target audit eksak: nilai secret unik, nilai sid rahasia unik, dan string nilai signature aktual","1. grep nilai secret menghasilkan 0 kecocokan.
 2. grep nilai sid rahasia menghasilkan 0 kecocokan.
 3. grep nilai signature aktual menghasilkan 0 kecocokan.
-4. [LOG CONTRACT]: Log SUT hanya mencatat trx_id, appsid, dan endpoint (scheme+host+port+path).","","","","Pilar-2, security, credential_audit"
-"TC-021","Memastikan penyimpanan database MongoDB terbebas dari penyimpanan kunci rahasia pada dokumen transaksi baru yang diproses dengan verifikasi baseline kontrol.","TC-021 — Audit Kerahasiaan Basis Data Bebas dari Penyimpanan Kunci Rahasia","Given Data awal jumlah dokumen pada koleksi transaksi telah dicatat sebagai acuan dasar kontrol
+4. [LOG CONTRACT]: Log SUT hanya mencatat trx_id, appsid, dan endpoint (scheme+host+port+path).","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 3.78s | [SUT LOG] files=2 lines=4 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (2 baris) ---
+2026-11-26 13:58:55.331 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:58:57.383 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (2 baris) ---
+13:58:55.331 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:58:57.383 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-020","Pilar-2, security, credential_audit"
+TC-021,Memastikan penyimpanan database MongoDB terbebas dari penyimpanan kunci rahasia pada dokumen transaksi baru yang diproses dengan verifikasi baseline kontrol.,TC-021 — Audit Kerahasiaan Basis Data Bebas dari Penyimpanan Kunci Rahasia,"Given Data awal jumlah dokumen pada koleksi transaksi telah dicatat sebagai acuan dasar kontrol
 When Transaksi-transaksi baru diproses dan diselesaikan oleh sistem
 Then Dokumen-dokumen baru yang tersimpan terbukti tidak memiliki atribut kata sandi maupun kunci rahasia
-And Dokumen yang diproses tidak pernah ditambahi atribut rahasia serta jumlah dokumen ber-atribut rahasia tidak bertambah","P0","1. Catat baseline awal dokumen ber-field rahasia: countDocuments({$or:[{pwd:{$exists:true}},{client_secret:{$exists:true}}]}).
+And Dokumen yang diproses tidak pernah ditambahi atribut rahasia serta jumlah dokumen ber-atribut rahasia tidak bertambah",P0,"1. Catat baseline awal dokumen ber-field rahasia: countDocuments({$or:[{pwd:{$exists:true}},{client_secret:{$exists:true}}]}).
 2. Jalankan pemrosesan transaksi baru 'SAMPLE-SEC-021'.
 3. Ambil dokumen 'SAMPLE-SEC-021' dari MongoDB.
 4. Verifikasi bahwa dokumen secara eksplisit tidak memiliki key 'pwd' dan tidak memiliki key 'client_secret'.
@@ -332,12 +724,39 @@ And Dokumen yang diproses tidak pernah ditambahi atribut rahasia serta jumlah do
 6. Teardown: Hapus dokumen 'SAMPLE-SEC-021' dari MongoDB.","Baseline check pada koleksi dr_pull_telkomsel
 Dokumen baru: provider_trxid='SAMPLE-SEC-021'","1. Dokumen baru secara spesifik tidak memiliki key 'pwd' maupun 'client_secret'.
 2. Jumlah dokumen dengan field rahasia di MongoDB tidak bertambah dari baseline.
-3. [LOG CONTRACT]: Log SUT tidak mencatat penyimpanan field kredensial ke MongoDB.","","","","Pilar-2, security, storage_audit"
-"TC-022","Memastikan transaksi warisan versi lama yang masih memuat kata sandi lama tetap dapat diproses dengan sukses (kata sandi lama diabaikan dan tanda tangan terbukti menggunakan kunci rahasia konfigurasi baru).","TC-022 — Pemrosesan Kompatibel Transaksi Warisan Versi Lama yang Memuat Kata Sandi","Given Terdapat transaksi warisan versi lama yang masih menyimpan kata sandi lama pada database
+3. [LOG CONTRACT]: Log SUT tidak mencatat penyimpanan field kredensial ke MongoDB.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 9.69s | [SUT LOG] files=2 lines=24 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (12 baris) ---
+2026-11-26 13:59:01.493 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:59:03.580 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:59:03.684 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-SEC-021, PENDING -> PULLING, leaseId=7fcd6841-da4b-42a4-b255-f04adff02002
+2026-11-26 13:59:03.749 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-SEC-021 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:59:03.800 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-SEC-021 httpStatus=200
+2026-11-26 13:59:03.840 c.j.d.mongo.MongoService State change: trxId=SAMPLE-SEC-021, PULLING -> PUBLISHING
+2026-11-26 13:59:04.503 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-SEC-021, status=D
+2026-11-26 13:59:04.828 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-SEC-021
+2026-11-26 13:59:04.875 c.j.d.mongo.MongoService State change: trxId=SAMPLE-SEC-021, PUBLISHING -> RESOLVED
+2026-11-26 13:59:04.876 c.j.d.worker.PullWorker State change: trxId=SAMPLE-SEC-021, PUBLISHING -> RESOLVED
+2026-11-26 13:59:07.029 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:59:09.090 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (12 baris) ---
+13:59:01.493 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:59:03.580 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:59:03.684 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-SEC-021, PENDING -> PULLING, leaseId=7fcd6841-da4b-42a4-b255-f04adff02002
+13:59:03.749 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-SEC-021 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:59:03.800 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-SEC-021 httpStatus=200
+13:59:03.840 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-SEC-021, PULLING -> PUBLISHING
+13:59:04.503 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-SEC-021, status=D
+13:59:04.828 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-SEC-021
+13:59:04.875 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-SEC-021, PUBLISHING -> RESOLVED
+13:59:04.876 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-SEC-021, PUBLISHING -> RESOLVED
+13:59:07.029 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:59:09.090 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-021","Pilar-2, security, storage_audit"
+TC-022,Memastikan transaksi warisan versi lama yang masih memuat kata sandi lama tetap dapat diproses dengan sukses (kata sandi lama diabaikan dan tanda tangan terbukti menggunakan kunci rahasia konfigurasi baru).,TC-022 — Pemrosesan Kompatibel Transaksi Warisan Versi Lama yang Memuat Kata Sandi,"Given Terdapat transaksi warisan versi lama yang masih menyimpan kata sandi lama pada database
 When Sistem memeriksa status transaksi warisan tersebut ke Telkomsel V2
 Then Sistem mengabaikan kata sandi lama dan menggunakan kunci rahasia dari konfigurasi baru
 And Tanda tangan yang diterima vendor terbukti dihitung dari kunci konfigurasi baru dan bukan kata sandi lama
-And Transaksi berhasil diperiksa dan diperbarui statusnya menjadi RESOLVED","P1","1. Tanam dokumen PENDING dengan field legacy 'pwd':'old_pwd_123', provider_trxid='SAMPLE-LEGACY-022'.
+And Transaksi berhasil diperiksa dan diperbarui statusnya menjadi RESOLVED",P1,"1. Tanam dokumen PENDING dengan field legacy 'pwd':'old_pwd_123', provider_trxid='SAMPLE-LEGACY-022'.
 2. Pastikan secret valid 'secret-new-v2' terdaftar di apps_config.
 3. Jalankan worker drpulltelkomsel.
 4. Periksa Mock Server: buktikan signature yang diterima cocok dengan HMAC('secret-new-v2') dan bukan HMAC('old_pwd_123').
@@ -352,30 +771,65 @@ And Transaksi berhasil diperiksa dan diperbarui statusnya menjadi RESOLVED","P1"
 }","1. Dokumen MongoDB berhasil bertransisi ke 'RESOLVED'.
 2. Mock Server menerima signature yang dihitung dari secret baru (bukan pwd lama).
 3. Field 'pwd' tetap utuh pada dokumen (diabaikan secara aman).
-4. [LOG CONTRACT]: Log SUT mencatat 'httpStatus=200'.","","","","Pilar-2, compatibility, legacy_handling"
-"TC-023","[Mock Contract Guard] Memastikan proteksi server simulasi menolak permintaan yang menggunakan metode selain POST dengan respons 405 Method Not Allowed dan kode kesalahan 2405.","TC-023 — [Mock Contract Guard] Penegakan Aturan Mock Server Menolak Metode HTTP Non-POST","Given Server simulasi Telkomsel V2 aktif menegakkan aturan protokol IFA versi lima
+4. [LOG CONTRACT]: Log SUT mencatat 'httpStatus=200'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 5.65s | [SUT LOG] files=2 lines=22 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (11 baris) ---
+2026-11-26 13:59:11.232 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:59:13.302 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:59:13.354 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-LEGACY-022, PENDING -> PULLING, leaseId=e184ae35-acc9-4890-a4d0-8ab5fc9f92ba
+2026-11-26 13:59:13.356 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-LEGACY-022 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 13:59:13.363 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-LEGACY-022 httpStatus=200
+2026-11-26 13:59:13.418 c.j.d.mongo.MongoService State change: trxId=SAMPLE-LEGACY-022, PULLING -> PUBLISHING
+2026-11-26 13:59:13.803 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-LEGACY-022, status=D
+2026-11-26 13:59:14.190 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-LEGACY-022
+2026-11-26 13:59:14.239 c.j.d.mongo.MongoService State change: trxId=SAMPLE-LEGACY-022, PUBLISHING -> RESOLVED
+2026-11-26 13:59:14.240 c.j.d.worker.PullWorker State change: trxId=SAMPLE-LEGACY-022, PUBLISHING -> RESOLVED
+2026-11-26 13:59:16.394 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (11 baris) ---
+13:59:11.232 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+13:59:13.302 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+13:59:13.354 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-LEGACY-022, PENDING -> PULLING, leaseId=e184ae35-acc9-4890-a4d0-8ab5fc9f92ba
+13:59:13.356 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-LEGACY-022 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+13:59:13.363 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-LEGACY-022 httpStatus=200
+13:59:13.418 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-LEGACY-022, PULLING -> PUBLISHING
+13:59:13.803 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-LEGACY-022, status=D
+13:59:14.190 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-LEGACY-022
+13:59:14.239 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-LEGACY-022, PUBLISHING -> RESOLVED
+13:59:14.240 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-LEGACY-022, PUBLISHING -> RESOLVED
+13:59:16.394 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-022","Pilar-2, compatibility, legacy_handling"
+TC-023,[Mock Contract Guard] Memastikan proteksi server simulasi menolak permintaan yang menggunakan metode selain POST dengan respons 405 Method Not Allowed dan kode kesalahan 2405.,TC-023 — [Mock Contract Guard] Penegakan Aturan Mock Server Menolak Metode HTTP Non-POST,"Given Server simulasi Telkomsel V2 aktif menegakkan aturan protokol IFA versi lima
 When Permintaan pemeriksaan dikirimkan menggunakan metode selain POST seperti metode GET
 Then Server simulasi menolak permintaan tersebut dengan status kode HTTP 405 Method Not Allowed
-And Isi balasan memuat kode kesalahan 2405 sesuai spesifikasi baku","P2","1. Kirim HTTP GET ke endpoint Mock Server http://mock:8089/bank/v2/transaction-status.
+And Isi balasan memuat kode kesalahan 2405 sesuai spesifikasi baku",P2,"1. Kirim HTTP GET ke endpoint Mock Server http://mock:8089/bank/v2/transaction-status.
 2. Tangkap status code HTTP dan body JSON respons.
 3. Verifikasi HTTP status code == 405.
 4. Verifikasi body JSON: error=true, error_code=2405, message='Use POST'.
-5. Teardown: Tidak ada state data yang tertinggal.","Endpoint: http://mock:8089/bank/v2/transaction-status | Metode: GET","1. HTTP Status Code: 405 Method Not Allowed.
-2. Body JSON: {""error"": true, ""error_code"": 2405, ""message"": ""Use POST""}.","","","","Pilar-2, mock_validation, protocol_guard"
-"TC-024","[Mock Contract Guard] Memastikan proteksi server simulasi menolak permintaan yang membawa parameter pada query string URL dengan respons 400 Bad Request dan kode kesalahan 2400.","TC-024 — [Mock Contract Guard] Penegakan Aturan Mock Server Menolak Parameter Query String","Given Server simulasi Telkomsel V2 aktif menegakkan aturan protokol IFA versi lima
+5. Teardown: Tidak ada state data yang tertinggal.",Endpoint: http://mock:8089/bank/v2/transaction-status | Metode: GET,"1. HTTP Status Code: 405 Method Not Allowed.
+2. Body JSON: {""error"": true, ""error_code"": 2405, ""message"": ""Use POST""}.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 0.63s | [SUT LOG] files=2 lines=2 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (1 baris) ---
+2026-11-26 13:59:18.451 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (1 baris) ---
+13:59:18.451 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-023","Pilar-2, mock_validation, protocol_guard"
+TC-024,[Mock Contract Guard] Memastikan proteksi server simulasi menolak permintaan yang membawa parameter pada query string URL dengan respons 400 Bad Request dan kode kesalahan 2400.,TC-024 — [Mock Contract Guard] Penegakan Aturan Mock Server Menolak Parameter Query String,"Given Server simulasi Telkomsel V2 aktif menegakkan aturan protokol IFA versi lima
 When Permintaan pemeriksaan dikirimkan membawa parameter pada bagian query string URL
 Then Server simulasi menolak permintaan tersebut dengan status kode HTTP 400 Bad Request
-And Isi balasan memuat kode kesalahan 2400 sesuai spesifikasi baku","P2","1. Kirim HTTP POST ke endpoint Mock Server dengan query string: http://mock:8089/bank/v2/transaction-status?transaction_id=SAMPLE-001.
+And Isi balasan memuat kode kesalahan 2400 sesuai spesifikasi baku",P2,"1. Kirim HTTP POST ke endpoint Mock Server dengan query string: http://mock:8089/bank/v2/transaction-status?transaction_id=SAMPLE-001.
 2. Tangkap status code HTTP dan body JSON respons.
 3. Verifikasi HTTP status code == 400.
 4. Verifikasi body JSON: error=true, error_code=2400.
-5. Teardown: Tidak ada state data yang tertinggal.","Endpoint: http://mock:8089/bank/v2/transaction-status?transaction_id=SAMPLE-001 | Metode: POST","1. HTTP Status Code: 400 Bad Request.
-2. Body JSON: {""error"": true, ""error_code"": 2400, ""message"": ""Invalid Request: parameters must not be in query string""}.","","","","Pilar-2, mock_validation, protocol_guard"
-"TC-025","Memastikan kesalahan penulisan alamat endpoint vendor yang rusak tidak menyebabkan aplikasi berhenti mendadak (transaksi dijadwalkan ulang dan sistem tetap beroperasi normal).","TC-025 — Ketahanan Sistem Terhadap Kesalahan Penulisan Alamat URL Vendor","Given Alamat endpoint vendor pada konfigurasi database dituliskan dengan format rusak tanpa skema protokol
+5. Teardown: Tidak ada state data yang tertinggal.",Endpoint: http://mock:8089/bank/v2/transaction-status?transaction_id=SAMPLE-001 | Metode: POST,"1. HTTP Status Code: 400 Bad Request.
+2. Body JSON: {""error"": true, ""error_code"": 2400, ""message"": ""Invalid Request: parameters must not be in query string""}.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 0.64s | [SUT LOG] files=2 lines=2 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (1 baris) ---
+2026-11-26 13:59:20.583 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (1 baris) ---
+13:59:20.583 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-024","Pilar-2, mock_validation, protocol_guard"
+TC-025,Memastikan kesalahan penulisan alamat endpoint vendor yang rusak tidak menyebabkan aplikasi berhenti mendadak (transaksi dijadwalkan ulang dan sistem tetap beroperasi normal).,TC-025 — Ketahanan Sistem Terhadap Kesalahan Penulisan Alamat URL Vendor,"Given Alamat endpoint vendor pada konfigurasi database dituliskan dengan format rusak tanpa skema protokol
 And Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memproses transaksi menggunakan alamat endpoint yang rusak tersebut
 Then Transaksi dijadwalkan ulang dengan status PENDING dan catatan kesalahan tercatat di log
-And Aplikasi tetap berjalan lancar dan proses pemeriksaan transaksi lainnya tidak terhenti","P2","1. Set apps_config provider_status_url='invalid-broken-url-without-scheme'.
+And Aplikasi tetap berjalan lancar dan proses pemeriksaan transaksi lainnya tidak terhenti",P2,"1. Set apps_config provider_status_url='invalid-broken-url-without-scheme'.
 2. Tanam dokumen PENDING dengan provider_trxid='SAMPLE-BADURL-025'.
 3. Jalankan worker drpulltelkomsel.
 4. Verifikasi MongoDB: status='PENDING', attempt=1.
@@ -383,12 +837,85 @@ And Aplikasi tetap berjalan lancar dan proses pemeriksaan transaksi lainnya tida
 6. Teardown: Hapus dokumen 'SAMPLE-BADURL-025' dan pulihkan konfigurasi provider_status_url.","apps_config: provider_status_url='invalid-broken-url-without-scheme'
 Dokumen MongoDB: provider_trxid='SAMPLE-BADURL-025'","1. MongoDB: status='PENDING', attempt=1, next_pull_at dijadwalkan ulang.
 2. Proses worker aplikasi tetap aktif (zero crash).
-3. [LOG CONTRACT]: Log SUT mencatat peringatan URL tidak valid.","","","","Pilar-4, resilience, configuration_safety"
-"TC-026","Memastikan sistem tetap dapat menyala dan beroperasi aman saat database konfigurasi tidak memiliki data kunci rahasia sama sekali dengan mekanisme backup dan restore yang terisolasi.","TC-026 — Penanganan Operasional Aman Saat Konfigurasi Kunci Rahasia Kosong Total","Given Basis data konfigurasi tidak memiliki rekaman kunci rahasia sama sekali
+3. [LOG CONTRACT]: Log SUT mencatat peringatan URL tidak valid.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 49.12s | [SUT LOG] files=2 lines=70 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (49 baris) ---
+2026-11-26 13:59:22.304 o.s.o.j.LocalContainerEntityManagerFactoryBean Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 13:59:22.308 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown initiated...
+2026-11-26 13:59:22.320 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown completed.
+2026-11-26 13:59:30.526 c.j.d.DrPullTelkomselApplication Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 585609 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+2026-11-26 13:59:30.529 c.j.d.DrPullTelkomselApplication No active profile set, falling back to 1 default profile: ""default""
+2026-11-26 13:59:31.111 o.s.d.r.c.RepositoryConfigurationDelegate Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-26 13:59:31.173 o.s.d.r.c.RepositoryConfigurationDelegate Finished Spring Data repository scanning in 50 ms. Found 1 JPA repository interfaces.
+2026-11-26 13:59:31.798 o.h.jpa.internal.util.LogHelper HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-26 13:59:31.866 org.hibernate.Version HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-11-26 13:59:32.115 o.h.annotations.common.Version HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-11-26 13:59:32.245 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Starting...
+2026-11-26 13:59:32.909 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Start completed.
+2026-11-26 13:59:32.964 org.hibernate.dialect.Dialect HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+2026-11-26 13:59:33.574 o.h.e.t.j.p.i.JtaPlatformInitiator HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-11-26 13:59:33.586 o.s.o.j.LocalContainerEntityManagerFactoryBean Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 13:59:34.543 c.j.d.config.ConfigLoader [ConfigLoader] provider_status_url bukan endpoint Get Delivery Status V2 (harus memuat /v2/ dan transaction-status), bisa jadi masih Legacy GET /bank/transaction-status. Nilai sekarang: invalid_endpoint_without_protocol_telkomsel_v2
+2026-11-26 13:59:34.546 c.j.d.config.ConfigLoader [ConfigLoader] 24 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+2026-11-26 13:59:35.142 c.j.d.DrPullTelkomselApplication Started DrPullTelkomselApplication in 5.256 seconds (JVM running for 5.726)
+2026-11-26 13:59:36.045 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:59:38.083 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:59:40.131 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:59:42.186 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:59:44.242 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 13:59:46.299 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 13:59:46.394 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-BADURL-025, PENDING -> PULLING, leaseId=1fabf89c-77fb-4455-b4fe-7799a198a21b
+2026-11-26 13:59:46.486 c.j.d.mongo.MongoService State change: trxId=SAMPLE-BADURL-025, PULLING -> PENDING (backoff, attempt=1)
+2026-11-26 13:59:47.225 o.s.o.j.LocalContainerEntityManagerFactoryBean Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 13:59:47.227 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown initiated...
+2026-11-26 13:59:47.236 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown completed.
+2026-11-26 13:59:55.604 c.j.d.DrPullTelkomselApplication Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 585694 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+2026-11-26 13:59:55.606 c.j.d.DrPullTelkomselApplication No active profile set, falling back to 1 default profile: ""default""
+2026-11-26 13:59:56.216 o.s.d.r.c.RepositoryConfigurationDelegate Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-26 13:59:56.276 o.s.d.r.c.RepositoryConfigurationDelegate Finished Spring Data repository scanning in 49 ms. Found 1 JPA repository interfaces.
+2026-11-26 13:59:56.928 o.h.jpa.internal.util.LogHelper HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-26 13:59:57.006 org.hibernate.Version HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-11-26 13:59:57.263 o.h.annotations.common.Version HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-11-26 13:59:57.404 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Starting...
+2026-11-26 13:59:58.059 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Start completed.
+2026-11-26 13:59:58.110 org.hibernate.dialect.Dialect HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+2026-11-26 13:59:58.700 o.h.e.t.j.p.i.JtaPlatformInitiator HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-11-26 13:59:58.713 o.s.o.j.LocalContainerEntityManagerFactoryBean Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 13:59:59.614 c.j.d.config.ConfigLoader [ConfigLoader] 24 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+2026-11-26 14:00:00.242 c.j.d.DrPullTelkomselApplication Started DrPullTelkomselApplication in 5.333 seconds (JVM running for 5.91)
+2026-11-26 14:00:00.801 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:02.874 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:04.994 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:07.072 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:09.131 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:11.208 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (21 baris) [ROTATED] ---
+.   ____          _            __ _ _ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \ ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \ \\/  ___)| |_)| | | | | || (_| |  ) ) ) ) '  |____| .__|_| |_|_| |_\__, | / / / / =========|_|==============|___/=/_/_/_/ :: Spring Boot ::               (v2.7.18)
+13:59:55.604 [main] INFO  c.j.d.DrPullTelkomselApplication - Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 585694 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+13:59:55.606 [main] INFO  c.j.d.DrPullTelkomselApplication - No active profile set, falling back to 1 default profile: ""default""
+13:59:56.216 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+13:59:56.276 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 49 ms. Found 1 JPA repository interfaces.
+13:59:56.928 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+13:59:57.006 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.6.15.Final
+13:59:57.263 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+13:59:57.404 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+13:59:58.059 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+13:59:58.110 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+13:59:58.700 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+13:59:58.713 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+13:59:59.614 [main] INFO  c.j.d.config.ConfigLoader - [ConfigLoader] 24 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+14:00:00.242 [main] INFO  c.j.d.DrPullTelkomselApplication - Started DrPullTelkomselApplication in 5.333 seconds (JVM running for 5.91)
+14:00:00.801 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:00:02.874 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:00:04.994 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:00:07.072 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:00:09.131 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:00:11.208 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-025","Pilar-4, resilience, configuration_safety"
+TC-026,Memastikan sistem tetap dapat menyala dan beroperasi aman saat database konfigurasi tidak memiliki data kunci rahasia sama sekali dengan mekanisme backup dan restore yang terisolasi.,TC-026 — Penanganan Operasional Aman Saat Konfigurasi Kunci Rahasia Kosong Total,"Given Basis data konfigurasi tidak memiliki rekaman kunci rahasia sama sekali
 And Terdapat transaksi SMS berstatus PENDING pada database
 When Layanan DR Pull dijalankan dan memproses transaksi tersebut
 Then Inisialisasi layanan berhasil berjalan lancar tanpa mengalami kegagalan fatal
-And Transaksi yang diperiksa diubah statusnya menjadi GIVE_UP karena ketiadaan kunci rahasia","P2","1. Backup baris konfigurasi apps_config.jns_config lookup_type='drpulltelkomsel'.
+And Transaksi yang diperiksa diubah statusnya menjadi GIVE_UP karena ketiadaan kunci rahasia",P2,"1. Backup baris konfigurasi apps_config.jns_config lookup_type='drpulltelkomsel'.
 2. Hapus entri client_secret dan client_secrets_json secara terisolasi.
 3. Tanam dokumen PENDING dengan provider_trxid='SAMPLE-NOKEYS-026'.
 4. Jalankan worker drpulltelkomsel.
@@ -396,11 +923,81 @@ And Transaksi yang diperiksa diubah statusnya menjadi GIVE_UP karena ketiadaan k
 6. Teardown Wajib (Try-Finally): Restore kembali seluruh baris konfigurasi dari backup meskipun testcase gagal.","apps_config: tanpa entri client_secret maupun client_secrets_json (dengan backup restore terisolasi)
 Dokumen MongoDB: provider_trxid='SAMPLE-NOKEYS-026'","1. SUT menyala normal tanpa crash fatal.
 2. MongoDB: status='GIVE_UP', last_error='client_secret not found'.
-3. [LOG CONTRACT]: Log SUT mencatat ketiadaan secret.","","","","Pilar-3, negative, configuration_safety"
-"TC-027","Memastikan penanda waktu permintaan (X-Timestamp) yang berada tepat pada batas toleransi plus 300 detik dan minus 300 detik berhasil diterima menggunakan mekanisme jam virtual Mock Server yang di-anchor pada epoch referensi request (100% bebas dari race condition pergantian detik fisik).","TC-027 — Validasi Batas Toleransi Waktu Tanda Tangan Tepat Plus Minus Tiga Ratus Detik Berhasil","Given Transaksi SMS siap dilakukan pemeriksaan status
+3. [LOG CONTRACT]: Log SUT mencatat ketiadaan secret.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 48.31s | [SUT LOG] files=2 lines=67 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (47 baris) ---
+2026-11-26 14:00:12.973 o.s.o.j.LocalContainerEntityManagerFactoryBean Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 14:00:12.975 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown initiated...
+2026-11-26 14:00:12.983 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown completed.
+2026-11-26 14:00:21.236 c.j.d.DrPullTelkomselApplication Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 585972 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+2026-11-26 14:00:21.239 c.j.d.DrPullTelkomselApplication No active profile set, falling back to 1 default profile: ""default""
+2026-11-26 14:00:21.810 o.s.d.r.c.RepositoryConfigurationDelegate Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-26 14:00:21.873 o.s.d.r.c.RepositoryConfigurationDelegate Finished Spring Data repository scanning in 52 ms. Found 1 JPA repository interfaces.
+2026-11-26 14:00:22.522 o.h.jpa.internal.util.LogHelper HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-26 14:00:22.592 org.hibernate.Version HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-11-26 14:00:22.822 o.h.annotations.common.Version HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-11-26 14:00:22.964 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Starting...
+2026-11-26 14:00:23.539 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Start completed.
+2026-11-26 14:00:23.595 org.hibernate.dialect.Dialect HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+2026-11-26 14:00:24.200 o.h.e.t.j.p.i.JtaPlatformInitiator HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-11-26 14:00:24.213 o.s.o.j.LocalContainerEntityManagerFactoryBean Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 14:00:25.113 c.j.d.config.ConfigLoader [ConfigLoader] 22 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+2026-11-26 14:00:25.693 c.j.d.DrPullTelkomselApplication Started DrPullTelkomselApplication in 5.113 seconds (JVM running for 5.607)
+2026-11-26 14:00:26.153 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:28.213 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:30.483 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:32.533 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:34.754 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:36.847 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 14:00:36.951 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-NOKEYS-026, PENDING -> PULLING, leaseId=2c9c2fa8-d190-40c2-95ee-71ae7108cc64
+2026-11-26 14:00:36.999 c.j.d.worker.PullWorker State change: trxId=SAMPLE-NOKEYS-026, PULLING -> GIVE_UP, reason=client_secret not found
+2026-11-26 14:00:37.862 o.s.o.j.LocalContainerEntityManagerFactoryBean Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 14:00:37.865 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown initiated...
+2026-11-26 14:00:37.876 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Shutdown completed.
+2026-11-26 14:00:46.113 c.j.d.DrPullTelkomselApplication Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 586050 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+2026-11-26 14:00:46.116 c.j.d.DrPullTelkomselApplication No active profile set, falling back to 1 default profile: ""default""
+2026-11-26 14:00:46.692 o.s.d.r.c.RepositoryConfigurationDelegate Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-26 14:00:46.758 o.s.d.r.c.RepositoryConfigurationDelegate Finished Spring Data repository scanning in 54 ms. Found 1 JPA repository interfaces.
+2026-11-26 14:00:47.416 o.h.jpa.internal.util.LogHelper HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-26 14:00:47.482 org.hibernate.Version HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-11-26 14:00:47.715 o.h.annotations.common.Version HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-11-26 14:00:47.852 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Starting...
+2026-11-26 14:00:49.231 com.zaxxer.hikari.HikariDataSource HikariPool-1 - Start completed.
+2026-11-26 14:00:49.283 org.hibernate.dialect.Dialect HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+2026-11-26 14:00:49.894 o.h.e.t.j.p.i.JtaPlatformInitiator HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-11-26 14:00:49.907 o.s.o.j.LocalContainerEntityManagerFactoryBean Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-26 14:00:51.124 c.j.d.config.ConfigLoader [ConfigLoader] 24 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+2026-11-26 14:00:51.733 c.j.d.DrPullTelkomselApplication Started DrPullTelkomselApplication in 6.285 seconds (JVM running for 6.755)
+2026-11-26 14:00:52.713 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:54.798 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:56.861 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:00:58.921 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:01:01.503 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (20 baris) [ROTATED] ---
+.   ____          _            __ _ _ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \ ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \ \\/  ___)| |_)| | | | | || (_| |  ) ) ) ) '  |____| .__|_| |_|_| |_\__, | / / / / =========|_|==============|___/=/_/_/_/ :: Spring Boot ::               (v2.7.18)
+14:00:46.113 [main] INFO  c.j.d.DrPullTelkomselApplication - Starting DrPullTelkomselApplication v2.0.0 using Java 25.0.5 on fedora with PID 586050 (/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin/drpulltelkomsel-2.0.0.jar started by gunawan in /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin)
+14:00:46.116 [main] INFO  c.j.d.DrPullTelkomselApplication - No active profile set, falling back to 1 default profile: ""default""
+14:00:46.692 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+14:00:46.758 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 54 ms. Found 1 JPA repository interfaces.
+14:00:47.416 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+14:00:47.482 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.6.15.Final
+14:00:47.715 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+14:00:47.852 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+14:00:49.231 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+14:00:49.283 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+14:00:49.894 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+14:00:49.907 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+14:00:51.124 [main] INFO  c.j.d.config.ConfigLoader - [ConfigLoader] 24 config key dimuat dari apps_config.jns_config (lookup_type=drpulltelkomsel)
+14:00:51.733 [main] INFO  c.j.d.DrPullTelkomselApplication - Started DrPullTelkomselApplication in 6.285 seconds (JVM running for 6.755)
+14:00:52.713 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:00:54.798 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:00:56.861 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:00:58.921 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:01:01.503 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-026","Pilar-3, negative, configuration_safety"
+TC-027,Memastikan penanda waktu permintaan (X-Timestamp) yang berada tepat pada batas toleransi plus 300 detik dan minus 300 detik berhasil diterima menggunakan mekanisme jam virtual Mock Server yang di-anchor pada epoch referensi request (100% bebas dari race condition pergantian detik fisik).,TC-027 — Validasi Batas Toleransi Waktu Tanda Tangan Tepat Plus Minus Tiga Ratus Detik Berhasil,"Given Transaksi SMS siap dilakukan pemeriksaan status
 When Permintaan dikirimkan dan dievaluasi terhadap jam server simulasi yang diselisihkan tepat tiga ratus detik
 Then Server vendor Telkomsel menerima permintaan dan memvalidasi tanda tangan dengan sukses pada kedua arah batas
-And Transaksi berhasil diselesaikan dan statusnya diperbarui menjadi RESOLVED","P1","1. Mekanisme Jam Virtual Anchored: Untuk mengeliminasi race condition 1 detik akibat delay transit jaringan atau pergantian detik fisik antara SUT dan Mock, Mock Server mengaktifkan mode evaluasi ter-anchor: waktu_evaluasi_mock = int(timestamp_request) + delta_detik, sehingga skew dihitung deterministik: skew = abs(waktu_evaluasi_mock - int(timestamp_request)) = abs(delta_detik).
+And Transaksi berhasil diselesaikan dan statusnya diperbarui menjadi RESOLVED",P1,"1. Mekanisme Jam Virtual Anchored: Untuk mengeliminasi race condition 1 detik akibat delay transit jaringan atau pergantian detik fisik antara SUT dan Mock, Mock Server mengaktifkan mode evaluasi ter-anchor: waktu_evaluasi_mock = int(timestamp_request) + delta_detik, sehingga skew dihitung deterministik: skew = abs(waktu_evaluasi_mock - int(timestamp_request)) = abs(delta_detik).
 2. Pengujian Batas Atas (+300s): Konfigurasikan Mock Server dengan parameter virtual clock delta = +300 detik (mensimulasikan jam vendor berada tepat 300 detik di depan timestamp SUT). Tanam dokumen PENDING 'SAMPLE-TSBOUND-POS27', jalankan worker, dan verifikasi Mock memvalidasi signature serta menerima request dengan HTTP 200 (karena skew == 300 <= 300).
 3. Pengujian Batas Bawah (-300s): Konfigurasikan Mock Server dengan parameter virtual clock delta = -300 detik (mensimulasikan jam vendor berada tepat 300 detik di belakang timestamp SUT). Tanam dokumen PENDING 'SAMPLE-TSBOUND-NEG27', jalankan worker, dan verifikasi Mock memvalidasi signature serta menerima request dengan HTTP 200 (karena skew == 300 <= 300).
 4. Verifikasi kedua dokumen pada MongoDB bertransisi ke status 'RESOLVED'.
@@ -409,11 +1006,50 @@ Batas yang diuji: delta = +300 detik (skew eksak 300s) dan delta = -300 detik (s
 Dokumen MongoDB: provider_trxid='SAMPLE-TSBOUND-POS27' dan 'SAMPLE-TSBOUND-NEG27'","1. Mock Server menerima kedua request pada batas deterministik +300s dan -300s (HTTP 200, bukan 401).
 2. Nilai X-Signature terbukti valid dan cocok dengan HMAC atas canonical string yang memuat timestamp tersebut.
 3. MongoDB: kedua dokumen bertransisi ke status='RESOLVED'.
-4. [LOG CONTRACT]: Log SUT mencatat keberhasilan publikasi DR.","","","","Pilar-2, security, timestamp_boundary"
-"TC-028","Memastikan penanda waktu permintaan (X-Timestamp) yang melampaui batas toleransi (selisih plus 301 detik dan minus 301 detik) ditolak sebagai kegagalan autentikasi 401 dan transaksi langsung dihentikan GIVE_UP menggunakan mekanisme jam virtual ter-anchor.","TC-028 — Penolakan Transaksi Saat Penanda Waktu Melampaui Batas Toleransi Tiga Ratus Satu Detik","Given Transaksi SMS siap dilakukan pemeriksaan status
+4. [LOG CONTRACT]: Log SUT mencatat keberhasilan publikasi DR.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 14.01s | [SUT LOG] files=2 lines=36 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (18 baris) ---
+2026-11-26 14:01:03.586 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 14:01:03.847 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-TSBOUND-POS27, PENDING -> PULLING, leaseId=91e3401c-0213-454f-a62f-be153df519bd
+2026-11-26 14:01:03.907 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-TSBOUND-POS27 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:01:03.954 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-TSBOUND-POS27 httpStatus=200
+2026-11-26 14:01:04.265 c.j.d.mongo.MongoService State change: trxId=SAMPLE-TSBOUND-POS27, PULLING -> PUBLISHING
+2026-11-26 14:01:09.114 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-TSBOUND-POS27, status=D
+2026-11-26 14:01:09.568 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-TSBOUND-POS27
+2026-11-26 14:01:09.629 c.j.d.mongo.MongoService State change: trxId=SAMPLE-TSBOUND-POS27, PUBLISHING -> RESOLVED
+2026-11-26 14:01:09.630 c.j.d.worker.PullWorker State change: trxId=SAMPLE-TSBOUND-POS27, PUBLISHING -> RESOLVED
+2026-11-26 14:01:12.156 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 14:01:12.618 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PENDING -> PULLING, leaseId=09f8b359-4d92-489c-a21a-47a192c10298
+2026-11-26 14:01:12.620 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-TSBOUND-POS27-NEG appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:01:12.633 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-TSBOUND-POS27-NEG httpStatus=200
+2026-11-26 14:01:12.812 c.j.d.mongo.MongoService State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PULLING -> PUBLISHING
+2026-11-26 14:01:14.805 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-TSBOUND-POS27-NEG, status=D
+2026-11-26 14:01:15.339 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-TSBOUND-POS27-NEG
+2026-11-26 14:01:15.423 c.j.d.mongo.MongoService State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PUBLISHING -> RESOLVED
+2026-11-26 14:01:15.424 c.j.d.worker.PullWorker State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PUBLISHING -> RESOLVED
+--- out-drpulltelkomsel.log (18 baris) ---
+14:01:03.586 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+14:01:03.847 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-TSBOUND-POS27, PENDING -> PULLING, leaseId=91e3401c-0213-454f-a62f-be153df519bd
+14:01:03.907 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-TSBOUND-POS27 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:01:03.954 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-TSBOUND-POS27 httpStatus=200
+14:01:04.265 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-TSBOUND-POS27, PULLING -> PUBLISHING
+14:01:09.114 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-TSBOUND-POS27, status=D
+14:01:09.568 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-TSBOUND-POS27
+14:01:09.629 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-TSBOUND-POS27, PUBLISHING -> RESOLVED
+14:01:09.630 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-TSBOUND-POS27, PUBLISHING -> RESOLVED
+14:01:12.156 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+14:01:12.618 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PENDING -> PULLING, leaseId=09f8b359-4d92-489c-a21a-47a192c10298
+14:01:12.620 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-TSBOUND-POS27-NEG appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:01:12.633 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-TSBOUND-POS27-NEG httpStatus=200
+14:01:12.812 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PULLING -> PUBLISHING
+14:01:14.805 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-TSBOUND-POS27-NEG, status=D
+14:01:15.339 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-TSBOUND-POS27-NEG
+14:01:15.423 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PUBLISHING -> RESOLVED
+14:01:15.424 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PUBLISHING -> RESOLVED
+artifact=results/logs/20261126_135518/TC-027","Pilar-2, security, timestamp_boundary"
+TC-028,Memastikan penanda waktu permintaan (X-Timestamp) yang melampaui batas toleransi (selisih plus 301 detik dan minus 301 detik) ditolak sebagai kegagalan autentikasi 401 dan transaksi langsung dihentikan GIVE_UP menggunakan mekanisme jam virtual ter-anchor.,TC-028 — Penolakan Transaksi Saat Penanda Waktu Melampaui Batas Toleransi Tiga Ratus Satu Detik,"Given Transaksi SMS siap dilakukan pemeriksaan status
 When Permintaan dikirimkan dan dievaluasi terhadap jam server simulasi yang melampaui batas toleransi selisih tiga ratus satu detik
 Then Server vendor menolak permintaan dengan kode kesalahan 401 karena penanda waktu kedaluwarsa
-And Transaksi seketika diubah statusnya menjadi GIVE_UP secara permanen tanpa dicoba ulang","P1","1. Mekanisme Jam Virtual Anchored: Evaluasi selisih waktu pada Mock Server dihitung menggunakan jam virtual ter-anchor: waktu_evaluasi_mock = int(timestamp_request) + delta_detik, sehingga skew = abs(delta_detik) secara deterministik.
+And Transaksi seketika diubah statusnya menjadi GIVE_UP secara permanen tanpa dicoba ulang",P1,"1. Mekanisme Jam Virtual Anchored: Evaluasi selisih waktu pada Mock Server dihitung menggunakan jam virtual ter-anchor: waktu_evaluasi_mock = int(timestamp_request) + delta_detik, sehingga skew = abs(delta_detik) secara deterministik.
 2. Pengujian Lewat Batas Atas (+301s): Konfigurasikan Mock Server dengan parameter virtual clock delta = +301 detik. Tanam dokumen PENDING 'SAMPLE-TSEXP-POS28', jalankan worker, dan verifikasi Mock menolak request dengan HTTP 401 Authentication Error (karena skew == 301 > 300).
 3. Pengujian Lewat Batas Bawah (-301s): Konfigurasikan Mock Server dengan parameter virtual clock delta = -301 detik. Tanam dokumen PENDING 'SAMPLE-TSEXP-NEG28', jalankan worker, dan verifikasi Mock menolak request dengan HTTP 401 (karena skew == 301 > 300).
 4. Verifikasi kedua dokumen pada MongoDB seketika bertransisi ke status 'GIVE_UP' permanen tanpa retry.
@@ -421,12 +1057,25 @@ And Transaksi seketika diubah statusnya menjadi GIVE_UP secara permanen tanpa di
 Batas yang diuji: delta = +301 detik (skew eksak 301s) dan delta = -301 detik (skew eksak 301s)
 Dokumen MongoDB: provider_trxid='SAMPLE-TSEXP-POS28' dan 'SAMPLE-TSEXP-NEG28'","1. Mock Server menolak kedua request dengan HTTP 401 (Authentication Error).
 2. MongoDB: kedua dokumen seketika bertransisi ke status='GIVE_UP' permanen tanpa retry (last_error mencatat telkomsel 401).
-3. [LOG CONTRACT]: Log SUT mencatat AUTH_ERROR dan transisi ke GIVE_UP.","","","","Pilar-2, security, timestamp_boundary"
-"TC-029","Memastikan prioritas tertinggi pencarian kunci rahasia berdasarkan pasangan lengkap appsid:sid bekerja dengan benar saat ketiga tingkat kunci terkonfigurasi bersamaan.","TC-029 — Penegakan Prioritas Tertinggi Kunci Rahasia Pasangan Lengkap Appsid dan SID","Given Konfigurasi database memuat ketiga tingkat kunci rahasia sekaligus dengan nilai yang berbeda
+3. [LOG CONTRACT]: Log SUT mencatat AUTH_ERROR dan transisi ke GIVE_UP.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 2.45s | [SUT LOG] files=2 lines=10 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (5 baris) ---
+2026-11-26 14:01:19.636 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 14:01:19.692 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-TSEXP-POS28, PENDING -> PULLING, leaseId=7fd4c5c3-57f0-4b46-94d5-eed714cd1ccc
+2026-11-26 14:01:19.694 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-TSEXP-POS28 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:01:19.701 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-TSEXP-POS28 httpStatus=401
+2026-11-26 14:01:19.764 c.j.d.worker.PullWorker State change: trxId=SAMPLE-TSEXP-POS28, PULLING -> GIVE_UP, reason=credential wrong, give up (telkomsel 401)
+--- out-drpulltelkomsel.log (5 baris) ---
+14:01:19.636 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+14:01:19.692 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-TSEXP-POS28, PENDING -> PULLING, leaseId=7fd4c5c3-57f0-4b46-94d5-eed714cd1ccc
+14:01:19.694 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-TSEXP-POS28 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:01:19.701 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-TSEXP-POS28 httpStatus=401
+14:01:19.764 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-TSEXP-POS28, PULLING -> GIVE_UP, reason=credential wrong, give up (telkomsel 401)
+artifact=results/logs/20261126_135518/TC-028","Pilar-2, security, timestamp_boundary"
+TC-029,Memastikan prioritas tertinggi pencarian kunci rahasia berdasarkan pasangan lengkap appsid:sid bekerja dengan benar saat ketiga tingkat kunci terkonfigurasi bersamaan.,TC-029 — Penegakan Prioritas Tertinggi Kunci Rahasia Pasangan Lengkap Appsid dan SID,"Given Konfigurasi database memuat ketiga tingkat kunci rahasia sekaligus dengan nilai yang berbeda
 And Kunci tingkat satu appsid:sid bernilai Kunci A, tingkat dua bernilai Kunci B, dan default bernilai Kunci C
 When Sistem memproses transaksi yang memiliki pasangan appsid dan sid tersebut
 Then Sistem terbukti memprioritaskan Kunci A dan mengabaikan Kunci B maupun Kunci C
-And Permintaan berhasil diverifikasi dan diterima oleh vendor menggunakan Kunci A","P0","1. Konfigurasikan apps_config dengan 3 tier berbeda: client_secrets_json='{""cp_prio:sid_prio"": ""secret-A"", ""cp_prio"": ""secret-B""}', client_secret='secret-C'.
+And Permintaan berhasil diverifikasi dan diterima oleh vendor menggunakan Kunci A",P0,"1. Konfigurasikan apps_config dengan 3 tier berbeda: client_secrets_json='{""cp_prio:sid_prio"": ""secret-A"", ""cp_prio"": ""secret-B""}', client_secret='secret-C'.
 2. Konfigurasikan Mock Server dengan --secret 'secret-A'.
 3. Tanam dokumen PENDING dengan appsid='cp_prio', sid='sid_prio', provider_trxid='SAMPLE-PRIO1-029'.
 4. Jalankan worker drpulltelkomsel.
@@ -438,12 +1087,35 @@ And Permintaan berhasil diverifikasi dan diterima oleh vendor menggunakan Kunci 
 Mock Server secret: ""secret-A""","1. SUT terbukti memilih secret-A (tingkat prioritas tertinggi exact match appsid:sid).
 2. Autentikasi Mock Server berhasil (HTTP 200).
 3. MongoDB: status='RESOLVED'.
-4. [LOG CONTRACT]: Log SUT mencatat httpStatus=200.","","","","Pilar-2, security, secret_hierarchy"
-"TC-030","Memastikan respons kesalahan gerbang jaringan dari Telkomsel dengan kode HTTP 502 Bad Gateway diperlakukan sebagai kesalahan sementara dengan penjadwalan retry.","TC-030 — Penanganan Gangguan Gerbang Jaringan Vendor 502 Bad Gateway Sebagai Kesalahan Sementara","Given Terdapat transaksi SMS berstatus PENDING pada database
+4. [LOG CONTRACT]: Log SUT mencatat httpStatus=200.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 6.08s | [SUT LOG] files=2 lines=20 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (10 baris) ---
+2026-11-26 14:01:22.199 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:01:24.496 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 14:01:24.647 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-PRIO1-029, PENDING -> PULLING, leaseId=c6e0c2c8-b528-4cd7-8394-23187a76243c
+2026-11-26 14:01:24.649 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-PRIO1-029 appsid=prio_app endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:01:24.657 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-PRIO1-029 httpStatus=200
+2026-11-26 14:01:24.873 c.j.d.mongo.MongoService State change: trxId=SAMPLE-PRIO1-029, PULLING -> PUBLISHING
+2026-11-26 14:01:25.852 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-PRIO1-029, status=D
+2026-11-26 14:01:26.392 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-PRIO1-029
+2026-11-26 14:01:27.422 c.j.d.mongo.MongoService State change: trxId=SAMPLE-PRIO1-029, PUBLISHING -> RESOLVED
+2026-11-26 14:01:27.423 c.j.d.worker.PullWorker State change: trxId=SAMPLE-PRIO1-029, PUBLISHING -> RESOLVED
+--- out-drpulltelkomsel.log (10 baris) ---
+14:01:22.199 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:01:24.496 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+14:01:24.647 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-PRIO1-029, PENDING -> PULLING, leaseId=c6e0c2c8-b528-4cd7-8394-23187a76243c
+14:01:24.649 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-PRIO1-029 appsid=prio_app endpoint=http://localhost:8089/bank/v2/transaction-status
+14:01:24.657 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-PRIO1-029 httpStatus=200
+14:01:24.873 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-PRIO1-029, PULLING -> PUBLISHING
+14:01:25.852 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-PRIO1-029, status=D
+14:01:26.392 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-PRIO1-029
+14:01:27.422 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-PRIO1-029, PUBLISHING -> RESOLVED
+14:01:27.423 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-PRIO1-029, PUBLISHING -> RESOLVED
+artifact=results/logs/20261126_135518/TC-029","Pilar-2, security, secret_hierarchy"
+TC-030,Memastikan respons kesalahan gerbang jaringan dari Telkomsel dengan kode HTTP 502 Bad Gateway diperlakukan sebagai kesalahan sementara dengan penjadwalan retry.,TC-030 — Penanganan Gangguan Gerbang Jaringan Vendor 502 Bad Gateway Sebagai Kesalahan Sementara,"Given Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memeriksa status dan gerbang jaringan Telkomsel mengembalikan respons 502 Bad Gateway
 Then Transaksi tidak dinyatakan gagal permanen melainkan tetap berstatus PENDING
 And Riwayat jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
-And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-502-030', attempt=0.
+And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir",P1,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-502-030', attempt=0.
 2. Konfigurasikan Mock Server untuk menjawab HTTP 502 Bad Gateway.
 3. Jalankan worker drpulltelkomsel.
 4. Ambil dokumen MongoDB dan pastikan status='PENDING', attempt=1, last_error memuat '502'.
@@ -451,12 +1123,29 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1.
 6. Teardown: Hapus dokumen 'MOCK-502-030' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-502-030'
 Mock response: HTTP 502 Bad Gateway","1. MongoDB: status='PENDING' (bukan GIVE_UP), attempt=1, next_pull_at dijadwalkan mundur.
 2. ActiveMQ: 0 pesan masuk ke kedua antrean hilir.
-3. [LOG CONTRACT]: Log SUT mencatat pemanggilan backoffOrGiveUp.","","","","Pilar-4, resilience, retry_backoff"
-"TC-031","Memastikan saat terjadi kegagalan parsial penerbitan antrean hilir (pesan DR terbit namun SQL gagal), dokumen tertahan di status PUBLISHING dan prosedur rekonsiliasi recovery manual berhasil menyelesaikan secara idempoten tanpa duplikasi laporan.","TC-031 — Penanganan Kegagalan Parsial Antrean Hilir dan Prosedur Rekonsiliasi Recovery Idempoten","Given Transaksi berhasil mendapatkan status akhir Delivered dari vendor Telkomsel
+3. [LOG CONTRACT]: Log SUT mencatat pemanggilan backoffOrGiveUp.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 5.77s | [SUT LOG] files=2 lines=14 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (7 baris) ---
+2026-11-26 14:01:29.579 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:01:31.699 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 14:01:31.783 c.j.d.scheduler.SweepTask State change: trxId=MOCK-502-030, PENDING -> PULLING, leaseId=f418f652-78d0-4ddb-a691-8c79e0f79927
+2026-11-26 14:01:31.785 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-502-030 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:01:31.796 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-502-030 httpStatus=502
+2026-11-26 14:01:31.861 c.j.d.mongo.MongoService State change: trxId=MOCK-502-030, PULLING -> PENDING (backoff, attempt=1)
+2026-11-26 14:01:34.017 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (7 baris) ---
+14:01:29.579 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:01:31.699 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+14:01:31.783 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-502-030, PENDING -> PULLING, leaseId=f418f652-78d0-4ddb-a691-8c79e0f79927
+14:01:31.785 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-502-030 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:01:31.796 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-502-030 httpStatus=502
+14:01:31.861 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-502-030, PULLING -> PENDING (backoff, attempt=1)
+14:01:34.017 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-030","Pilar-4, resilience, retry_backoff"
+TC-031,"Memastikan saat terjadi kegagalan parsial penerbitan antrean hilir (pesan DR terbit namun SQL gagal), dokumen tertahan di status PUBLISHING dan prosedur rekonsiliasi recovery manual berhasil menyelesaikan secara idempoten tanpa duplikasi laporan.",TC-031 — Penanganan Kegagalan Parsial Antrean Hilir dan Prosedur Rekonsiliasi Recovery Idempoten,"Given Transaksi berhasil mendapatkan status akhir Delivered dari vendor Telkomsel
 When Penerbitan pesan laporan DR ke antrean pertama berhasil namun antrean database SQL mengalami gangguan
 Then Dokumen transaksi tetap tertahan pada status PUBLISHING untuk investigasi manual operasional
 And Prosedur rekonsiliasi recovery membuktikan keberadaan pesan DR terlebih dahulu sebelum menerbitkan pesan SQL yang tertinggal
-And Status akhir dokumen difinalisasi menjadi RESOLVED secara idempoten tanpa menduplikasi pesan DR jika rekonsiliasi dijalankan ulang","P1","1. Tanam dokumen PENDING dengan provider_trxid='SAMPLE-QERR-031'.
+And Status akhir dokumen difinalisasi menjadi RESOLVED secara idempoten tanpa menduplikasi pesan DR jika rekonsiliasi dijalankan ulang",P1,"1. Tanam dokumen PENDING dengan provider_trxid='SAMPLE-QERR-031'.
 2. Simulasikan kegagalan penerbitan pada antrean kedua jns.db.deliveryreport (simulasi JmsException setelah antrean pertama jns.dr.drrealhandler berhasil terkirim).
 3. Jalankan worker drpulltelkomsel.
 4. Verifikasi Kondisi Tertahan: Dokumen di MongoDB berstatus 'PUBLISHING' (tidak menjadi RESOLVED dan tidak di-give-up), log mencatat 'doc tetap PUBLISHING (perlu investigasi manual)'.
@@ -473,12 +1162,17 @@ Mekanisme: Desain penanganan insiden operasional via status tertahan PUBLISHING 
 3. Tahap 3: Prosedur rekonsiliasi hanya menerbitkan pesan SQL yang tertinggal berdasarkan bukti keberadaan pesan DR.
 4. Tahap 4 (Idempotency): Eksekusi rekonsiliasi berulang tidak menghasilkan duplikasi pesan ke antrean mana pun.
 5. Total pesan akhir pada kedua antrean hilir tepat 1 pesan masing-masing.
-6. [LOG CONTRACT]: Log SUT mencatat 'publish gagal... doc tetap PUBLISHING'.","","","","Pilar-4, resilience, downstream_failure_handling"
-"TC-032","Memastikan pemrosesan batch sweep berisi beberapa transaksi sekaligus beroperasi secara terisolasi (kegagalan atau timeout pada satu transaksi tidak menghentikan transaksi lainnya dalam batch yang sama).","TC-032 — Isolasi Pemrosesan Transaksi dalam Satu Siklus Batch Pemindaian Bersama","Given Terdapat tiga transaksi SMS sekaligus dalam satu siklus pemindaian berkala yang sama
+6. [LOG CONTRACT]: Log SUT mencatat 'publish gagal... doc tetap PUBLISHING'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 1.13s | [SUT LOG] files=2 lines=2 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (1 baris) ---
+2026-11-26 14:01:38.141 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (1 baris) ---
+14:01:38.141 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-031","Pilar-4, resilience, downstream_failure_handling"
+TC-032,Memastikan pemrosesan batch sweep berisi beberapa transaksi sekaligus beroperasi secara terisolasi (kegagalan atau timeout pada satu transaksi tidak menghentikan transaksi lainnya dalam batch yang sama).,TC-032 — Isolasi Pemrosesan Transaksi dalam Satu Siklus Batch Pemindaian Bersama,"Given Terdapat tiga transaksi SMS sekaligus dalam satu siklus pemindaian berkala yang sama
 And Transaksi kedua mengalami batas waktu koneksi sedangkan transaksi pertama dan ketiga normal
 When Sistem menjalankan pemindaian dan pemrosesan batch transaksi tersebut dalam satu siklus sweep
 Then Transaksi kedua dijadwalkan ulang sesuai aturan penanganan kesalahan sementara
-And Transaksi pertama dan transaksi ketiga berhasil diselesaikan hingga status RESOLVED tanpa terganggu","P1","1. Tanam 3 dokumen PENDING sekaligus pada MongoDB dengan waktu next_pull_at yang sama:
+And Transaksi pertama dan transaksi ketiga berhasil diselesaikan hingga status RESOLVED tanpa terganggu",P1,"1. Tanam 3 dokumen PENDING sekaligus pada MongoDB dengan waktu next_pull_at yang sama:
    - Dokumen 1: provider_trxid='SAMPLE-BATCH-OK1' (normal status D)
    - Dokumen 2: provider_trxid='MOCK-TIMEOUT-BATCH' (mock sleep 35s -> timeout 30s)
    - Dokumen 3: provider_trxid='SAMPLE-BATCH-OK2' (normal status D)
@@ -494,13 +1188,64 @@ And Transaksi pertama dan transaksi ketiga berhasil diselesaikan hingga status R
   3. SAMPLE-BATCH-OK2 (normal D)","1. Dokumen 1: status='RESOLVED'.
 2. Dokumen 2: status='PENDING' (backoff).
 3. Dokumen 3: status='RESOLVED' (tidak terblokir oleh Dokumen 2).
-4. [LOG CONTRACT]: Log SUT mencatat pemrosesan seluruh item dalam batch.","","","","Pilar-4, resilience, batch_isolation"
-"TC-033","Memastikan mekanisme penguncian atomic pada tahap publikasi (Publishing Fence) antar dua instance SUT terpisah mencegah duplikasi laporan saat dua instance bersamaan mempublikasikan transaksi yang sudah berstatus PULLING.","TC-033 — Penguncian Atomic Multi-Instance Tahap Publikasi (Publishing Fence) Mencegah Duplikasi Laporan","Given Terdapat transaksi pada database yang telah berada pada tahap PULLING dengan status akhir diperoleh
+4. [LOG CONTRACT]: Log SUT mencatat pemrosesan seluruh item dalam batch.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 61.28s | [SUT LOG] files=2 lines=48 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (24 baris) ---
+2026-11-26 14:01:40.188 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 3 trx due
+2026-11-26 14:01:40.226 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-BATCH-OK1, PENDING -> PULLING, leaseId=9145275d-00da-42f8-a68b-208951b07432
+2026-11-26 14:01:40.229 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-BATCH-OK1 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:01:40.236 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-BATCH-OK1 httpStatus=200
+2026-11-26 14:01:40.307 c.j.d.mongo.MongoService State change: trxId=SAMPLE-BATCH-OK1, PULLING -> PUBLISHING
+2026-11-26 14:01:40.638 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-BATCH-OK1, status=D
+2026-11-26 14:01:41.233 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-BATCH-OK1
+2026-11-26 14:01:41.302 c.j.d.mongo.MongoService State change: trxId=SAMPLE-BATCH-OK1, PUBLISHING -> RESOLVED
+2026-11-26 14:01:41.303 c.j.d.worker.PullWorker State change: trxId=SAMPLE-BATCH-OK1, PUBLISHING -> RESOLVED
+2026-11-26 14:01:41.467 c.j.d.scheduler.SweepTask State change: trxId=MOCK-TIMEOUT-BATCH, PENDING -> PULLING, leaseId=1b129112-f105-47d5-8827-b47e6c30a9b2
+2026-11-26 14:01:41.469 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-TIMEOUT-BATCH appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:02:11.485 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] timeout/IO error trx=MOCK-TIMEOUT-BATCH: timeout
+2026-11-26 14:02:12.191 c.j.d.mongo.MongoService State change: trxId=MOCK-TIMEOUT-BATCH, PULLING -> PENDING (backoff, attempt=1)
+2026-11-26 14:02:15.106 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-BATCH-OK2, PENDING -> PULLING, leaseId=4338f2de-8a43-4054-bc7f-2ad22b9dab8e
+2026-11-26 14:02:15.107 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-BATCH-OK2 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:02:15.115 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-BATCH-OK2 httpStatus=200
+2026-11-26 14:02:15.722 c.j.d.mongo.MongoService State change: trxId=SAMPLE-BATCH-OK2, PULLING -> PUBLISHING
+2026-11-26 14:02:21.849 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-BATCH-OK2, status=D
+2026-11-26 14:02:25.931 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-BATCH-OK2
+2026-11-26 14:02:26.470 c.j.d.mongo.MongoService State change: trxId=SAMPLE-BATCH-OK2, PUBLISHING -> RESOLVED
+2026-11-26 14:02:26.470 c.j.d.worker.PullWorker State change: trxId=SAMPLE-BATCH-OK2, PUBLISHING -> RESOLVED
+2026-11-26 14:02:36.407 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:02:38.924 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:02:40.985 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (24 baris) ---
+14:01:40.188 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 3 trx due
+14:01:40.226 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-BATCH-OK1, PENDING -> PULLING, leaseId=9145275d-00da-42f8-a68b-208951b07432
+14:01:40.229 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-BATCH-OK1 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:01:40.236 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-BATCH-OK1 httpStatus=200
+14:01:40.307 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-BATCH-OK1, PULLING -> PUBLISHING
+14:01:40.638 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-BATCH-OK1, status=D
+14:01:41.233 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-BATCH-OK1
+14:01:41.302 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-BATCH-OK1, PUBLISHING -> RESOLVED
+14:01:41.303 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-BATCH-OK1, PUBLISHING -> RESOLVED
+14:01:41.467 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-TIMEOUT-BATCH, PENDING -> PULLING, leaseId=1b129112-f105-47d5-8827-b47e6c30a9b2
+14:01:41.469 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-TIMEOUT-BATCH appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:02:11.485 [pool-1-thread-1] WARN  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] timeout/IO error trx=MOCK-TIMEOUT-BATCH: timeout
+14:02:12.191 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-TIMEOUT-BATCH, PULLING -> PENDING (backoff, attempt=1)
+14:02:15.106 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-BATCH-OK2, PENDING -> PULLING, leaseId=4338f2de-8a43-4054-bc7f-2ad22b9dab8e
+14:02:15.107 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-BATCH-OK2 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:02:15.115 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-BATCH-OK2 httpStatus=200
+14:02:15.722 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-BATCH-OK2, PULLING -> PUBLISHING
+14:02:21.849 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-BATCH-OK2, status=D
+14:02:25.931 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-BATCH-OK2
+14:02:26.470 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-BATCH-OK2, PUBLISHING -> RESOLVED
+14:02:26.470 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-BATCH-OK2, PUBLISHING -> RESOLVED
+14:02:36.407 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:02:38.924 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:02:40.985 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-032","Pilar-4, resilience, batch_isolation"
+TC-033,Memastikan mekanisme penguncian atomic pada tahap publikasi (Publishing Fence) antar dua instance SUT terpisah mencegah duplikasi laporan saat dua instance bersamaan mempublikasikan transaksi yang sudah berstatus PULLING.,TC-033 — Penguncian Atomic Multi-Instance Tahap Publikasi (Publishing Fence) Mencegah Duplikasi Laporan,"Given Terdapat transaksi pada database yang telah berada pada tahap PULLING dengan status akhir diperoleh
 When Dua instance aplikasi DR Pull terpisah mencoba melakukan klaim publikasi secara bersamaan pada transaksi tersebut
 Then Hanya instance pemenang yang berhasil memenangkan penguncian atomic claimPublishing
 And Instance pemenang mengeksekusi penerbitan laporan secara penuh ke kedua antrean hilir dan mengubah status menjadi RESOLVED
 And Instance kedua membatalkan publikasi serta tidak menerbitkan pesan apa pun ke sistem hilir
-And Jumlah pesan yang diterima pada masing-masing antrean hilir terbukti tepat satu pesan","P0","1. Tanam dokumen pada MongoDB dengan status='PULLING', provider_trxid='MOCK-FENCE-PUB-033', lease_id='initial-lease-033'.
+And Jumlah pesan yang diterima pada masing-masing antrean hilir terbukti tepat satu pesan",P0,"1. Tanam dokumen pada MongoDB dengan status='PULLING', provider_trxid='MOCK-FENCE-PUB-033', lease_id='initial-lease-033'.
 2. Jalankan dua proses instance SUT terpisah (Instance A dan Instance B) yang secara simultan mengeksekusi claimPublishing('MOCK-FENCE-PUB-033', 'initial-lease-033', newLeaseId).
 3. Verifikasi Instance Pemenang (Instance A): Berhasil memenangkan CAS update (matchedCount == 1), status dokumen berubah menjadi PUBLISHING, mengeksekusi penuh penerbitan 1 pesan DR ke jns.dr.drrealhandler, 1 perintah SQL ke jns.db.deliveryreport, dan memanggil finalizeResolved() hingga status menjadi RESOLVED.
 4. Verifikasi Instance Kalah (Instance B): Mengalami kegagalan CAS update (matchedCount == 0), membatalkan eksekusi publikasi, dan mencatat log: 'Skip publish, trxId=MOCK-FENCE-PUB-033, reason=push path already claimed'.
@@ -512,12 +1257,19 @@ Dokumen MongoDB: provider_trxid='MOCK-FENCE-PUB-033', status='PULLING', lease_id
 Operasi yang diuji: claimPublishing(String providerTrxid, String leaseId, String publishingLeaseId) dilanjutkan full publication","1. Instance A memenangkan claimPublishing dan menyelesaikan penerbitan penuh ke kedua antrean hilir.
 2. Instance B gagal claimPublishing dan membatalkan publikasi (zero double publish).
 3. Total pesan berkorelasi tepat 1 pesan pada jns.dr.drrealhandler dan tepat 1 pesan pada jns.db.deliveryreport.
-4. [LOG CONTRACT]: Instance B mencatat 'Skip publish, trxId=MOCK-FENCE-PUB-033, reason=push path already claimed'.","","","","Pilar-4, resilience, concurrency_fencing"
-"TC-034","Memastikan respons kesalahan layanan dari Telkomsel dengan kode HTTP 503 Service Unavailable diperlakukan sebagai kesalahan sementara dengan penjadwalan retry.","TC-034 — Penanganan Gangguan Layanan Vendor 503 Service Unavailable Sebagai Kesalahan Sementara","Given Terdapat transaksi SMS berstatus PENDING pada database
+4. [LOG CONTRACT]: Instance B mencatat 'Skip publish, trxId=MOCK-FENCE-PUB-033, reason=push path already claimed'.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 2.61s | [SUT LOG] files=2 lines=4 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (2 baris) ---
+2026-11-26 14:02:43.036 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-26 14:02:45.100 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (2 baris) ---
+14:02:43.036 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+14:02:45.100 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-033","Pilar-4, resilience, concurrency_fencing"
+TC-034,Memastikan respons kesalahan layanan dari Telkomsel dengan kode HTTP 503 Service Unavailable diperlakukan sebagai kesalahan sementara dengan penjadwalan retry.,TC-034 — Penanganan Gangguan Layanan Vendor 503 Service Unavailable Sebagai Kesalahan Sementara,"Given Terdapat transaksi SMS berstatus PENDING pada database
 When Sistem memeriksa status dan layanan Telkomsel sedang tidak dapat melayani dengan kode 503 Service Unavailable
 Then Transaksi tidak dinyatakan gagal permanen melainkan tetap berstatus PENDING
 And Riwayat jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
-And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1. Tanam dokumen PENDING dengan provider_trxid='MOCK-503-034', attempt=0.
+And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir",P1,"1. Tanam dokumen PENDING dengan provider_trxid='MOCK-503-034', attempt=0.
 2. Konfigurasikan Mock Server untuk menjawab HTTP 503 Service Unavailable.
 3. Jalankan worker drpulltelkomsel.
 4. Ambil dokumen MongoDB dan pastikan status='PENDING', attempt=1, last_error memuat '503'.
@@ -525,4 +1277,19 @@ And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir","P1","1.
 6. Teardown: Hapus dokumen 'MOCK-503-034' dari MongoDB.","Dokumen MongoDB: provider_trxid='MOCK-503-034'
 Mock response: HTTP 503 Service Unavailable","1. MongoDB: status='PENDING' (bukan GIVE_UP), attempt=1, next_pull_at dijadwalkan mundur.
 2. ActiveMQ: 0 pesan masuk ke kedua antrean hilir.
-3. [LOG CONTRACT]: Log SUT mencatat pemanggilan backoffOrGiveUp.","","","","Pilar-4, resilience, retry_backoff"
+3. [LOG CONTRACT]: Log SUT mencatat pemanggilan backoffOrGiveUp.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 4.25s | [SUT LOG] files=2 lines=12 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (6 baris) ---
+2026-11-26 14:02:47.400 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-26 14:02:47.471 c.j.d.scheduler.SweepTask State change: trxId=MOCK-503-034, PENDING -> PULLING, leaseId=a833d7d3-8565-47a4-a5f7-2850e45ecc0c
+2026-11-26 14:02:47.472 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=MOCK-503-034 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-26 14:02:47.474 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=MOCK-503-034 httpStatus=503
+2026-11-26 14:02:47.537 c.j.d.mongo.MongoService State change: trxId=MOCK-503-034, PULLING -> PENDING (backoff, attempt=1)
+2026-11-26 14:02:49.701 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (6 baris) ---
+14:02:47.400 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+14:02:47.471 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=MOCK-503-034, PENDING -> PULLING, leaseId=a833d7d3-8565-47a4-a5f7-2850e45ecc0c
+14:02:47.472 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=MOCK-503-034 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status
+14:02:47.474 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=MOCK-503-034 httpStatus=503
+14:02:47.537 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-503-034, PULLING -> PENDING (backoff, attempt=1)
+14:02:49.701 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261126_135518/TC-034","Pilar-4, resilience, retry_backoff"

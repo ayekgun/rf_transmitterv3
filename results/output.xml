@@ -1,0 +1,4191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.2 (Python 3.14.10 on linux)" generated="2026-11-26T14:04:23.573788" rpa="false" schemaversion="5">
+<suite id="s1" name="Drpull Telkomsel V2" source="/home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/rf_drpulltelkomsel/tests/drpull_telkomsel_v2.robot">
+<kw name="Inisialisasi Lingkungan Pengujian Drpull" owner="common_keywords" type="SETUP">
+<kw name="Mock Telkomsel Mulai Server" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:23.839934" level="INFO">Mock Telkomsel V2 Server berhasil berjalan pada port 8089 dengan secret default '7s5tLvM1'.</msg>
+<arg>port=${MOCK_PORT}</arg>
+<arg>secret=${DEFAULT_CLIENT_SECRET}</arg>
+<status status="PASS" start="2026-11-26T14:04:23.836965" elapsed="0.003131"/>
+</kw>
+<kw name="Mongo Hubungkan Ke Database Dr Pull" owner="MongoDrPullLibrary">
+<msg time="2026-11-26T14:04:23.844450" level="INFO">Berhasil terhubung ke MongoDB pada 192.168.181.63:27017, db=jnsCore, col=dr_pull_telkomsel</msg>
+<status status="PASS" start="2026-11-26T14:04:23.840347" elapsed="0.004323"/>
+</kw>
+<kw name="Activemq Hubungkan Ke Broker" owner="ActiveMqDrPullLibrary">
+<msg time="2026-11-26T14:04:23.845249" level="INFO">attempt reconnection (True, None, 0)</msg>
+<msg time="2026-11-26T14:04:23.845351" level="INFO">Attempting connection to host 192.168.181.51, port 61613</msg>
+<msg time="2026-11-26T14:04:23.936475" level="INFO">Established connection to host 192.168.181.51, port 61613</msg>
+<msg time="2026-11-26T14:04:23.940875" level="INFO">Created thread &lt;Thread(Thread-2 (__receiver_loop), started daemon 140719012427456)&gt; using func &lt;function default_create_thread at 0x7ffbb46dbcc0&gt;</msg>
+<msg time="2026-11-26T14:04:23.941575" level="INFO">Sending frame: 'STOMP'</msg>
+<msg time="2026-11-26T14:04:23.988567" level="INFO">Sending frame: 'SUBSCRIBE'</msg>
+<msg time="2026-11-26T14:04:23.989282" level="INFO">Sending frame: 'SUBSCRIBE'</msg>
+<msg time="2026-11-26T14:04:23.989537" level="INFO">Berhasil terhubung ke ActiveMQ 192.168.181.51:61613 dan subscribe ke /queue/jns.dr.drrealhandler serta /queue/jns.db.deliveryreport.</msg>
+<status status="PASS" start="2026-11-26T14:04:23.844891" elapsed="0.144970"/>
+</kw>
+<kw name="Mysql Hubungkan Ke Database Apps Config" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:24.124229" level="INFO">Berhasil terhubung ke MySQL apps_config pada 192.168.181.63:3306</msg>
+<status status="PASS" start="2026-11-26T14:04:23.990837" elapsed="0.133891"/>
+</kw>
+<kw name="Mysql Backup Konfigurasi Dr Pull" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:24.253577" level="INFO">Berhasil mem-backup 16 baris konfigurasi drpulltelkomsel.</msg>
+<status status="PASS" start="2026-11-26T14:04:24.125347" elapsed="0.128704"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:24.438744" level="INFO">Konfigurasi drpulltelkomsel key='mongo_host' diset ke: '192.168.181.63'</msg>
+<arg>mongo_host</arg>
+<arg>192.168.181.63</arg>
+<status status="PASS" start="2026-11-26T14:04:24.254701" elapsed="0.184435"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:24.630228" level="INFO">Konfigurasi drpulltelkomsel key='mongo_port' diset ke: '27017'</msg>
+<arg>mongo_port</arg>
+<arg>27017</arg>
+<status status="PASS" start="2026-11-26T14:04:24.439736" elapsed="0.190998"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:24.937772" level="INFO">Konfigurasi drpulltelkomsel key='mongo_user' diset ke: 'jnsCore'</msg>
+<arg>mongo_user</arg>
+<arg>jnsCore</arg>
+<status status="PASS" start="2026-11-26T14:04:24.631469" elapsed="0.306836"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:25.150845" level="INFO">Konfigurasi drpulltelkomsel key='mongo_password' diset ke: 'jnsCore123'</msg>
+<arg>mongo_password</arg>
+<arg>jnsCore123</arg>
+<status status="PASS" start="2026-11-26T14:04:24.939058" elapsed="0.212205"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:25.340865" level="INFO">Konfigurasi drpulltelkomsel key='mongo_db' diset ke: 'jnsCore'</msg>
+<arg>mongo_db</arg>
+<arg>jnsCore</arg>
+<status status="PASS" start="2026-11-26T14:04:25.151926" elapsed="0.189474"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:25.522742" level="INFO">Konfigurasi drpulltelkomsel key='mongo_collection' diset ke: 'dr_pull_telkomsel'</msg>
+<arg>mongo_collection</arg>
+<arg>dr_pull_telkomsel</arg>
+<status status="PASS" start="2026-11-26T14:04:25.342110" elapsed="0.181068"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:25.733141" level="INFO">Konfigurasi drpulltelkomsel key='activemq_host' diset ke: 'tcp://192.168.181.51:61616'</msg>
+<arg>activemq_host</arg>
+<arg>tcp://192.168.181.51:61616</arg>
+<status status="PASS" start="2026-11-26T14:04:25.523856" elapsed="0.209727"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:25.902024" level="INFO">Konfigurasi drpulltelkomsel key='activemq_user' diset ke: 'admin'</msg>
+<arg>activemq_user</arg>
+<arg>admin</arg>
+<status status="PASS" start="2026-11-26T14:04:25.734279" elapsed="0.168234"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:26.081856" level="INFO">Konfigurasi drpulltelkomsel key='activemq_password' diset ke: 'admin'</msg>
+<arg>activemq_password</arg>
+<arg>admin</arg>
+<status status="PASS" start="2026-11-26T14:04:25.903726" elapsed="0.178657"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:26.256939" level="INFO">Konfigurasi drpulltelkomsel key='activemq_queuedr' diset ke: 'jns.dr.drrealhandler'</msg>
+<arg>activemq_queuedr</arg>
+<arg>jns.dr.drrealhandler</arg>
+<status status="PASS" start="2026-11-26T14:04:26.083070" elapsed="0.174307"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:26.441072" level="INFO">Konfigurasi drpulltelkomsel key='activemq_dbexecutor' diset ke: 'jns.db.deliveryreport'</msg>
+<arg>activemq_dbexecutor</arg>
+<arg>jns.db.deliveryreport</arg>
+<status status="PASS" start="2026-11-26T14:04:26.258070" elapsed="0.183433"/>
+</kw>
+<kw name="Mysql Update Lookup Value" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:26.627460" level="INFO">Konfigurasi drpulltelkomsel key='sweep_interval_seconds' diset ke: '2'</msg>
+<arg>sweep_interval_seconds</arg>
+<arg>2</arg>
+<status status="PASS" start="2026-11-26T14:04:26.442190" elapsed="0.186067"/>
+</kw>
+<kw name="Mysql Set Konfigurasi Provider Status Url" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:26.812541" level="INFO">Konfigurasi drpulltelkomsel key='provider_status_url' diset ke: 'http://localhost:8089/bank/v2/transaction-status'</msg>
+<arg>${MOCK_STATUS_URL}</arg>
+<status status="PASS" start="2026-11-26T14:04:26.629111" elapsed="0.183968"/>
+</kw>
+<kw name="Mysql Set Konfigurasi Dr Pull Secret Dan Json" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:26.972695" level="INFO">Konfigurasi drpulltelkomsel key='client_secret' diset ke: '7s5tLvM1'</msg>
+<msg time="2026-11-26T14:04:27.161581" level="INFO">Konfigurasi drpulltelkomsel key='client_secrets_json' diset ke: '{"QueueUID:QueueSenderID":"7s5tLvM1","tselxyz:jatismatahari":"7s5tLvM1","cp_sample:sender_sample":"7s5tLvM1","cp_sample":"7s5tLvM1","app_tier2_only":"secret_tier_dua","prio_app:prio_sid":"SECRET_KEY_A_EXACT","prio_app":"SECRET_KEY_B_APP"}'</msg>
+<msg time="2026-11-26T14:04:27.162113" level="INFO">Konfigurasi secret drpulltelkomsel berhasil diperbarui.</msg>
+<arg>client_secret=${DEFAULT_CLIENT_SECRET}</arg>
+<arg>client_secrets_json=${DEFAULT_CLIENT_SECRETS_JSON}</arg>
+<status status="PASS" start="2026-11-26T14:04:26.813749" elapsed="0.348833"/>
+</kw>
+<kw name="Mock Telkomsel Set Secret" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:27.164285" level="INFO">Mock Telkomsel secret diset ke: 7s5tLvM1</msg>
+<arg>${DEFAULT_CLIENT_SECRET}</arg>
+<status status="PASS" start="2026-11-26T14:04:27.163496" elapsed="0.001054"/>
+</kw>
+<kw name="Drpull App Mulai Service" owner="DrPullAppLibrary">
+<msg time="2026-11-26T14:04:27.165758" level="INFO">Memulai layanan drpulltelkomsel di /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin...</msg>
+<msg time="2026-11-26T14:04:27.165927" level="INFO">Menghentikan layanan drpulltelkomsel di /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin...</msg>
+<msg time="2026-11-26T14:04:28.247840" level="INFO">Layanan drpulltelkomsel berhasil dihentikan.</msg>
+<msg time="2026-11-26T14:04:28.270143" level="INFO">Hasil start.sh: Starting drpulltelkomsel-2.0.0.jar
+drpulltelkomsel started (pid=587094)</msg>
+<msg time="2026-11-26T14:04:43.335623" level="INFO">Layanan drpulltelkomsel terbukti aktif dengan PID: 587094</msg>
+<msg time="2026-11-26T14:04:43.335738" level="INFO">Layanan drpulltelkomsel berhasil aktif dan siap memproses dokumen.</msg>
+<status status="PASS" start="2026-11-26T14:04:27.165203" elapsed="16.170634"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-11-26T14:04:43.336472" level="INFO">Suite bootstrap selesai. Seluruh dependency dan SUT siap.</msg>
+<arg>Suite bootstrap selesai. Seluruh dependency dan SUT siap.</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-11-26T14:04:43.336054" elapsed="0.000488"/>
+</kw>
+<doc>Suite Setup: menyalakan mock server, menghubungkan ke Mongo/AMQ/MySQL, backup konfigurasi, arahkan endpoint ke mock, dan mulai SUT.</doc>
+<status status="PASS" start="2026-11-26T14:04:23.836206" elapsed="19.500455"/>
+</kw>
+<test id="s1-t1" name="TC-001 — Pengambilan Status SMS Berhasil (Delivered) dan Penerusan Laporan Hilir" line="14">
+<kw name="Persiapkan Konteks Pengujian" owner="common_keywords" type="SETUP">
+<kw name="Mock Telkomsel Reset Perekam Request" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:43.341294" level="INFO">Rekaman request Mock Telkomsel V2 berhasil di-reset.</msg>
+<status status="PASS" start="2026-11-26T14:04:43.341084" elapsed="0.000329"/>
+</kw>
+<kw name="Mock Telkomsel Set Secret" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:43.344740" level="INFO">Mock Telkomsel secret diset ke: 7s5tLvM1</msg>
+<arg>${DEFAULT_CLIENT_SECRET}</arg>
+<status status="PASS" start="2026-11-26T14:04:43.344485" elapsed="0.000337"/>
+</kw>
+<kw name="Mock Telkomsel Set Secret Map" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:43.347379" level="INFO">Mock Telkomsel secret map diset: ['QueueUID:QueueSenderID', 'tselxyz:jatismatahari', 'cp_sample:sender_sample', 'cp_sample', 'app_tier2_only', 'prio_app:prio_sid', 'prio_app']</msg>
+<arg>${DEFAULT_CLIENT_SECRETS_JSON}</arg>
+<status status="PASS" start="2026-11-26T14:04:43.347130" elapsed="0.000339"/>
+</kw>
+<kw name="Activemq Reset Penampung Pesan" owner="ActiveMqDrPullLibrary">
+<msg time="2026-11-26T14:04:43.350316" level="INFO">Penampung pesan ActiveMQ drrealhandler dan deliveryreport berhasil di-reset.</msg>
+<status status="PASS" start="2026-11-26T14:04:43.350159" elapsed="0.000237"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-11-26T14:04:43.354198" level="INFO">${CURRENT_TRXID} = </msg>
+<arg>${CURRENT_TRXID}</arg>
+<arg>${EMPTY}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-11-26T14:04:43.352693" elapsed="0.001593"/>
+</kw>
+<doc>Test Setup: reset state mock, drain pesan ActiveMQ, dan siapkan variabel konteks transaksi.</doc>
+<status status="PASS" start="2026-11-26T14:04:43.340410" elapsed="0.016005"/>
+</kw>
+<kw name="Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status" owner="drpull_keywords">
+<kw name="Dapatkan ID Transaksi Scoped" owner="drpull_keywords">
+<kw name="Get Variable Value" owner="BuiltIn">
+<msg time="2026-11-26T14:04:43.361351" level="INFO">${tag_trx} = </msg>
+<var>${tag_trx}</var>
+<arg>${CURRENT_TRXID}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="PASS" start="2026-11-26T14:04:43.360877" elapsed="0.000532"/>
+</kw>
+<if>
+<branch type="IF" condition="'${tag_trx}' != '${EMPTY}' and '${tag_trx}' != '${None}'">
+<return>
+<value>${tag_trx}</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.364399" elapsed="0.000052"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.363751" elapsed="0.000768"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.363702" elapsed="0.000875"/>
+</if>
+<kw name="Get Variable Value" owner="BuiltIn">
+<msg time="2026-11-26T14:04:43.365208" level="INFO">${tags} = ...</msg>
+<var>${tags}</var>
+<arg>${TEST TAGS}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="PASS" start="2026-11-26T14:04:43.364747" elapsed="0.000507"/>
+</kw>
+<for flavor="IN">
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.368843" elapsed="0.000041"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.368683" elapsed="0.000264"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.368654" elapsed="0.000342"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.369250" elapsed="0.000033"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.369067" elapsed="0.000264"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.369046" elapsed="0.000328"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.369580" elapsed="0.000041"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.369441" elapsed="0.000228"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.369421" elapsed="0.000290"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.369915" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.369781" elapsed="0.000207"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.369761" elapsed="0.000266"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.370234" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.370092" elapsed="0.000220"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.370073" elapsed="0.000280"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.370546" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.370417" elapsed="0.000213"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.370398" elapsed="0.000274"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.370869" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.370737" elapsed="0.000203"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.370718" elapsed="0.000261"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.371172" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.371042" elapsed="0.000200"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.371023" elapsed="0.000259"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.371476" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.371347" elapsed="0.000199"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.371328" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.371810" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.371662" elapsed="0.000222"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.371642" elapsed="0.000282"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.372120" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.371990" elapsed="0.000202"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.371969" elapsed="0.000261"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.372420" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.372294" elapsed="0.000198"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.372275" elapsed="0.000255"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.372736" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.372605" elapsed="0.000205"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.372575" elapsed="0.000274"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.373039" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.372913" elapsed="0.000199"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.372894" elapsed="0.000256"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.373342" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.373215" elapsed="0.000197"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.373195" elapsed="0.000255"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.373651" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.373513" elapsed="0.000209"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.373494" elapsed="0.000266"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.373949" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.373823" elapsed="0.000218"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.373804" elapsed="0.000298"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.374304" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.374172" elapsed="0.000203"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.374152" elapsed="0.000262"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.374659" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.374476" elapsed="0.000290"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.374458" elapsed="0.000353"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.375014" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.374879" elapsed="0.000207"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.374859" elapsed="0.000265"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.375318" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.375189" elapsed="0.000199"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.375170" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.375640" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.375490" elapsed="0.000223"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.375471" elapsed="0.000282"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.375944" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.375817" elapsed="0.000196"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.375798" elapsed="0.000253"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.376246" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.376113" elapsed="0.000202"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.376095" elapsed="0.000264"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.376549" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.376424" elapsed="0.000207"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.376404" elapsed="0.000266"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.376867" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.376738" elapsed="0.000200"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.376716" elapsed="0.000260"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.377168" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.377041" elapsed="0.000200"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.377022" elapsed="0.000259"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.377470" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.377343" elapsed="0.000197"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.377325" elapsed="0.000252"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.377777" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.377651" elapsed="0.000196"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.377632" elapsed="0.000253"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.378083" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.377946" elapsed="0.000207"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.377928" elapsed="0.000263"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.378378" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.378252" elapsed="0.000195"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.378234" elapsed="0.000251"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.378688" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.378546" elapsed="0.000211"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.378528" elapsed="0.000265"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.379000" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.378872" elapsed="0.000199"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.378853" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.379297" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.379171" elapsed="0.000196"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.379153" elapsed="0.000253"/>
+</if>
+<var name="${t}">...</var>
+<status status="PASS" start="2026-11-26T14:04:43.368567" elapsed="0.010868"/>
+</iter>
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.380981" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.380838" elapsed="0.000225"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.380814" elapsed="0.000292"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.381309" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.381173" elapsed="0.000208"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.381153" elapsed="0.000268"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.381656" elapsed="0.000045"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.381485" elapsed="0.000277"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.381466" elapsed="0.000338"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.382004" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.381870" elapsed="0.000207"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.381850" elapsed="0.000266"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.382308" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.382179" elapsed="0.000200"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.382160" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.382621" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.382480" elapsed="0.000217"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.382461" elapsed="0.000274"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.382935" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.382797" elapsed="0.000209"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.382779" elapsed="0.000266"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.383244" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.383109" elapsed="0.000208"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.383089" elapsed="0.000266"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.383591" elapsed="0.000040"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.383421" elapsed="0.000256"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.383399" elapsed="0.000318"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.383925" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.383782" elapsed="0.000214"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.383762" elapsed="0.000274"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.384220" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.384096" elapsed="0.000192"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.384078" elapsed="0.000249"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.384509" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.384386" elapsed="0.000193"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.384368" elapsed="0.000258"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.384811" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.384687" elapsed="0.000193"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.384668" elapsed="0.000250"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.385102" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.384978" elapsed="0.000191"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.384959" elapsed="0.000247"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.385390" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.385267" elapsed="0.000189"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.385249" elapsed="0.000243"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.385690" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.385551" elapsed="0.000206"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.385533" elapsed="0.000261"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.385976" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.385853" elapsed="0.000197"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.385835" elapsed="0.000254"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.386279" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.386151" elapsed="0.000196"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.386132" elapsed="0.000254"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.386572" elapsed="0.000035"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.386448" elapsed="0.000203"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.386428" elapsed="0.000261"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.386874" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.386751" elapsed="0.000192"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.386732" elapsed="0.000249"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.387163" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.387041" elapsed="0.000203"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.387023" elapsed="0.000262"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.387471" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.387348" elapsed="0.000191"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.387329" elapsed="0.000248"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.387773" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.387650" elapsed="0.000191"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.387630" elapsed="0.000250"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.388063" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.387942" elapsed="0.000191"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.387924" elapsed="0.000247"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.388353" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.388233" elapsed="0.000187"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.388214" elapsed="0.000245"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.388650" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.388521" elapsed="0.000196"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.388503" elapsed="0.000254"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.388938" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.388818" elapsed="0.000188"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.388800" elapsed="0.000243"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.389225" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.389104" elapsed="0.000188"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.389085" elapsed="0.000245"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.389510" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.389390" elapsed="0.000187"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.389372" elapsed="0.000251"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.389808" elapsed="0.000033"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.389686" elapsed="0.000197"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.389667" elapsed="0.000255"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.390104" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.389983" elapsed="0.000188"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.389965" elapsed="0.000245"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.390390" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.390271" elapsed="0.000186"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.390252" elapsed="0.000243"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.390685" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.390556" elapsed="0.000195"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.390538" elapsed="0.000250"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.390984" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.390850" elapsed="0.000202"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.390831" elapsed="0.000260"/>
+</if>
+<var name="${t}">...</var>
+<status status="PASS" start="2026-11-26T14:04:43.380747" elapsed="0.010373"/>
+</iter>
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.392223" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.392090" elapsed="0.000208"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.392068" elapsed="0.000272"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.392622" elapsed="0.000042"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.392433" elapsed="0.000309"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.392396" elapsed="0.000427"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.393045" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.392916" elapsed="0.000215"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.392894" elapsed="0.000280"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.393364" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.393238" elapsed="0.000196"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.393219" elapsed="0.000254"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.393674" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.393534" elapsed="0.000215"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.393516" elapsed="0.000273"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.393976" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.393851" elapsed="0.000192"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.393832" elapsed="0.000250"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.394322" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.394182" elapsed="0.000209"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.394148" elapsed="0.000281"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.394625" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.394491" elapsed="0.000204"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.394473" elapsed="0.000261"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.394926" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.394802" elapsed="0.000192"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.394777" elapsed="0.000255"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.395238" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.395110" elapsed="0.000200"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.395091" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.395530" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.395410" elapsed="0.000203"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.395392" elapsed="0.000266"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.395886" elapsed="0.000035"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.395719" elapsed="0.000247"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.395701" elapsed="0.000304"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.396251" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.396091" elapsed="0.000231"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.396064" elapsed="0.000298"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.396646" elapsed="0.000052"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.396428" elapsed="0.000356"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.396408" elapsed="0.000447"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.397187" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.396979" elapsed="0.000288"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.396936" elapsed="0.000412"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.397558" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.397425" elapsed="0.000221"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.397403" elapsed="0.000283"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.397936" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.397776" elapsed="0.000232"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.397750" elapsed="0.000297"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.398236" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.398110" elapsed="0.000205"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.398091" elapsed="0.000265"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.398543" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.398419" elapsed="0.000219"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.398400" elapsed="0.000305"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.398972" elapsed="0.000049"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.398803" elapsed="0.000293"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.398774" elapsed="0.000380"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.399351" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.399223" elapsed="0.000198"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.399202" elapsed="0.000256"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.399654" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.399519" elapsed="0.000204"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.399501" elapsed="0.000259"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.399945" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.399822" elapsed="0.000192"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.399803" elapsed="0.000248"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.400239" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.400112" elapsed="0.000195"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.400093" elapsed="0.000251"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.400523" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.400404" elapsed="0.000187"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.400386" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.400833" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.400707" elapsed="0.000196"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.400688" elapsed="0.000251"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.401122" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.401000" elapsed="0.000191"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.400981" elapsed="0.000246"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.401409" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.401288" elapsed="0.000188"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.401269" elapsed="0.000243"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.401704" elapsed="0.000032"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.401572" elapsed="0.000207"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.401554" elapsed="0.000262"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.401999" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.401879" elapsed="0.000189"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.401860" elapsed="0.000243"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.402290" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.402164" elapsed="0.000194"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.402146" elapsed="0.000247"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.402574" elapsed="0.000034"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.402455" elapsed="0.000198"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.402436" elapsed="0.000270"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.402893" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.402770" elapsed="0.000191"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.402751" elapsed="0.000247"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.403181" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.403059" elapsed="0.000191"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.403040" elapsed="0.000245"/>
+</if>
+<var name="${t}">...</var>
+<status status="PASS" start="2026-11-26T14:04:43.392012" elapsed="0.011301"/>
+</iter>
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.404447" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.404314" elapsed="0.000210"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.404292" elapsed="0.000273"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.404768" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.404640" elapsed="0.000201"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.404619" elapsed="0.000262"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.405074" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.404945" elapsed="0.000201"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.404925" elapsed="0.000259"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.405373" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.405248" elapsed="0.000195"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.405229" elapsed="0.000253"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.405673" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.405542" elapsed="0.000200"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.405524" elapsed="0.000255"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.405961" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.405840" elapsed="0.000196"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.405821" elapsed="0.000255"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.406259" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.406136" elapsed="0.000192"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.406118" elapsed="0.000247"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.406551" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.406424" elapsed="0.000204"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.406406" elapsed="0.000261"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.406850" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.406726" elapsed="0.000191"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.406708" elapsed="0.000246"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.407134" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.407012" elapsed="0.000192"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.406995" elapsed="0.000248"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.407428" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.407302" elapsed="0.000193"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.407284" elapsed="0.000248"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.407725" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.407603" elapsed="0.000190"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.407578" elapsed="0.000252"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.408015" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.407889" elapsed="0.000194"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.407870" elapsed="0.000251"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.408302" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.408181" elapsed="0.000190"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.408162" elapsed="0.000246"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.408588" elapsed="0.000035"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.408466" elapsed="0.000199"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.408448" elapsed="0.000254"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.408894" elapsed="0.000024"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.408761" elapsed="0.000199"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.408743" elapsed="0.000258"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.409182" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.409060" elapsed="0.000187"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.409043" elapsed="0.000240"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.409469" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.409342" elapsed="0.000193"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.409324" elapsed="0.000247"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.409756" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.409639" elapsed="0.000183"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.409620" elapsed="0.000238"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.410033" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.409914" elapsed="0.000184"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.409897" elapsed="0.000236"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.410325" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.410189" elapsed="0.000205"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.410173" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.410614" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.410487" elapsed="0.000194"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.410470" elapsed="0.000247"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.410889" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.410773" elapsed="0.000182"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.410755" elapsed="0.000237"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.411166" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.411050" elapsed="0.000183"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.411032" elapsed="0.000237"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.411442" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.411326" elapsed="0.000181"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.411309" elapsed="0.000234"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.411725" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.411607" elapsed="0.000184"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.411582" elapsed="0.000245"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.411999" elapsed="0.000024"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.411883" elapsed="0.000179"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.411866" elapsed="0.000232"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.412270" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.412155" elapsed="0.000180"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.412137" elapsed="0.000234"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.412545" elapsed="0.000024"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.412427" elapsed="0.000190"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.412410" elapsed="0.000244"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.412835" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.412713" elapsed="0.000189"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.412694" elapsed="0.000245"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.413113" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.412997" elapsed="0.000181"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.412979" elapsed="0.000235"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.413387" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.413272" elapsed="0.000179"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.413254" elapsed="0.000232"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.413668" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.413543" elapsed="0.000201"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.413525" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.413956" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.413839" elapsed="0.000181"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.413821" elapsed="0.000235"/>
+</if>
+<var name="${t}">...</var>
+<status status="PASS" start="2026-11-26T14:04:43.404234" elapsed="0.009849"/>
+</iter>
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="PASS" start="2026-11-26T14:04:43.415423" elapsed="0.000081"/>
+</return>
+<status status="PASS" start="2026-11-26T14:04:43.415280" elapsed="0.000308"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.415258" elapsed="0.000397"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.415783" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.415734" elapsed="0.000116"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.415713" elapsed="0.000176"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.415992" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.415948" elapsed="0.000104"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.415930" elapsed="0.000157"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416185" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416143" elapsed="0.000101"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416126" elapsed="0.000153"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416377" elapsed="0.000023"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416335" elapsed="0.000101"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416318" elapsed="0.000153"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416568" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416524" elapsed="0.000116"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416508" elapsed="0.000168"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416774" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416731" elapsed="0.000101"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416714" elapsed="0.000152"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416960" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416919" elapsed="0.000099"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.416902" elapsed="0.000151"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417149" elapsed="0.000023"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417106" elapsed="0.000115"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417089" elapsed="0.000204"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417404" elapsed="0.000047"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417354" elapsed="0.000165"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417336" elapsed="0.000248"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417711" elapsed="0.000023"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417665" elapsed="0.000107"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417645" elapsed="0.000162"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417905" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417862" elapsed="0.000102"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.417845" elapsed="0.000153"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418094" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418052" elapsed="0.000100"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418035" elapsed="0.000152"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418290" elapsed="0.000023"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418241" elapsed="0.000110"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418224" elapsed="0.000162"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418483" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418440" elapsed="0.000101"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418423" elapsed="0.000153"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418685" elapsed="0.000023"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418642" elapsed="0.000103"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418624" elapsed="0.000156"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418878" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418834" elapsed="0.000101"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.418818" elapsed="0.000151"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419069" elapsed="0.000023"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419022" elapsed="0.000136"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419006" elapsed="0.000222"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419339" elapsed="0.000023"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419293" elapsed="0.000107"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419274" elapsed="0.000161"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419534" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419491" elapsed="0.000101"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419473" elapsed="0.000166"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419738" elapsed="0.000024"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419694" elapsed="0.000105"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419677" elapsed="0.000156"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419928" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419886" elapsed="0.000100"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.419869" elapsed="0.000153"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420117" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420075" elapsed="0.000101"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420059" elapsed="0.000151"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420305" elapsed="0.000020"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420264" elapsed="0.000099"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420247" elapsed="0.000150"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420491" elapsed="0.000020"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420449" elapsed="0.000099"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420433" elapsed="0.000149"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420692" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420650" elapsed="0.000100"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420632" elapsed="0.000153"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420880" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420839" elapsed="0.000104"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.420821" elapsed="0.000156"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421073" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421031" elapsed="0.000100"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421014" elapsed="0.000150"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421259" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421218" elapsed="0.000098"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421201" elapsed="0.000148"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421442" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421401" elapsed="0.000099"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421384" elapsed="0.000150"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421644" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421588" elapsed="0.000115"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421570" elapsed="0.000168"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421849" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421806" elapsed="0.000102"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421789" elapsed="0.000153"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.422037" elapsed="0.000021"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421995" elapsed="0.000101"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.421978" elapsed="0.000153"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.422226" elapsed="0.000022"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:43.422184" elapsed="0.000100"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:43.422167" elapsed="0.000151"/>
+</if>
+<var name="${t}">...</var>
+<status status="PASS" start="2026-11-26T14:04:43.415197" elapsed="0.007147"/>
+</iter>
+<var>${t}</var>
+<value>@{tags}</value>
+<status status="PASS" start="2026-11-26T14:04:43.367501" elapsed="0.054912"/>
+</for>
+<return>
+<value>SAMPLE-TEST-999</value>
+<status status="NOT RUN" start="2026-11-26T14:04:43.422490" elapsed="0.000025"/>
+</return>
+<msg time="2026-11-26T14:04:43.422678" level="INFO">${trx} = ...</msg>
+<var>${trx}</var>
+<status status="PASS" start="2026-11-26T14:04:43.360465" elapsed="0.062252"/>
+</kw>
+<kw name="Set Identitas Transaksi Pengujian" owner="drpull_keywords">
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-11-26T14:04:43.425603" level="INFO">${CURRENT_TRXID} = ...</msg>
+<arg>${CURRENT_TRXID}</arg>
+<arg>${trx_id}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-11-26T14:04:43.425189" elapsed="0.000477"/>
+</kw>
+<arg>${trx}</arg>
+<status status="PASS" start="2026-11-26T14:04:43.424807" elapsed="0.002673"/>
+</kw>
+<if>
+<branch type="IF" condition="'${trx}' == 'MOCK-FENCE-PULL-012'">
+<kw name="Mongo Tanam Dokumen Dr Pull" owner="MongoDrPullLibrary">
+<arg>provider_trxid=${trx}</arg>
+<arg>appsid=${DEFAULT_APPSID}</arg>
+<arg>sid=${DEFAULT_SID}</arg>
+<arg>status=PENDING</arg>
+<arg>attempt=0</arg>
+<arg>next_pull_at_offset_seconds=300</arg>
+<status status="NOT RUN" start="2026-11-26T14:04:43.429481" elapsed="0.000046"/>
+</kw>
+<status status="NOT RUN" start="2026-11-26T14:04:43.429258" elapsed="0.002011"/>
+</branch>
+<branch type="ELSE">
+<kw name="Mongo Tanam Dokumen Dr Pull" owner="MongoDrPullLibrary">
+<msg time="2026-11-26T14:04:44.047207" level="INFO">Berhasil menanam dokumen Dr Pull id=6b07da0bb4ecabf623777a43, provider_trxid='SAMPLE-D-001', status='PENDING', attempt=0</msg>
+<arg>provider_trxid=${trx}</arg>
+<arg>appsid=${DEFAULT_APPSID}</arg>
+<arg>sid=${DEFAULT_SID}</arg>
+<arg>status=PENDING</arg>
+<arg>attempt=0</arg>
+<status status="PASS" start="2026-11-26T14:04:43.431438" elapsed="0.616445"/>
+</kw>
+<status status="PASS" start="2026-11-26T14:04:43.431322" elapsed="0.625956"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:43.429228" elapsed="0.628321"/>
+</if>
+<status status="PASS" start="2026-11-26T14:04:43.359103" elapsed="0.698913"/>
+</kw>
+<kw name="And Konfigurasi kredensial mitra dan alamat endpoint Telkomsel V2 tersedia secara valid" owner="drpull_keywords">
+<kw name="Mysql Set Konfigurasi Provider Status Url" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:44.310978" level="INFO">Konfigurasi drpulltelkomsel key='provider_status_url' diset ke: 'http://localhost:8089/bank/v2/transaction-status'</msg>
+<arg>${MOCK_STATUS_URL}</arg>
+<status status="PASS" start="2026-11-26T14:04:44.069754" elapsed="0.241688"/>
+</kw>
+<kw name="Mysql Set Konfigurasi Dr Pull Secret Dan Json" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:44.498274" level="INFO">Konfigurasi drpulltelkomsel key='client_secret' diset ke: '7s5tLvM1'</msg>
+<msg time="2026-11-26T14:04:44.669128" level="INFO">Konfigurasi drpulltelkomsel key='client_secrets_json' diset ke: '{"QueueUID:QueueSenderID":"7s5tLvM1","tselxyz:jatismatahari":"7s5tLvM1","cp_sample:sender_sample":"7s5tLvM1","cp_sample":"7s5tLvM1","app_tier2_only":"secret_tier_dua","prio_app:prio_sid":"SECRET_KEY_A_EXACT","prio_app":"SECRET_KEY_B_APP"}'</msg>
+<msg time="2026-11-26T14:04:44.669462" level="INFO">Konfigurasi secret drpulltelkomsel berhasil diperbarui.</msg>
+<arg>client_secret=${DEFAULT_CLIENT_SECRET}</arg>
+<arg>client_secrets_json=${DEFAULT_CLIENT_SECRETS_JSON}</arg>
+<status status="PASS" start="2026-11-26T14:04:44.319893" elapsed="0.349941"/>
+</kw>
+<kw name="Mock Telkomsel Set Secret" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:44.678727" level="INFO">Mock Telkomsel secret diset ke: 7s5tLvM1</msg>
+<arg>${DEFAULT_CLIENT_SECRET}</arg>
+<status status="PASS" start="2026-11-26T14:04:44.677997" elapsed="0.000988"/>
+</kw>
+<status status="PASS" start="2026-11-26T14:04:44.067929" elapsed="0.618201"/>
+</kw>
+<kw name="When Layanan DR Pull memeriksa status pengiriman ke Telkomsel V2" owner="drpull_keywords">
+<kw name="Dapatkan ID Transaksi Scoped" owner="drpull_keywords">
+<kw name="Get Variable Value" owner="BuiltIn">
+<msg time="2026-11-26T14:04:44.702391" level="INFO">${tag_trx} = ...</msg>
+<var>${tag_trx}</var>
+<arg>${CURRENT_TRXID}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="PASS" start="2026-11-26T14:04:44.701611" elapsed="0.000861"/>
+</kw>
+<if>
+<branch type="IF" condition="'${tag_trx}' != '${EMPTY}' and '${tag_trx}' != '${None}'">
+<return>
+<value>${tag_trx}</value>
+<status status="PASS" start="2026-11-26T14:04:44.708389" elapsed="0.000095"/>
+</return>
+<status status="PASS" start="2026-11-26T14:04:44.707496" elapsed="0.001090"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:44.707410" elapsed="0.001273"/>
+</if>
+<kw name="Get Variable Value" owner="BuiltIn">
+<var>${tags}</var>
+<arg>${TEST TAGS}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="NOT RUN" start="2026-11-26T14:04:44.708941" elapsed="0.000067"/>
+</kw>
+<for flavor="IN">
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713318" elapsed="0.000037"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713231" elapsed="0.000201"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713197" elapsed="0.000309"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713676" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713594" elapsed="0.000169"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713568" elapsed="0.000243"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.714006" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713946" elapsed="0.000168"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713868" elapsed="0.000330"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.714369" elapsed="0.000033"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.714304" elapsed="0.000178"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.714275" elapsed="0.000316"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.714788" elapsed="0.000034"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.714720" elapsed="0.000181"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.714690" elapsed="0.000307"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.715343" elapsed="0.000053"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.715162" elapsed="0.000305"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.715111" elapsed="0.000410"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.715726" elapsed="0.000034"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.715651" elapsed="0.000172"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.715592" elapsed="0.000279"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716021" elapsed="0.000032"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.715957" elapsed="0.000150"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.715930" elapsed="0.000224"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716290" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716230" elapsed="0.000142"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716205" elapsed="0.000211"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716547" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716489" elapsed="0.000155"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716466" elapsed="0.000225"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716825" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716766" elapsed="0.000137"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716742" elapsed="0.000204"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717073" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717018" elapsed="0.000134"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.716995" elapsed="0.000231"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717429" elapsed="0.000041"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717362" elapsed="0.000166"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717317" elapsed="0.000306"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717769" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717710" elapsed="0.000139"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717685" elapsed="0.000210"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718022" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717966" elapsed="0.000135"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.717943" elapsed="0.000202"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718273" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718217" elapsed="0.000133"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718194" elapsed="0.000200"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718537" elapsed="0.000068"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718465" elapsed="0.000203"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718443" elapsed="0.000272"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718846" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718791" elapsed="0.000146"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.718768" elapsed="0.000215"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719125" elapsed="0.000032"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719056" elapsed="0.000150"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719033" elapsed="0.000217"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719377" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719322" elapsed="0.000133"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719299" elapsed="0.000203"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719644" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719572" elapsed="0.000151"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719549" elapsed="0.000221"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719904" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719841" elapsed="0.000141"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.719819" elapsed="0.000209"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720152" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720098" elapsed="0.000136"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720076" elapsed="0.000203"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720404" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720349" elapsed="0.000132"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720327" elapsed="0.000204"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720674" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720614" elapsed="0.000137"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720579" elapsed="0.000217"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720920" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720865" elapsed="0.000131"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.720843" elapsed="0.000197"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721163" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721110" elapsed="0.000129"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721088" elapsed="0.000196"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721406" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721352" elapsed="0.000129"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721330" elapsed="0.000217"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721699" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721639" elapsed="0.000139"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721613" elapsed="0.000212"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721954" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721896" elapsed="0.000135"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.721874" elapsed="0.000202"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722202" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722147" elapsed="0.000133"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722124" elapsed="0.000201"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722450" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722394" elapsed="0.000132"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722372" elapsed="0.000199"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722759" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722698" elapsed="0.000142"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722667" elapsed="0.000220"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.723012" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722958" elapsed="0.000131"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:44.722935" elapsed="0.000198"/>
+</if>
+<var name="${t}"/>
+<status status="NOT RUN" start="2026-11-26T14:04:44.713073" elapsed="0.010093"/>
+</iter>
+<var>${t}</var>
+<value>@{tags}</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.711837" elapsed="0.011391"/>
+</for>
+<return>
+<value>SAMPLE-TEST-999</value>
+<status status="NOT RUN" start="2026-11-26T14:04:44.723314" elapsed="0.000032"/>
+</return>
+<msg time="2026-11-26T14:04:44.723586" level="INFO">${trx} = ...</msg>
+<var>${trx}</var>
+<status status="PASS" start="2026-11-26T14:04:44.700925" elapsed="0.022729"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-11-26T14:04:44.726621" level="INFO">Menunggu worker SUT memproses transaksi SAMPLE-D-001...</msg>
+<arg>Menunggu worker SUT memproses transaksi ${trx}...</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-11-26T14:04:44.726128" elapsed="0.000583"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-11-26T14:04:47.730265" level="INFO">Slept 3 seconds.</msg>
+<arg>3.0s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-11-26T14:04:44.729565" elapsed="3.000878"/>
+</kw>
+<status status="PASS" start="2026-11-26T14:04:44.697565" elapsed="3.035566"/>
+</kw>
+<kw name="Then Telkomsel merespons bahwa pesan berhasil diterima dengan status D" owner="drpull_keywords">
+<kw name="Dapatkan ID Transaksi Scoped" owner="drpull_keywords">
+<kw name="Get Variable Value" owner="BuiltIn">
+<msg time="2026-11-26T14:04:47.739137" level="INFO">${tag_trx} = ...</msg>
+<var>${tag_trx}</var>
+<arg>${CURRENT_TRXID}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="PASS" start="2026-11-26T14:04:47.738614" elapsed="0.000578"/>
+</kw>
+<if>
+<branch type="IF" condition="'${tag_trx}' != '${EMPTY}' and '${tag_trx}' != '${None}'">
+<return>
+<value>${tag_trx}</value>
+<status status="PASS" start="2026-11-26T14:04:47.742199" elapsed="0.000070"/>
+</return>
+<status status="PASS" start="2026-11-26T14:04:47.741545" elapsed="0.000800"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:47.741491" elapsed="0.000915"/>
+</if>
+<kw name="Get Variable Value" owner="BuiltIn">
+<var>${tags}</var>
+<arg>${TEST TAGS}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="NOT RUN" start="2026-11-26T14:04:47.742625" elapsed="0.000056"/>
+</kw>
+<for flavor="IN">
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746403" elapsed="0.000035"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746332" elapsed="0.000173"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746300" elapsed="0.000257"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746706" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746648" elapsed="0.000134"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746625" elapsed="0.000203"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746955" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746899" elapsed="0.000129"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746877" elapsed="0.000195"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747195" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747142" elapsed="0.000126"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747120" elapsed="0.000202"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747445" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747391" elapsed="0.000125"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747370" elapsed="0.000189"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747783" elapsed="0.000052"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747698" elapsed="0.000234"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.747663" elapsed="0.000353"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748208" elapsed="0.000051"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748104" elapsed="0.000209"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748076" elapsed="0.000282"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748491" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748436" elapsed="0.000182"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748411" elapsed="0.000261"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748815" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748751" elapsed="0.000141"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748724" elapsed="0.000213"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749071" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749014" elapsed="0.000136"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.748989" elapsed="0.000244"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749383" elapsed="0.000032"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749321" elapsed="0.000144"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749292" elapsed="0.000221"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749679" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749587" elapsed="0.000170"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749562" elapsed="0.000238"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749922" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749871" elapsed="0.000123"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.749848" elapsed="0.000188"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750153" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750101" elapsed="0.000121"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750080" elapsed="0.000182"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750379" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750327" elapsed="0.000124"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750306" elapsed="0.000186"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750669" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750579" elapsed="0.000167"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750540" elapsed="0.000249"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750907" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750856" elapsed="0.000124"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.750834" elapsed="0.000188"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751139" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751087" elapsed="0.000124"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751066" elapsed="0.000187"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751370" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751318" elapsed="0.000124"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751297" elapsed="0.000202"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751690" elapsed="0.000041"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751627" elapsed="0.000154"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751582" elapsed="0.000242"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751947" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751893" elapsed="0.000131"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.751870" elapsed="0.000198"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752185" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752134" elapsed="0.000150"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752112" elapsed="0.000226"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752474" elapsed="0.000053"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752407" elapsed="0.000210"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752386" elapsed="0.000278"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752794" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752735" elapsed="0.000132"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752711" elapsed="0.000199"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753027" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752977" elapsed="0.000139"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.752955" elapsed="0.000205"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753281" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753226" elapsed="0.000129"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753205" elapsed="0.000193"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753518" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753466" elapsed="0.000121"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753444" elapsed="0.000207"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753781" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753722" elapsed="0.000133"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753698" elapsed="0.000197"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754009" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753959" elapsed="0.000122"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.753939" elapsed="0.000182"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754236" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754185" elapsed="0.000127"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754165" elapsed="0.000189"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754469" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754419" elapsed="0.000121"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754399" elapsed="0.000180"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754711" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754660" elapsed="0.000123"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754639" elapsed="0.000185"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754944" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754889" elapsed="0.000153"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.754869" elapsed="0.000217"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.755243" elapsed="0.000069"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.755151" elapsed="0.000256"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.755131" elapsed="0.000359"/>
+</if>
+<var name="${t}"/>
+<status status="NOT RUN" start="2026-11-26T14:04:47.746201" elapsed="0.009353"/>
+</iter>
+<var>${t}</var>
+<value>@{tags}</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.744910" elapsed="0.010763"/>
+</for>
+<return>
+<value>SAMPLE-TEST-999</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.755813" elapsed="0.000054"/>
+</return>
+<msg time="2026-11-26T14:04:47.756234" level="INFO">${trx} = ...</msg>
+<var>${trx}</var>
+<status status="PASS" start="2026-11-26T14:04:47.738076" elapsed="0.018234"/>
+</kw>
+<kw name="Mock Telkomsel Verifikasi Request V2 Masuk" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:47.760047" level="INFO">Mock Telkomsel V2 berhasil memverifikasi request untuk SAMPLE-D-001: signature=170fd095f07e256682236933515ba1855c3bf33a36512de217bac24bc0e0190b</msg>
+<arg>${trx}</arg>
+<status status="PASS" start="2026-11-26T14:04:47.759681" elapsed="0.000513"/>
+</kw>
+<status status="PASS" start="2026-11-26T14:04:47.736210" elapsed="0.026900"/>
+</kw>
+<kw name="And Transaksi pada database status diperbarui menjadi RESOLVED" owner="drpull_keywords">
+<kw name="Dapatkan ID Transaksi Scoped" owner="drpull_keywords">
+<kw name="Get Variable Value" owner="BuiltIn">
+<msg time="2026-11-26T14:04:47.768875" level="INFO">${tag_trx} = ...</msg>
+<var>${tag_trx}</var>
+<arg>${CURRENT_TRXID}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="PASS" start="2026-11-26T14:04:47.768323" elapsed="0.000618"/>
+</kw>
+<if>
+<branch type="IF" condition="'${tag_trx}' != '${EMPTY}' and '${tag_trx}' != '${None}'">
+<return>
+<value>${tag_trx}</value>
+<status status="PASS" start="2026-11-26T14:04:47.772850" elapsed="0.000071"/>
+</return>
+<status status="PASS" start="2026-11-26T14:04:47.772172" elapsed="0.000832"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:47.772113" elapsed="0.000955"/>
+</if>
+<kw name="Get Variable Value" owner="BuiltIn">
+<var>${tags}</var>
+<arg>${TEST TAGS}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="NOT RUN" start="2026-11-26T14:04:47.773285" elapsed="0.000058"/>
+</kw>
+<for flavor="IN">
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.777618" elapsed="0.000045"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.777501" elapsed="0.000234"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.777469" elapsed="0.000322"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.777932" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.777873" elapsed="0.000139"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.777849" elapsed="0.000210"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778188" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778130" elapsed="0.000133"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778109" elapsed="0.000199"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778436" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778379" elapsed="0.000132"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778357" elapsed="0.000198"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778749" elapsed="0.000055"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778659" elapsed="0.000228"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.778622" elapsed="0.000317"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779093" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779033" elapsed="0.000138"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779004" elapsed="0.000212"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779341" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779286" elapsed="0.000131"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779265" elapsed="0.000197"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779616" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779531" elapsed="0.000169"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779510" elapsed="0.000235"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779866" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779812" elapsed="0.000125"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.779792" elapsed="0.000187"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780096" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780044" elapsed="0.000123"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780024" elapsed="0.000186"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780329" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780276" elapsed="0.000124"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780254" elapsed="0.000189"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780559" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780508" elapsed="0.000140"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780488" elapsed="0.000205"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780812" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780760" elapsed="0.000123"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780740" elapsed="0.000184"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.781049" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780998" elapsed="0.000122"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.780978" elapsed="0.000183"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.781328" elapsed="0.000044"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.781244" elapsed="0.000199"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.781209" elapsed="0.000362"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.781820" elapsed="0.000049"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.781726" elapsed="0.000221"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.781685" elapsed="0.000335"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.782232" elapsed="0.000047"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.782147" elapsed="0.000207"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.782113" elapsed="0.000311"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.782690" elapsed="0.000059"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.782554" elapsed="0.000293"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.782509" elapsed="0.000429"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783158" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783084" elapsed="0.000155"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783044" elapsed="0.000241"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783411" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783357" elapsed="0.000129"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783335" elapsed="0.000193"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783672" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783611" elapsed="0.000136"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783573" elapsed="0.000219"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783916" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783862" elapsed="0.000127"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.783839" elapsed="0.000191"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784146" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784096" elapsed="0.000123"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784073" elapsed="0.000187"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784379" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784326" elapsed="0.000124"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784304" elapsed="0.000188"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784626" elapsed="0.000033"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784558" elapsed="0.000159"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784535" elapsed="0.000231"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784886" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784835" elapsed="0.000124"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.784812" elapsed="0.000188"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785133" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785065" elapsed="0.000140"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785044" elapsed="0.000202"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785361" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785310" elapsed="0.000122"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785289" elapsed="0.000182"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785581" elapsed="0.000045"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785533" elapsed="0.000140"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785512" elapsed="0.000201"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785827" elapsed="0.000025"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785777" elapsed="0.000119"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785756" elapsed="0.000181"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786051" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786000" elapsed="0.000124"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.785980" elapsed="0.000185"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786280" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786230" elapsed="0.000122"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786208" elapsed="0.000184"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786504" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786455" elapsed="0.000118"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786435" elapsed="0.000191"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786741" elapsed="0.000026"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786692" elapsed="0.000119"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:47.786671" elapsed="0.000180"/>
+</if>
+<var name="${t}"/>
+<status status="NOT RUN" start="2026-11-26T14:04:47.777359" elapsed="0.009521"/>
+</iter>
+<var>${t}</var>
+<value>@{tags}</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.775781" elapsed="0.011156"/>
+</for>
+<return>
+<value>SAMPLE-TEST-999</value>
+<status status="NOT RUN" start="2026-11-26T14:04:47.787009" elapsed="0.000029"/>
+</return>
+<msg time="2026-11-26T14:04:47.787307" level="INFO">${trx} = ...</msg>
+<var>${trx}</var>
+<status status="PASS" start="2026-11-26T14:04:47.767817" elapsed="0.019565"/>
+</kw>
+<kw name="Wait Until Keyword Succeeds" owner="BuiltIn">
+<kw name="Mongo Verifikasi Status Dokumen" owner="MongoDrPullLibrary">
+<msg time="2026-11-26T14:04:47.843709" level="INFO">--- START Dokumen MongoDB [SAMPLE-D-001] | Length=485 chars | Parts=1 ---</msg>
+<msg time="2026-11-26T14:04:47.843811" level="INFO">{
+  "_id": "6b07da0bb4ecabf623777a43",
+  "provider_trxid": "SAMPLE-D-001",
+  "status": "RESOLVED",
+  "attempt": 0,
+  "next_pull_at": "2026-11-26 07:04:33.431000",
+  "created_at": "2026-11-26 07:04:43.431000",
+  "updated": "2026-11-26 07:04:45.963000",
+  "appsid": "cp_sample",
+  "sid": "sender_sample",
+  "lease_id": "632c8ae8-faec-4588-bbb8-da72fa921c3e",
+  "resolved_by": "pull",
+  "dr_published_at": "2026-11-26 07:04:45.610000",
+  "sql_published_at": "2026-11-26 07:04:45.961000"
+}</msg>
+<msg time="2026-11-26T14:04:47.843891" level="INFO">--- END Dokumen MongoDB [SAMPLE-D-001] ---</msg>
+<msg time="2026-11-26T14:04:47.843936" level="INFO">Status dokumen SAMPLE-D-001 terbukti: RESOLVED</msg>
+<arg>provider_trxid=${trx}</arg>
+<arg>expected_status=RESOLVED</arg>
+<status status="PASS" start="2026-11-26T14:04:47.790857" elapsed="0.053168"/>
+</kw>
+<arg>12s</arg>
+<arg>500ms</arg>
+<arg>Mongo Verifikasi Status Dokumen</arg>
+<arg>provider_trxid=${trx}</arg>
+<arg>expected_status=RESOLVED</arg>
+<doc>Runs the specified keyword and retries if it fails.</doc>
+<status status="PASS" start="2026-11-26T14:04:47.789987" elapsed="0.056777"/>
+</kw>
+<kw name="Mongo Verifikasi Field Not Null" owner="MongoDrPullLibrary">
+<msg time="2026-11-26T14:04:47.900246" level="INFO">--- START Dokumen MongoDB [SAMPLE-D-001] | Length=485 chars | Parts=1 ---</msg>
+<msg time="2026-11-26T14:04:47.900355" level="INFO">{
+  "_id": "6b07da0bb4ecabf623777a43",
+  "provider_trxid": "SAMPLE-D-001",
+  "status": "RESOLVED",
+  "attempt": 0,
+  "next_pull_at": "2026-11-26 07:04:33.431000",
+  "created_at": "2026-11-26 07:04:43.431000",
+  "updated": "2026-11-26 07:04:45.963000",
+  "appsid": "cp_sample",
+  "sid": "sender_sample",
+  "lease_id": "632c8ae8-faec-4588-bbb8-da72fa921c3e",
+  "resolved_by": "pull",
+  "dr_published_at": "2026-11-26 07:04:45.610000",
+  "sql_published_at": "2026-11-26 07:04:45.961000"
+}</msg>
+<msg time="2026-11-26T14:04:47.900404" level="INFO">--- END Dokumen MongoDB [SAMPLE-D-001] ---</msg>
+<msg time="2026-11-26T14:04:47.900445" level="INFO">Field 'dr_published_at' pada SAMPLE-D-001 terbukti terisi: 2026-11-26 07:04:45.610000</msg>
+<arg>provider_trxid=${trx}</arg>
+<arg>field_name=dr_published_at</arg>
+<status status="PASS" start="2026-11-26T14:04:47.849421" elapsed="0.051132"/>
+</kw>
+<kw name="Mongo Verifikasi Field Not Null" owner="MongoDrPullLibrary">
+<msg time="2026-11-26T14:04:48.004645" level="INFO">--- START Dokumen MongoDB [SAMPLE-D-001] | Length=485 chars | Parts=1 ---</msg>
+<msg time="2026-11-26T14:04:48.004800" level="INFO">{
+  "_id": "6b07da0bb4ecabf623777a43",
+  "provider_trxid": "SAMPLE-D-001",
+  "status": "RESOLVED",
+  "attempt": 0,
+  "next_pull_at": "2026-11-26 07:04:33.431000",
+  "created_at": "2026-11-26 07:04:43.431000",
+  "updated": "2026-11-26 07:04:45.963000",
+  "appsid": "cp_sample",
+  "sid": "sender_sample",
+  "lease_id": "632c8ae8-faec-4588-bbb8-da72fa921c3e",
+  "resolved_by": "pull",
+  "dr_published_at": "2026-11-26 07:04:45.610000",
+  "sql_published_at": "2026-11-26 07:04:45.961000"
+}</msg>
+<msg time="2026-11-26T14:04:48.004909" level="INFO">--- END Dokumen MongoDB [SAMPLE-D-001] ---</msg>
+<msg time="2026-11-26T14:04:48.004990" level="INFO">Field 'sql_published_at' pada SAMPLE-D-001 terbukti terisi: 2026-11-26 07:04:45.961000</msg>
+<arg>provider_trxid=${trx}</arg>
+<arg>field_name=sql_published_at</arg>
+<status status="PASS" start="2026-11-26T14:04:47.903555" elapsed="0.101568"/>
+</kw>
+<status status="PASS" start="2026-11-26T14:04:47.766109" elapsed="0.243621"/>
+</kw>
+<kw name="And Tepat satu pesan laporan pengiriman diteruskan ke antrean laporan DR untuk nomor transaksi tersebut" owner="drpull_keywords">
+<kw name="Dapatkan ID Transaksi Scoped" owner="drpull_keywords">
+<kw name="Get Variable Value" owner="BuiltIn">
+<msg time="2026-11-26T14:04:48.017441" level="INFO">${tag_trx} = ...</msg>
+<var>${tag_trx}</var>
+<arg>${CURRENT_TRXID}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="PASS" start="2026-11-26T14:04:48.016927" elapsed="0.000567"/>
+</kw>
+<if>
+<branch type="IF" condition="'${tag_trx}' != '${EMPTY}' and '${tag_trx}' != '${None}'">
+<return>
+<value>${tag_trx}</value>
+<status status="PASS" start="2026-11-26T14:04:48.021702" elapsed="0.000087"/>
+</return>
+<status status="PASS" start="2026-11-26T14:04:48.020376" elapsed="0.001500"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:48.020280" elapsed="0.001659"/>
+</if>
+<kw name="Get Variable Value" owner="BuiltIn">
+<var>${tags}</var>
+<arg>${TEST TAGS}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="NOT RUN" start="2026-11-26T14:04:48.022134" elapsed="0.000056"/>
+</kw>
+<for flavor="IN">
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.028356" elapsed="0.000056"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.028242" elapsed="0.000284"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.028185" elapsed="0.000454"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.028882" elapsed="0.000054"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.028780" elapsed="0.000252"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.028737" elapsed="0.000384"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.029348" elapsed="0.000052"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.029255" elapsed="0.000244"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.029215" elapsed="0.000364"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.029809" elapsed="0.000053"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.029716" elapsed="0.000231"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.029678" elapsed="0.000350"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.030255" elapsed="0.000049"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.030160" elapsed="0.000234"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.030120" elapsed="0.000369"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.030734" elapsed="0.000052"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.030636" elapsed="0.000244"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.030578" elapsed="0.000420"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.031281" elapsed="0.000054"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.031167" elapsed="0.000261"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.031116" elapsed="0.000396"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.031784" elapsed="0.000064"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.031682" elapsed="0.000253"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.031635" elapsed="0.000379"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.032268" elapsed="0.000065"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.032139" elapsed="0.000304"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.032100" elapsed="0.000447"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.032862" elapsed="0.000058"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.032744" elapsed="0.000272"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.032688" elapsed="0.000411"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.033300" elapsed="0.000033"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.033232" elapsed="0.000154"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.033195" elapsed="0.000238"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.033733" elapsed="0.000032"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.033664" elapsed="0.000160"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.033631" elapsed="0.000242"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034008" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.033951" elapsed="0.000137"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.033926" elapsed="0.000210"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034266" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034209" elapsed="0.000135"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034187" elapsed="0.000206"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034521" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034464" elapsed="0.000147"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034442" elapsed="0.000258"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034842" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034783" elapsed="0.000137"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.034757" elapsed="0.000211"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035101" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035042" elapsed="0.000147"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035018" elapsed="0.000221"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035402" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035337" elapsed="0.000150"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035299" elapsed="0.000236"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035771" elapsed="0.000073"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035659" elapsed="0.000323"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.035614" elapsed="0.000475"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.036416" elapsed="0.000071"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.036252" elapsed="0.000364"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.036202" elapsed="0.000515"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.037018" elapsed="0.000073"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.036883" elapsed="0.000321"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.036830" elapsed="0.000471"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.037567" elapsed="0.000077"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.037453" elapsed="0.000306"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.037408" elapsed="0.000473"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038118" elapsed="0.000066"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038039" elapsed="0.000213"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.037990" elapsed="0.000318"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038452" elapsed="0.000032"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038391" elapsed="0.000144"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038366" elapsed="0.000217"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038764" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038700" elapsed="0.000147"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038672" elapsed="0.000225"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039056" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038979" elapsed="0.000204"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.038953" elapsed="0.000292"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039393" elapsed="0.000030"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039331" elapsed="0.000140"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039305" elapsed="0.000214"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039680" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039612" elapsed="0.000163"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039571" elapsed="0.000254"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039961" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039903" elapsed="0.000135"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.039879" elapsed="0.000205"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040211" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040155" elapsed="0.000131"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040132" elapsed="0.000200"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040466" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040403" elapsed="0.000137"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040381" elapsed="0.000203"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040726" elapsed="0.000027"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040669" elapsed="0.000138"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040646" elapsed="0.000209"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040982" elapsed="0.000028"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040926" elapsed="0.000136"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.040904" elapsed="0.000204"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.041235" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.041179" elapsed="0.000157"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.041157" elapsed="0.000229"/>
+</if>
+<var name="${t}"/>
+<status status="NOT RUN" start="2026-11-26T14:04:48.028019" elapsed="0.013402"/>
+</iter>
+<var>${t}</var>
+<value>@{tags}</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.026308" elapsed="0.015177"/>
+</for>
+<return>
+<value>SAMPLE-TEST-999</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.041566" elapsed="0.000040"/>
+</return>
+<msg time="2026-11-26T14:04:48.041876" level="INFO">${trx} = ...</msg>
+<var>${trx}</var>
+<status status="PASS" start="2026-11-26T14:04:48.016384" elapsed="0.025542"/>
+</kw>
+<kw name="Activemq Verifikasi Pesan Dr Handler Masuk" owner="ActiveMqDrPullLibrary">
+<msg time="2026-11-26T14:04:48.044922" level="INFO">--- START Pesan DR Handler [SAMPLE-D-001] | Length=200 chars | Parts=1 ---</msg>
+<msg time="2026-11-26T14:04:48.044983" level="INFO">trxid=&amp;transmitter_status=D&amp;transmitter_sent=&amp;provider_trxid=SAMPLE-D-001&amp;provider_id=1&amp;provider_status=D&amp;provider_status_received=20261126140445&amp;provider_name=Telkomsel&amp;without_dr=false&amp;provider_err=</msg>
+<msg time="2026-11-26T14:04:48.045026" level="INFO">--- END Pesan DR Handler [SAMPLE-D-001] ---</msg>
+<msg time="2026-11-26T14:04:48.045103" level="INFO">provider_status terverifikasi: D</msg>
+<arg>provider_trxid=${trx}</arg>
+<arg>expected_status=D</arg>
+<status status="PASS" start="2026-11-26T14:04:48.044532" elapsed="0.000660"/>
+</kw>
+<status status="PASS" start="2026-11-26T14:04:48.013487" elapsed="0.034463"/>
+</kw>
+<kw name="And Tepat satu perintah SQL penyimpanan diteruskan ke antrean database executor untuk nomor transaksi tersebut" owner="drpull_keywords">
+<kw name="Dapatkan ID Transaksi Scoped" owner="drpull_keywords">
+<kw name="Get Variable Value" owner="BuiltIn">
+<msg time="2026-11-26T14:04:48.057843" level="INFO">${tag_trx} = ...</msg>
+<var>${tag_trx}</var>
+<arg>${CURRENT_TRXID}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="PASS" start="2026-11-26T14:04:48.057214" elapsed="0.000681"/>
+</kw>
+<if>
+<branch type="IF" condition="'${tag_trx}' != '${EMPTY}' and '${tag_trx}' != '${None}'">
+<return>
+<value>${tag_trx}</value>
+<status status="PASS" start="2026-11-26T14:04:48.060904" elapsed="0.000067"/>
+</return>
+<status status="PASS" start="2026-11-26T14:04:48.060277" elapsed="0.000765"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:48.060237" elapsed="0.000865"/>
+</if>
+<kw name="Get Variable Value" owner="BuiltIn">
+<var>${tags}</var>
+<arg>${TEST TAGS}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="NOT RUN" start="2026-11-26T14:04:48.061287" elapsed="0.000070"/>
+</kw>
+<for flavor="IN">
+<iter>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-001'">
+<return>
+<value>SAMPLE-D-001</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067129" elapsed="0.000040"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067021" elapsed="0.000226"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.066985" elapsed="0.000323"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-002'">
+<return>
+<value>MOCK-ND-002</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067456" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067393" elapsed="0.000146"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067369" elapsed="0.000221"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-003'">
+<return>
+<value>MOCK-PROTO-003</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067770" elapsed="0.000032"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067708" elapsed="0.000147"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067679" elapsed="0.000224"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-004'">
+<return>
+<value>MOCK-404-004</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068156" elapsed="0.000074"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068032" elapsed="0.000268"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.067978" elapsed="0.000372"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-005'">
+<return>
+<value>MOCK-404-005</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068499" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068436" elapsed="0.000145"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068411" elapsed="0.000231"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-006'">
+<return>
+<value>MOCK-500-006</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068800" elapsed="0.000031"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068731" elapsed="0.000151"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068708" elapsed="0.000219"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-007'">
+<return>
+<value>MOCK-TIMEOUT-007</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.069060" elapsed="0.000029"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.069001" elapsed="0.000137"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.068979" elapsed="0.000234"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-008'">
+<return>
+<value>MOCK-MALFORMED-008</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.069454" elapsed="0.000052"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.069345" elapsed="0.000273"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.069306" elapsed="0.000408"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-009'">
+<return>
+<value>SAMPLE-TIER2-009</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.069961" elapsed="0.000064"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.069853" elapsed="0.000278"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.069810" elapsed="0.000415"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-010'">
+<return>
+<value>SAMPLE-TIER3-010</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.070527" elapsed="0.000057"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.070405" elapsed="0.000314"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.070343" elapsed="0.000457"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-011'">
+<return>
+<value>SAMPLE-D-011</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.071063" elapsed="0.000070"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.070952" elapsed="0.000274"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.070902" elapsed="0.000409"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-012'">
+<return>
+<value>MOCK-FENCE-PULL-012</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.071540" elapsed="0.000069"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.071439" elapsed="0.000259"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.071399" elapsed="0.000388"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-013'">
+<return>
+<value>SAMPLE-LIFECYCLE-013</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.072014" elapsed="0.000051"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.071906" elapsed="0.000246"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.071869" elapsed="0.000368"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-014'">
+<return>
+<value>MOCK-400-014</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.072461" elapsed="0.000051"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.072366" elapsed="0.000252"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.072324" elapsed="0.000387"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-015'">
+<return>
+<value>MOCK-405-015</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.072925" elapsed="0.000049"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.072832" elapsed="0.000234"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.072795" elapsed="0.000391"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-016'">
+<return>
+<value>MOCK-401-016</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.073399" elapsed="0.000050"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.073305" elapsed="0.000231"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.073270" elapsed="0.000367"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-017'">
+<return>
+<value>SAMPLE-NOAPP-017</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.073856" elapsed="0.000055"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.073762" elapsed="0.000254"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.073726" elapsed="0.000391"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-018'">
+<return>
+<value>SAMPLE-NOSID-018</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.074359" elapsed="0.000060"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.074255" elapsed="0.000268"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.074215" elapsed="0.000422"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-019'">
+<return>
+<value>SAMPLE-NOKEY-019</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.074927" elapsed="0.000071"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.074809" elapsed="0.000286"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.074753" elapsed="0.000437"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-020'">
+<return>
+<value>SAMPLE-SEC-020</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.075452" elapsed="0.000052"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.075341" elapsed="0.000286"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.075297" elapsed="0.000436"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-021'">
+<return>
+<value>SAMPLE-SEC-021</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.076003" elapsed="0.000054"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.075897" elapsed="0.000250"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.075851" elapsed="0.000381"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-022'">
+<return>
+<value>SAMPLE-LEGACY-022</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.076468" elapsed="0.000053"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.076355" elapsed="0.000285"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.076318" elapsed="0.000417"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-023'">
+<return>
+<value>MOCK-GUARD-GET-023</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.076988" elapsed="0.000058"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.076877" elapsed="0.000269"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.076832" elapsed="0.000405"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-024'">
+<return>
+<value>MOCK-GUARD-QUERY-024</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.077462" elapsed="0.000056"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.077360" elapsed="0.000266"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.077322" elapsed="0.000393"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-025'">
+<return>
+<value>SAMPLE-BADURL-025</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.077949" elapsed="0.000058"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.077848" elapsed="0.000251"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.077809" elapsed="0.000377"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-026'">
+<return>
+<value>SAMPLE-NOKEYS-026</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.078434" elapsed="0.000059"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.078325" elapsed="0.000266"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.078280" elapsed="0.000417"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-027'">
+<return>
+<value>SAMPLE-TSBOUND-POS27</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.078937" elapsed="0.000050"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.078835" elapsed="0.000242"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.078791" elapsed="0.000385"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-028'">
+<return>
+<value>SAMPLE-TSEXP-POS28</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.079414" elapsed="0.000050"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.079307" elapsed="0.000243"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.079266" elapsed="0.000382"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-029'">
+<return>
+<value>SAMPLE-PRIO1-029</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.079881" elapsed="0.000051"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.079776" elapsed="0.000244"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.079738" elapsed="0.000369"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-030'">
+<return>
+<value>MOCK-502-030</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.080341" elapsed="0.000048"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.080241" elapsed="0.000232"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.080202" elapsed="0.000353"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-031'">
+<return>
+<value>SAMPLE-QERR-031</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.080829" elapsed="0.000054"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.080716" elapsed="0.000268"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.080669" elapsed="0.000410"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-032'">
+<return>
+<value>SAMPLE-BATCH-032</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.081312" elapsed="0.000054"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.081214" elapsed="0.000241"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.081175" elapsed="0.000366"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-033'">
+<return>
+<value>MOCK-FENCE-PUB-033</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.081814" elapsed="0.000065"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.081703" elapsed="0.000274"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.081659" elapsed="0.000400"/>
+</if>
+<if>
+<branch type="IF" condition="'${t}' == 'TC-034'">
+<return>
+<value>MOCK-503-034</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.082316" elapsed="0.000055"/>
+</return>
+<status status="NOT RUN" start="2026-11-26T14:04:48.082197" elapsed="0.000292"/>
+</branch>
+<status status="NOT RUN" start="2026-11-26T14:04:48.082154" elapsed="0.000456"/>
+</if>
+<var name="${t}"/>
+<status status="NOT RUN" start="2026-11-26T14:04:48.066843" elapsed="0.015836"/>
+</iter>
+<var>${t}</var>
+<value>@{tags}</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.065319" elapsed="0.017486"/>
+</for>
+<return>
+<value>SAMPLE-TEST-999</value>
+<status status="NOT RUN" start="2026-11-26T14:04:48.082980" elapsed="0.000054"/>
+</return>
+<msg time="2026-11-26T14:04:48.083426" level="INFO">${trx} = ...</msg>
+<var>${trx}</var>
+<status status="PASS" start="2026-11-26T14:04:48.056514" elapsed="0.026998"/>
+</kw>
+<kw name="Activemq Verifikasi Pesan Db Executor Masuk" owner="ActiveMqDrPullLibrary">
+<msg time="2026-11-26T14:04:48.086784" level="INFO">--- START Pesan DB Executor [SAMPLE-D-001] | Length=208 chars | Parts=1 ---</msg>
+<msg time="2026-11-26T14:04:48.086852" level="INFO">INSERT INTO delivery_reports_new(provider_trxid, channel_group_name, provider_status, provider_status_received, provider_err, created) VALUES('SAMPLE-D-001','Telkomsel','D','20261126140445','',NOW());|retry=1</msg>
+<msg time="2026-11-26T14:04:48.086894" level="INFO">--- END Pesan DB Executor [SAMPLE-D-001] ---</msg>
+<msg time="2026-11-26T14:04:48.086935" level="INFO">Pesan SQL deliveryreport terverifikasi: INSERT INTO delivery_reports_new(provider_trxid, channel_group_name, provider_status, provider_status_received, provider_err, created) VALUES('SAMPLE-D-001','Telkomsel','D','20261126140445','',NOW());|retry=1</msg>
+<arg>provider_trxid=${trx}</arg>
+<arg>expected_status=D</arg>
+<status status="PASS" start="2026-11-26T14:04:48.086279" elapsed="0.000764"/>
+</kw>
+<status status="PASS" start="2026-11-26T14:04:48.052816" elapsed="0.037395"/>
+</kw>
+<kw name="Bersihkan Konteks Pengujian" owner="common_keywords" type="TEARDOWN">
+<kw name="Get Variable Value" owner="BuiltIn">
+<msg time="2026-11-26T14:04:48.094661" level="INFO">${status} = ...</msg>
+<var>${status}</var>
+<arg>${TEST STATUS}</arg>
+<doc>Returns variable value or ``default`` if the variable does not exist.</doc>
+<status status="PASS" start="2026-11-26T14:04:48.094057" elapsed="0.000697"/>
+</kw>
+<if>
+<branch type="IF" condition="'${CURRENT_TRXID}' != '${EMPTY}' and '${status}' == 'PASS'">
+<kw name="Mongo Bersihkan Dokumen Uji" owner="MongoDrPullLibrary">
+<msg time="2026-11-26T14:04:48.152757" level="INFO">Dihapus 1 dokumen uji untuk provider_trxid='SAMPLE-D-001'.</msg>
+<arg>${CURRENT_TRXID}</arg>
+<status status="PASS" start="2026-11-26T14:04:48.100619" elapsed="0.052412"/>
+</kw>
+<status status="PASS" start="2026-11-26T14:04:48.099112" elapsed="0.057243"/>
+</branch>
+<status status="PASS" start="2026-11-26T14:04:48.099011" elapsed="0.057459"/>
+</if>
+<kw name="Mysql Set Konfigurasi Provider Status Url" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:48.316755" level="INFO">Konfigurasi drpulltelkomsel key='provider_status_url' diset ke: 'http://localhost:8089/bank/v2/transaction-status'</msg>
+<arg>${MOCK_STATUS_URL}</arg>
+<status status="PASS" start="2026-11-26T14:04:48.156694" elapsed="0.160297"/>
+</kw>
+<kw name="Mysql Set Konfigurasi Dr Pull Secret Dan Json" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:48.526315" level="INFO">Konfigurasi drpulltelkomsel key='client_secret' diset ke: '7s5tLvM1'</msg>
+<msg time="2026-11-26T14:04:48.739834" level="INFO">Konfigurasi drpulltelkomsel key='client_secrets_json' diset ke: '{"QueueUID:QueueSenderID":"7s5tLvM1","tselxyz:jatismatahari":"7s5tLvM1","cp_sample:sender_sample":"7s5tLvM1","cp_sample":"7s5tLvM1","app_tier2_only":"secret_tier_dua","prio_app:prio_sid":"SECRET_KEY_A_EXACT","prio_app":"SECRET_KEY_B_APP"}'</msg>
+<msg time="2026-11-26T14:04:48.740421" level="INFO">Konfigurasi secret drpulltelkomsel berhasil diperbarui.</msg>
+<arg>client_secret=${DEFAULT_CLIENT_SECRET}</arg>
+<arg>client_secrets_json=${DEFAULT_CLIENT_SECRETS_JSON}</arg>
+<status status="PASS" start="2026-11-26T14:04:48.323156" elapsed="0.417622"/>
+</kw>
+<kw name="Mock Telkomsel Reset Perekam Request" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:48.750669" level="INFO">Rekaman request Mock Telkomsel V2 berhasil di-reset.</msg>
+<status status="PASS" start="2026-11-26T14:04:48.750085" elapsed="0.000853"/>
+</kw>
+<kw name="Mock Telkomsel Set Secret" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:48.760951" level="INFO">Mock Telkomsel secret diset ke: 7s5tLvM1</msg>
+<arg>${DEFAULT_CLIENT_SECRET}</arg>
+<status status="PASS" start="2026-11-26T14:04:48.760264" elapsed="0.000873"/>
+</kw>
+<kw name="Mock Telkomsel Set Secret Map" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:48.766562" level="INFO">Mock Telkomsel secret map diset: ['QueueUID:QueueSenderID', 'tselxyz:jatismatahari', 'cp_sample:sender_sample', 'cp_sample', 'app_tier2_only', 'prio_app:prio_sid', 'prio_app']</msg>
+<arg>${DEFAULT_CLIENT_SECRETS_JSON}</arg>
+<status status="PASS" start="2026-11-26T14:04:48.766218" elapsed="0.000490"/>
+</kw>
+<kw name="Mock Telkomsel Set Virtual Clock Delta" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:48.771829" level="INFO">Mock Telkomsel Request-Anchored Virtual Clock Delta diset ke: None detik.</msg>
+<arg>${None}</arg>
+<status status="PASS" start="2026-11-26T14:04:48.771402" elapsed="0.000552"/>
+</kw>
+<doc>Test Teardown: bersihkan dokumen uji pada MongoDB dan pulihkan state mock serta konfigurasi MySQL.</doc>
+<status status="PASS" start="2026-11-26T14:04:48.093484" elapsed="0.682107"/>
+</kw>
+<msg time="2026-11-26T14:04:49.389006" level="INFO">--- [SUT LOG EVIDENCE: TC-001] 2 file bertambah ---</msg>
+<msg time="2026-11-26T14:04:49.389173" level="INFO">[SUT Log: log/drpulltelkomsel.debug.log] (Total 10 baris delta, ditampilkan 10 baris):</msg>
+<msg time="2026-11-26T14:04:49.389259" level="INFO">  | 2026-11-26 14:04:44.773 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due</msg>
+<msg time="2026-11-26T14:04:49.389325" level="INFO">  | 2026-11-26 14:04:44.856 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-D-001, PENDING -&gt; PULLING, leaseId=bbcc4527-1aa2-4414-890c-a087e887fa6f</msg>
+<msg time="2026-11-26T14:04:49.389391" level="INFO">  | 2026-11-26 14:04:44.899 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-D-001 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status</msg>
+<msg time="2026-11-26T14:04:49.389457" level="INFO">  | 2026-11-26 14:04:44.948 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-D-001 httpStatus=200</msg>
+<msg time="2026-11-26T14:04:49.389523" level="INFO">  | 2026-11-26 14:04:44.998 c.j.d.mongo.MongoService State change: trxId=SAMPLE-D-001, PULLING -&gt; PUBLISHING</msg>
+<msg time="2026-11-26T14:04:49.389626" level="INFO">  | 2026-11-26 14:04:45.610 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-D-001, status=D</msg>
+<msg time="2026-11-26T14:04:49.389706" level="INFO">  | 2026-11-26 14:04:45.961 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-D-001</msg>
+<msg time="2026-11-26T14:04:49.389777" level="INFO">  | 2026-11-26 14:04:46.013 c.j.d.mongo.MongoService State change: trxId=SAMPLE-D-001, PUBLISHING -&gt; RESOLVED</msg>
+<msg time="2026-11-26T14:04:49.389843" level="INFO">  | 2026-11-26 14:04:46.014 c.j.d.worker.PullWorker State change: trxId=SAMPLE-D-001, PUBLISHING -&gt; RESOLVED</msg>
+<msg time="2026-11-26T14:04:49.389912" level="INFO">  | 2026-11-26 14:04:48.166 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due</msg>
+<msg time="2026-11-26T14:04:49.389982" level="INFO">[SUT Log: out-drpulltelkomsel.log] (Total 10 baris delta, ditampilkan 10 baris):</msg>
+<msg time="2026-11-26T14:04:49.390047" level="INFO">  | 14:04:44.773 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due</msg>
+<msg time="2026-11-26T14:04:49.390116" level="INFO">  | 14:04:44.856 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-D-001, PENDING -&gt; PULLING, leaseId=bbcc4527-1aa2-4414-890c-a087e887fa6f</msg>
+<msg time="2026-11-26T14:04:49.390187" level="INFO">  | 14:04:44.899 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-D-001 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status</msg>
+<msg time="2026-11-26T14:04:49.390256" level="INFO">  | 14:04:44.948 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-D-001 httpStatus=200</msg>
+<msg time="2026-11-26T14:04:49.390325" level="INFO">  | 14:04:44.998 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-D-001, PULLING -&gt; PUBLISHING</msg>
+<msg time="2026-11-26T14:04:49.390397" level="INFO">  | 14:04:45.610 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-D-001, status=D</msg>
+<msg time="2026-11-26T14:04:49.390466" level="INFO">  | 14:04:45.961 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-D-001</msg>
+<msg time="2026-11-26T14:04:49.390534" level="INFO">  | 14:04:46.013 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-D-001, PUBLISHING -&gt; RESOLVED</msg>
+<msg time="2026-11-26T14:04:49.390626" level="INFO">  | 14:04:46.014 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-D-001, PUBLISHING -&gt; RESOLVED</msg>
+<msg time="2026-11-26T14:04:49.390711" level="INFO">  | 14:04:48.166 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due</msg>
+<msg time="2026-11-26T14:04:50.028644" level="INFO">--- [SUT LOG EVIDENCE: TC-001] 2 file bertambah ---</msg>
+<msg time="2026-11-26T14:04:50.028911" level="INFO">[SUT Log: log/drpulltelkomsel.debug.log] (Total 10 baris delta, ditampilkan 10 baris):</msg>
+<msg time="2026-11-26T14:04:50.029052" level="INFO">  | 2026-11-26 14:04:44.773 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due</msg>
+<msg time="2026-11-26T14:04:50.029166" level="INFO">  | 2026-11-26 14:04:44.856 c.j.d.scheduler.SweepTask State change: trxId=SAMPLE-D-001, PENDING -&gt; PULLING, leaseId=bbcc4527-1aa2-4414-890c-a087e887fa6f</msg>
+<msg time="2026-11-26T14:04:50.029279" level="INFO">  | 2026-11-26 14:04:44.899 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=SAMPLE-D-001 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status</msg>
+<msg time="2026-11-26T14:04:50.029381" level="INFO">  | 2026-11-26 14:04:44.948 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=SAMPLE-D-001 httpStatus=200</msg>
+<msg time="2026-11-26T14:04:50.029499" level="INFO">  | 2026-11-26 14:04:44.998 c.j.d.mongo.MongoService State change: trxId=SAMPLE-D-001, PULLING -&gt; PUBLISHING</msg>
+<msg time="2026-11-26T14:04:50.029628" level="INFO">  | 2026-11-26 14:04:45.610 c.j.d.publish.ResultPublisher DR published, trxId=SAMPLE-D-001, status=D</msg>
+<msg time="2026-11-26T14:04:50.029753" level="INFO">  | 2026-11-26 14:04:45.961 c.j.d.publish.ResultPublisher SQL insert published, trxId=SAMPLE-D-001</msg>
+<msg time="2026-11-26T14:04:50.029988" level="INFO">  | 2026-11-26 14:04:46.013 c.j.d.mongo.MongoService State change: trxId=SAMPLE-D-001, PUBLISHING -&gt; RESOLVED</msg>
+<msg time="2026-11-26T14:04:50.030118" level="INFO">  | 2026-11-26 14:04:46.014 c.j.d.worker.PullWorker State change: trxId=SAMPLE-D-001, PUBLISHING -&gt; RESOLVED</msg>
+<msg time="2026-11-26T14:04:50.030225" level="INFO">  | 2026-11-26 14:04:48.166 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due</msg>
+<msg time="2026-11-26T14:04:50.030330" level="INFO">[SUT Log: out-drpulltelkomsel.log] (Total 10 baris delta, ditampilkan 10 baris):</msg>
+<msg time="2026-11-26T14:04:50.030433" level="INFO">  | 14:04:44.773 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due</msg>
+<msg time="2026-11-26T14:04:50.030531" level="INFO">  | 14:04:44.856 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=SAMPLE-D-001, PENDING -&gt; PULLING, leaseId=bbcc4527-1aa2-4414-890c-a087e887fa6f</msg>
+<msg time="2026-11-26T14:04:50.030667" level="INFO">  | 14:04:44.899 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=SAMPLE-D-001 appsid=cp_sample endpoint=http://localhost:8089/bank/v2/transaction-status</msg>
+<msg time="2026-11-26T14:04:50.030880" level="INFO">  | 14:04:44.948 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-D-001 httpStatus=200</msg>
+<msg time="2026-11-26T14:04:50.031066" level="INFO">  | 14:04:44.998 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-D-001, PULLING -&gt; PUBLISHING</msg>
+<msg time="2026-11-26T14:04:50.031186" level="INFO">  | 14:04:45.610 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=SAMPLE-D-001, status=D</msg>
+<msg time="2026-11-26T14:04:50.031325" level="INFO">  | 14:04:45.961 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=SAMPLE-D-001</msg>
+<msg time="2026-11-26T14:04:50.031647" level="INFO">  | 14:04:46.013 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-D-001, PUBLISHING -&gt; RESOLVED</msg>
+<msg time="2026-11-26T14:04:50.031796" level="INFO">  | 14:04:46.014 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-D-001, PUBLISHING -&gt; RESOLVED</msg>
+<msg time="2026-11-26T14:04:50.031906" level="INFO">  | 14:04:48.166 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due</msg>
+<tag>e2e</tag>
+<tag>happy_path</tag>
+<tag>P0</tag>
+<tag>Pilar-1</tag>
+<tag>TC-001</tag>
+<status status="PASS" start="2026-11-26T14:04:43.336802" elapsed="5.441842"/>
+</test>
+<kw name="Hentikan Lingkungan Pengujian Drpull" owner="common_keywords" type="TEARDOWN">
+<kw name="Drpull App Hentikan Service" owner="DrPullAppLibrary">
+<msg time="2026-11-26T14:04:50.038215" level="INFO">Menghentikan layanan drpulltelkomsel di /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/bin...</msg>
+<msg time="2026-11-26T14:04:56.134782" level="INFO">Layanan drpulltelkomsel berhasil dihentikan.</msg>
+<status status="PASS" start="2026-11-26T14:04:50.037528" elapsed="6.097938"/>
+</kw>
+<kw name="Mysql Restore Konfigurasi Dr Pull" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:57.512899" level="INFO">Berhasil me-restore 16 baris konfigurasi drpulltelkomsel dari backup.</msg>
+<status status="PASS" start="2026-11-26T14:04:56.142411" elapsed="1.371048"/>
+</kw>
+<kw name="Mysql Putuskan Dari Database Apps Config" owner="MySqlDrPullLibrary">
+<msg time="2026-11-26T14:04:57.523228" level="INFO">Koneksi MySQL apps_config berhasil diputuskan.</msg>
+<status status="PASS" start="2026-11-26T14:04:57.522226" elapsed="0.001326"/>
+</kw>
+<kw name="Activemq Putuskan Dari Broker" owner="ActiveMqDrPullLibrary">
+<msg time="2026-11-26T14:04:57.532527" level="INFO">Sending frame: 'DISCONNECT'</msg>
+<msg time="2026-11-26T14:04:57.532932" level="INFO">Koneksi ActiveMQ berhasil diputuskan.</msg>
+<status status="PASS" start="2026-11-26T14:04:57.531723" elapsed="0.001472"/>
+</kw>
+<kw name="Mongo Putuskan Dari Database Dr Pull" owner="MongoDrPullLibrary">
+<msg time="2026-11-26T14:04:57.590014" level="INFO">Koneksi MongoDB Dr Pull berhasil diputuskan.</msg>
+<status status="PASS" start="2026-11-26T14:04:57.540479" elapsed="0.049934"/>
+</kw>
+<kw name="Mock Telkomsel Hentikan Server" owner="MockTelkomselV2Library">
+<msg time="2026-11-26T14:04:57.934452" level="INFO">Mock Telkomsel V2 Server berhasil dihentikan.</msg>
+<status status="PASS" start="2026-11-26T14:04:57.599168" elapsed="0.335463"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-11-26T14:04:57.937977" level="INFO">Suite teardown selesai. Seluruh resource telah dipulihkan.</msg>
+<arg>Suite teardown selesai. Seluruh resource telah dipulihkan.</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-11-26T14:04:57.937547" elapsed="0.000512"/>
+</kw>
+<doc>Suite Teardown: hentikan SUT, restore MySQL original, putuskan seluruh koneksi dan hentikan mock.</doc>
+<status status="PASS" start="2026-11-26T14:04:50.035985" elapsed="7.904544"/>
+</kw>
+<doc>Suite Pengujian Otomasi Robot Framework untuk drpulltelkomsel v2.0.0 (PB172645152602YA).
+Migrasi Get Delivery Status V2 (POST + HMAC-SHA256, Secret apps_config, Non-blocking SUT Log Audit).
+Menerapkan Clean BDD Murni, Zero False Positive, Audit Traceability, dan Idempotent Fencing.</doc>
+<status status="PASS" start="2026-11-26T14:04:23.596562" elapsed="34.346070"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+<stat pass="1" fail="0" skip="0">e2e</stat>
+<stat pass="1" fail="0" skip="0">happy_path</stat>
+<stat pass="1" fail="0" skip="0">P0</stat>
+<stat pass="1" fail="0" skip="0">Pilar-1</stat>
+<stat pass="1" fail="0" skip="0">TC-001</stat>
+</tag>
+<suite>
+<stat name="Drpull Telkomsel V2" id="s1" pass="1" fail="0" skip="0">Drpull Telkomsel V2</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

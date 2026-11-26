@@ -8,7 +8,8 @@ META-SUT,Matriks Pemetaan dan Penelusuran Perubahan Aplikasi drpulltelkomsel v2.
 [U-07] Perlindungan Kunci Rahasia: Kunci rahasia mitra tidak boleh tercatat di file log maupun tersimpan di database dokumen transaksi baru.
 [U-08] Pencegahan Pemrosesan dan Pengiriman Laporan Ganda: Sistem mengunci transaksi saat diambil dan saat laporan dikirim sehingga tidak ada laporan ganda meskipun dijalankan bersamaan.
 [U-09] Format Pengiriman Laporan ke Dua Antrean: Pengiriman laporan ke antrean laporan DR (jns.dr.drrealhandler) dan antrean database (jns.dbexecutor.dbexecutor / jns.db.deliveryreport) tetap sesuai format yang dibutuhkan.
-[U-10] Pemeriksaan Awal dan Isolasi Pemrosesan: Menghapus spasi berlebih pada kunci rahasia, memastikan alamat URL benar, dan memastikan gangguan pada satu transaksi tidak mengganggu transaksi lain yang diproses bersamaan.","SUT JAR: bin/drpulltelkomsel-2.0.0.jar | Baseline: bin/drpulltelkomsel-1.2.0.jar
+[U-10] Pemeriksaan Awal dan Isolasi Pemrosesan: Menghapus spasi berlebih pada kunci rahasia, memastikan alamat URL benar, dan memastikan gangguan pada satu transaksi tidak mengganggu transaksi lain yang diproses bersamaan.
+[U-11] Integrasi Hulu-Hilir Transmitter ke DR Pull: Transaksi SMS yang dikirim oleh Transmitter Telkomsel V2 secara otomatis terdaftar di MongoDB tanpa password (pwd) dan diselesaikan oleh DR Pull V2 hingga berstatus RESOLVED.","SUT JAR: bin/drpulltelkomsel-2.0.0.jar | Baseline: bin/drpulltelkomsel-1.2.0.jar
 Build: Apache Maven | Java: JDK 8 / JDK 11+
 Config: MySQL apps_config.jns_config (lookup_type='drpulltelkomsel') & bin/conf/logback.xml
 Repo: git-rbi.jatismobile.com:jns6_5/deliveryreportreceiver_java/drpulltelkomsel.git | Branch: feat/PB172645152602YA-Update-DR-Pull-Handle-New-API-Tsel
@@ -22,7 +23,8 @@ Dependency Environment: MongoDB (smsCore.dr_pull_telkomsel), ActiveMQ (jns.dr.dr
 [U-08] Pencegahan Pemrosesan dan Pengiriman Laporan Ganda -> diuji oleh: TC-012, TC-031, TC-033
 [U-09] Format Pengiriman Laporan ke Dua Antrean -> diuji oleh: TC-001, TC-002, TC-011, TC-031
 [U-10] Pemeriksaan Awal dan Isolasi Pemrosesan -> diuji oleh: TC-013, TC-025, TC-026, TC-032
-Pemetaan cakupan: 34 skenario uji telah memvalidasi seluruh 10 area pembaruan sistem (U-01 sampai U-10). Total: 34 skenario uji.",,META,,Dibuat: 2026-11-26 | Revisi: Hardening V2.2 (Final Review Findings Applied) | PIC: QA SDET Team | SUT: drpulltelkomsel v2.0.0
+[U-11] Integrasi Hulu-Hilir Transmitter ke DR Pull -> diuji oleh: TC-035
+Pemetaan cakupan: 35 skenario uji telah memvalidasi seluruh 11 area pembaruan sistem (U-01 sampai U-11). Total: 35 skenario uji.",,META,,Dibuat: 2026-11-26 | Revisi: Hardening V2.2 (Final Review Findings Applied) | PIC: QA SDET Team | SUT: drpulltelkomsel v2.0.0
 TC-001,Memastikan DR Pull berhasil mengambil laporan status Delivered (D) dari Telkomsel dan meneruskannya ke antrean laporan DR serta antrean database.,TC-001 — Pengambilan Status SMS Berhasil (Delivered) dan Pengiriman Laporan ke Antrean,Memastikan DR Pull berhasil mengambil status Delivered dari Telkomsel dan mengirimkan laporannya ke antrean DR report serta database queue.,P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-D-001', appsid='cp_sample', sid='sender_sample' pada MongoDB dr_pull_telkomsel.
 2. Atur server uji Telkomsel agar membalas status Delivered: HTTP 200, deliveryStatus='D', errorCode='000'.
 3. Jalankan aplikasi drpulltelkomsel untuk memproses transaksi tersebut.
@@ -1131,3 +1133,22 @@ Respons Telkomsel: HTTP 503 Service Unavailable.","1. MongoDB: status='PENDING' 
 22:22:07.285 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-503-034, PULLING -> PENDING (backoff, attempt=1)
 22:22:09.445 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_221415/TC-034","Pilar-4, resilience, retry_backoff"
+TC-035,"Memastikan transaksi SMS yang dikirim melalui Transmitter Telkomsel V2 secara otomatis terdaftar di MongoDB tanpa password, ditarik statusnya oleh DR Pull V2, dan diselesaikan hingga berstatus RESOLVED.",TC-035 — Integrasi Pengiriman SMS Transmitter Telkomsel V2 Hingga Penyelesaian Status DR Pull,Memastikan transaksi SMS yang berhasil dikirim Transmitter Telkomsel V2 tersimpan di MongoDB dan diselesaikan oleh DR Pull hingga status RESOLVED.,P0,"1. Kirim pesan SMS MT ke antrean ActiveMQ jns.transmitter.telkomsel.reg.247.
+2. Transmitter Telkomsel V2 memproses pesan dan mengirimkan permintaan POST /bank/v2/pushbulk dengan tanda tangan HMAC-SHA256 ke Mock Telkomsel.
+3. Mock Telkomsel mengembalikan respons berhasil HTTP 200 (response_code 1).
+4. Transmitter mempublikasikan perintah simpan transaksi ke antrean jns.db.mongodbv2 tanpa field password (pwd).
+5. DBExecutorMongoDb memproses antrean dan membuat dokumen transaksi berstatus PENDING pada MongoDB dr_pull_telkomsel.
+6. DR Pull mendeteksi transaksi jatuh tempo, mengubah status menjadi PULLING, dan me-resolve kunci rahasia mandiri dari konfigurasi apps_config.
+7. DR Pull memeriksa status transaksi ke Mock Telkomsel (POST /bank/v2/transaction-status) dan menerima status Delivered (D).
+8. DR Pull menerbitkan pesan laporan DR ke antrean jns.dr.drrealhandler.
+9. DR Pull menerbitkan perintah database SQL ke antrean jns.db.deliveryreport.
+10. Status dokumen transaksi pada MongoDB diperbarui menjadi RESOLVED.","Transmitter Telkomsel V2 aktif (192.168.181.51).
+DBExecutorMongoDb aktif (192.168.181.51, antrean jns.db.mongodbv2).
+DR Pull Telkomsel v2.0.0 aktif.
+ActiveMQ broker (192.168.181.51) dan Mock Telkomsel V2 aktif.","1. Pesan SMS MT berhasil diproses oleh Transmitter Telkomsel V2 dan menghasilkan ACK pada antrean jns.app.submitresults.
+2. Dokumen transaksi baru tersimpan di MongoDB dr_pull_telkomsel dengan status PENDING serta terbukti tidak memuat field pwd.
+3. DR Pull berhasil mengambil dan memproses transaksi tersebut tanpa membutuhkan password dari dokumen.
+4. Laporan DR berhasil diteruskan ke antrean jns.dr.drrealhandler tepat satu kali.
+5. Perintah database SQL berhasil diteruskan ke antrean jns.db.deliveryreport tepat satu kali.
+6. Status akhir dokumen transaksi pada MongoDB berakhir dengan status RESOLVED.
+7. Tidak terjadi duplikasi pesan atau kesalahan sistem pada seluruh rantai integrasi.",Menunggu validasi dan eksekusi skenario integrasi,READY,Belum dieksekusi (siap validasi skenario),"Pilar-Integrasi, end_to_end, transmitter_to_drpull"

@@ -290,3 +290,15 @@ TC-034 — Penanganan Gangguan Layanan Vendor 503 Service Unavailable Sebagai Ke
     Then Transaksi tidak dinyatakan gagal permanen melainkan tetap berstatus PENDING
     And Riwayat jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
     And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir
+
+TC-035 — Integrasi Pengiriman SMS Transmitter Telkomsel V2 Hingga Penyelesaian Status DR Pull
+    [Tags]    P0    TC-035    Pilar-Integrasi    end_to_end    transmitter_to_drpull
+    Given Seluruh komponen integrasi Transmitter Telkomsel V2 DBExecutorMongoDb dan DR Pull telah siap beroperasi
+    When Pesan SMS MT dikirimkan ke antrean Transmitter Telkomsel V2
+    Then Layanan Transmitter berhasil meneruskan SMS ke vendor Telkomsel dan menghasilkan bukti ACK
+    And Dokumen transaksi baru tersimpan di database MongoDB tanpa memuat kunci password
+    And Layanan DR Pull berhasil memproses transaksi tersebut dengan kunci rahasia dari konfigurasi database
+    And Laporan pengiriman diteruskan ke antrean laporan DR tepat satu kali untuk transaksi tersebut
+    And Perintah pembaruan basis data SQL diteruskan ke antrean database tepat satu kali untuk transaksi tersebut
+    And Status akhir dokumen transaksi pada MongoDB diperbarui menjadi RESOLVED
+    And Seluruh layanan integrasi tetap berjalan normal tanpa mengalami crash maupun duplikasi laporan

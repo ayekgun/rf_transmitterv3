@@ -41,9 +41,12 @@ class ActiveMqDrPullLibrary:
         self.password = os.environ.get("PASS_AMQ", "admin")
         self.queue_dr = "/queue/jns.dr.drrealhandler"
         self.queue_db = "/queue/jns.db.deliveryreport"
+        self.queue_ack = "/queue/jns.app.submitresults"
+        self.queue_tx = "/queue/jns.transmitter.telkomsel.reg.247"
         self.lock = threading.Lock()
         self.messages_dr = []  # list of (headers, body, trx_id)
         self.messages_db = []  # list of (headers, body, trx_id)
+        self.messages_ack = []  # list of (headers, body, trx_id)
 
     @keyword("Activemq Hubungkan Ke Broker")
     def activemq_hubungkan_ke_broker(self, host=None, port=None, user=None, password=None):
@@ -60,10 +63,11 @@ class ActiveMqDrPullLibrary:
         self.conn.set_listener("drpull_listener", DrPullStompListener(self))
         self.conn.connect(self.user, self.password, wait=True)
 
-        # Subscribe to both queues
+        # Subscribe to queues
         self.conn.subscribe(destination=self.queue_dr, id="sub_dr", ack="auto")
         self.conn.subscribe(destination=self.queue_db, id="sub_db", ack="auto")
-        logger.info(f"Berhasil terhubung ke ActiveMQ {self.host}:{self.port} dan subscribe ke {self.queue_dr} serta {self.queue_db}.")
+        self.conn.subscribe(destination=self.queue_ack, id="sub_ack", ack="auto")
+        logger.info(f"Berhasil terhubung ke ActiveMQ {self.host}:{self.port} dan subscribe ke {self.queue_dr}, {self.queue_db}, serta {self.queue_ack}.")
 
     @keyword("Activemq Putuskan Dari Broker")
     def activemq_putuskan_dari_broker(self):
@@ -80,7 +84,8 @@ class ActiveMqDrPullLibrary:
         with self.lock:
             self.messages_dr.clear()
             self.messages_db.clear()
-        logger.info("Penampung pesan ActiveMQ drrealhandler dan deliveryreport berhasil di-reset.")
+            self.messages_ack.clear()
+        logger.info("Penampung pesan ActiveMQ drrealhandler, deliveryreport, dan submitresults berhasil di-reset.")
 
     @keyword("Activemq Ambil Pesan Dr Handler Sesuai Trxid")
     def activemq_ambil_pesan_dr_handler_sesuai_trxid(self, provider_trxid, timeout_sec=10):
@@ -266,6 +271,67 @@ class ActiveMqDrPullLibrary:
             raise AssertionError(f"Jumlah pesan DB executor untuk {target_trx} mismatch: expected {expected_count} tapi dapat {count}")
         logger.info(f"Jumlah pesan DB executor terverifikasi tepat {expected_count} untuk {target_trx}.")
 
+    @keyword("Activemq Buat Message Id Integrasi Unik")
+    def activemq_buat_message_id_integrasi_unik(self, prefix="itest-e2e"):
+        mid = f"{prefix}-{int(time.time() * 1000)}"
+        logger.info(f"Dibuat unique messageid integrasi: {mid}")
+        return mid
+
+    @keyword("Activemq Kirim Pesan Sms Mt Ke Transmitter")
+    def activemq_kirim_pesan_sms_mt_ke_transmitter(self, messageid, msisdn="6281102000319", text="Hello Integration"):
+        import base64
+        import urllib.request
+        mid = str(messageid).strip()
+        body = (
+            f"messageid={mid}&trxid=JOB-{mid}&msisdn={msisdn}&message={urllib.parse.quote_plus(text)}"
+            f"&senderid=QueueSenderID&uid=QueueUID&providerid=1&sender=MASK&servicetype=SMS"
+            f"&smspartition=1&chargecode=FREE&clientid=1&divisionid=1&mask_id=1"
+        )
+        url = f"http://{self.host}:8161/api/message/jns.transmitter.telkomsel.reg.247?type=queue"
+        data = urllib.parse.urlencode({"body": body}).encode("utf-8")
+        req = urllib.request.Request(url, data=data)
+        auth = base64.b64encode(f"{self.user}:{self.password}".encode("ascii")).decode("ascii")
+        req.add_header("Authorization", f"Basic {auth}")
+        with urllib.request.urlopen(req, timeout=5) as r:
+            pass
+        _log_chunked("PAYLOAD SMS MT DIKIRIM KE TRANSMITTER", body)
+        logger.info(f"Pesan SMS MT terkirim ke jns.transmitter.telkomsel.reg.247 dengan messageid={mid}")
+
+    @keyword("Activemq Verifikasi Ack Transmitter Sukses")
+    def activemq_verifikasi_ack_transmitter_sukses(self, messageid, timeout_sec=10):
+        target_mid = str(messageid).strip()
+        end_time = time.time() + float(timeout_sec)
+        found_ack = None
+        while time.time() < end_time:
+            with self.lock:
+                for h, body, trx in self.messages_ack:
+                    if f"messageid={target_mid}" in body or f"trxid={target_mid}" in body or target_mid in body:
+                        found_ack = body
+                        break
+            if found_ack:
+                break
+            time.sleep(0.2)
+
+        if not found_ack:
+            raise AssertionError(f"Pesan ACK untuk messageid={target_mid} TIDAK DITERIMA di {self.queue_ack} dalam {timeout_sec}s")
+
+        parsed = urllib.parse.parse_qs(found_ack, keep_blank_values=True)
+        tx_status = parsed.get("transmitter_submit_status", [""])[0]
+        prov_status = parsed.get("provider_submit_status", [""])[0]
+        provider_trx_id = parsed.get("provider_trxid", parsed.get("provider_trx_id", [""]))[0]
+
+        _log_chunked("ACTUAL ACK PAYLOAD", found_ack)
+
+        if tx_status != "1" and tx_status != "SUCCESS_RECEIVED":
+            raise AssertionError(f"ACK transmitter_submit_status mismatch: expected 1/SUCCESS_RECEIVED but got '{tx_status}'")
+        if prov_status != "1":
+            raise AssertionError(f"ACK provider_submit_status mismatch: expected 1 but got '{prov_status}'")
+        if not provider_trx_id:
+            raise AssertionError("ACK provider_trx_id is empty!")
+
+        logger.info(f"ACK Transmitter terverifikasi sukses: messageid={target_mid}, provider_trx_id={provider_trx_id}, tx_status={tx_status}, prov_status={prov_status}")
+        return provider_trx_id
+
     # Internal helper
     def store_message(self, destination, headers, body):
         trx_id = ""
@@ -273,6 +339,9 @@ class ActiveMqDrPullLibrary:
             if "provider_trxid=" in body:
                 parts = urllib.parse.parse_qs(body, keep_blank_values=True)
                 trx_id = parts.get("provider_trxid", [""])[0]
+            elif "provider_trx_id=" in body:
+                parts = urllib.parse.parse_qs(body, keep_blank_values=True)
+                trx_id = parts.get("provider_trx_id", [""])[0]
             elif "INSERT INTO" in body and "VALUES(" in body:
                 # Extract trx_id from VALUES('trxid', ...
                 val_start = body.find("VALUES('")
@@ -287,3 +356,5 @@ class ActiveMqDrPullLibrary:
                 self.messages_dr.append((headers, body, trx_id))
             elif "deliveryreport" in destination:
                 self.messages_db.append((headers, body, trx_id))
+            elif "submitresults" in destination:
+                self.messages_ack.append((headers, body, trx_id))

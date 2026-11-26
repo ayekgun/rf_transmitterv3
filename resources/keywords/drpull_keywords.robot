@@ -60,6 +60,7 @@ Dapatkan ID Transaksi Scoped
         IF    '${t}' == 'TC-032'    RETURN    SAMPLE-BATCH-032
         IF    '${t}' == 'TC-033'    RETURN    MOCK-FENCE-PUB-033
         IF    '${t}' == 'TC-034'    RETURN    MOCK-503-034
+        IF    '${t}' == 'TC-035'    RETURN    SAMPLE-E2E-035
     END
     RETURN    SAMPLE-TEST-999
 
@@ -767,3 +768,50 @@ Permintaan pemeriksaan dikirimkan membawa parameter pada bagian query string URL
 
 Server simulasi menolak permintaan tersebut dengan status kode HTTP 400 Bad Request
     Mock Telkomsel Verifikasi Client Response    expected_status=400
+
+# ==============================================================================
+# KEYWORDS UNTUK TC-035 (INTEGRASI TRANSMITTER KE DR PULL)
+# ==============================================================================
+Seluruh komponen integrasi Transmitter Telkomsel V2 DBExecutorMongoDb dan DR Pull telah siap beroperasi
+    ${mid}=    Activemq Buat Message Id Integrasi Unik
+    Set Test Variable    ${E2E_MESSAGE_ID}    ${mid}
+    Set Test Variable    ${E2E_PROVIDER_TRXID}    ${EMPTY}
+    Set Identitas Transaksi Pengujian    ${mid}
+    Drpull App Verifikasi Service Sedang Berjalan
+    Activemq Reset Penampung Pesan
+    Mock Telkomsel Reset Perekam Request
+    Mock Telkomsel Set Secret    ${DEFAULT_CLIENT_SECRET}
+    Mock Telkomsel Set Secret Map    ${DEFAULT_CLIENT_SECRETS_JSON}
+
+Pesan SMS MT dikirimkan ke antrean Transmitter Telkomsel V2
+    Activemq Kirim Pesan Sms Mt Ke Transmitter    messageid=${E2E_MESSAGE_ID}
+
+Layanan Transmitter berhasil meneruskan SMS ke vendor Telkomsel dan menghasilkan bukti ACK
+    ${prov_trx}=    Wait Until Keyword Succeeds    15s    500ms    Activemq Verifikasi Ack Transmitter Sukses    messageid=${E2E_MESSAGE_ID}
+    Set Test Variable    ${E2E_PROVIDER_TRXID}    ${prov_trx}
+    Set Identitas Transaksi Pengujian    ${prov_trx}
+
+Dokumen transaksi baru tersimpan di database MongoDB tanpa memuat kunci password
+    ${prov_trx}=    Wait Until Keyword Succeeds    15s    500ms    Mongo Verifikasi Dokumen Terdaftar Tanpa Password    messageid=${E2E_MESSAGE_ID}
+    Set Test Variable    ${E2E_PROVIDER_TRXID}    ${prov_trx}
+    Set Identitas Transaksi Pengujian    ${prov_trx}
+
+Layanan DR Pull berhasil memproses transaksi tersebut dengan kunci rahasia dari konfigurasi database
+    Mongo Percepat Waktu Next Pull Menjadi Jatuh Tempo    provider_trxid=${E2E_PROVIDER_TRXID}
+    Wait Until Keyword Succeeds    15s    500ms    Mock Telkomsel Verifikasi Request V2 Masuk    ${E2E_PROVIDER_TRXID}
+
+Laporan pengiriman diteruskan ke antrean laporan DR tepat satu kali untuk transaksi tersebut
+    Wait Until Keyword Succeeds    15s    500ms    Activemq Verifikasi Pesan Dr Handler Masuk    provider_trxid=${E2E_PROVIDER_TRXID}    expected_status=D
+    Activemq Verifikasi Jumlah Pesan Dr Handler Tepat    expected_count=1    provider_trxid=${E2E_PROVIDER_TRXID}
+
+Perintah pembaruan basis data SQL diteruskan ke antrean database tepat satu kali untuk transaksi tersebut
+    Wait Until Keyword Succeeds    15s    500ms    Activemq Verifikasi Pesan Db Executor Masuk    provider_trxid=${E2E_PROVIDER_TRXID}    expected_status=D
+    Activemq Verifikasi Jumlah Pesan Db Executor Tepat    expected_count=1    provider_trxid=${E2E_PROVIDER_TRXID}
+
+Status akhir dokumen transaksi pada MongoDB diperbarui menjadi RESOLVED
+    Wait Until Keyword Succeeds    15s    500ms    Mongo Verifikasi Status Dokumen    provider_trxid=${E2E_PROVIDER_TRXID}    expected_status=RESOLVED
+
+Seluruh layanan integrasi tetap berjalan normal tanpa mengalami crash maupun duplikasi laporan
+    Drpull App Verifikasi Service Sedang Berjalan
+    Activemq Verifikasi Jumlah Pesan Dr Handler Tepat    expected_count=1    provider_trxid=${E2E_PROVIDER_TRXID}
+    Activemq Verifikasi Jumlah Pesan Db Executor Tepat    expected_count=1    provider_trxid=${E2E_PROVIDER_TRXID}

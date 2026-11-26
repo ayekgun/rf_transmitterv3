@@ -6,7 +6,8 @@ Manages smsCore.dr_pull_telkomsel collection, document planting, status assertio
 concurrency CAS simulation (claimPulling and claimPublishing).
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+import json
 import os
 import threading
 import time
@@ -234,3 +235,65 @@ class MongoDrPullLibrary:
 
         logger.info(f"Hasil kompetisi claimPublishing: Worker 1={results[0]}, Worker 2={results[1]}")
         return results
+
+    @keyword("Mongo Verifikasi Dokumen Terdaftar Tanpa Password")
+    def mongo_verifikasi_dokumen_terdaftar_tanpa_password(self, messageid, timeout_sec=15):
+        if self.collection is None:
+            self.mongo_hubungkan_ke_database_dr_pull()
+
+        mid = str(messageid).strip()
+        end_time = time.time() + float(timeout_sec)
+        doc = None
+        while time.time() < end_time:
+            doc = self.collection.find_one({"trxid": mid})
+            if doc:
+                break
+            time.sleep(0.5)
+
+        if not doc:
+            raise AssertionError(f"Dokumen dengan trxid={mid} TIDAK DITEMUKAN pada MongoDB dr_pull_telkomsel setelah {timeout_sec}s!")
+
+        # Anti-truncation log chunked
+        doc_copy = dict(doc)
+        if "_id" in doc_copy:
+            doc_copy["_id"] = str(doc_copy["_id"])
+        _log_chunked(f"Dokumen MongoDB Terdaftar [{mid}]", json.dumps(doc_copy, default=str, indent=2))
+
+        # Strict Assertions
+        if "pwd" in doc:
+            raise AssertionError(f"Dokumen MongoDB memuat field terlarang 'pwd': {doc.get('pwd')}")
+        if "client_secret" in doc:
+            raise AssertionError(f"Dokumen MongoDB memuat field terlarang 'client_secret': {doc.get('client_secret')}")
+
+        status = doc.get("status")
+        if status != "PENDING":
+            raise AssertionError(f"Status dokumen diharapkan 'PENDING' tetapi didapatkan '{status}'")
+
+        attempt = str(doc.get("attempt", "0"))
+        if attempt != "0":
+            raise AssertionError(f"Attempt dokumen diharapkan '0' tetapi didapatkan '{attempt}'")
+
+        if not doc.get("appsid") or not doc.get("sid"):
+            raise AssertionError(f"Kredensial appsid/sid tidak lengkap di dokumen: appsid={doc.get('appsid')}, sid={doc.get('sid')}")
+
+        provider_trxid = doc.get("provider_trxid")
+        if not provider_trxid:
+            raise AssertionError("Field provider_trxid pada dokumen kosong!")
+
+        logger.info(f"Dokumen MongoDB terbukti valid tanpa password: trxid={mid}, provider_trxid={provider_trxid}, status=PENDING, zero pwd")
+        return provider_trxid
+
+    @keyword("Mongo Percepat Waktu Next Pull Menjadi Jatuh Tempo")
+    def mongo_percepat_waktu_next_pull_menjadi_jatuh_tempo(self, provider_trxid):
+        if self.collection is None:
+            self.mongo_hubungkan_ke_database_dr_pull()
+
+        target_trx = str(provider_trxid).strip()
+        past_time = datetime.now(timezone.utc) - timedelta(seconds=10)
+        res = self.collection.update_one(
+            {"provider_trxid": target_trx},
+            {"$set": {"next_pull_at": past_time}}
+        )
+        if res.matched_count == 0:
+            raise AssertionError(f"Gagal mempercepat next_pull_at: dokumen {target_trx} tidak ditemukan")
+        logger.info(f"Waktu next_pull_at untuk {target_trx} berhasil dimajukan menjadi jatuh tempo.")

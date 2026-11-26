@@ -146,3 +146,23 @@ class DrPullAppLibrary:
     def drpull_app_flush_log_ke_disk(self):
         time.sleep(1.0)
         logger.info("Log SUT di-flush ke disk.")
+
+    @keyword("Drpull App Verifikasi Log Memuat String")
+    def drpull_app_verifikasi_log_memuat_string(self, expected_substring):
+        time.sleep(0.5)
+        files_to_check = [self.out_log, self.debug_log, self.error_log]
+        found = False
+        sample_tail = ""
+        for log_file in files_to_check:
+            if not os.path.isfile(log_file):
+                continue
+            with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+                if expected_substring in content:
+                    found = True
+                    break
+                sample_tail = content[-500:] if len(content) > 500 else content
+
+        if not found:
+            raise AssertionError(f"String '{expected_substring}' TIDAK DITEMUKAN pada log SUT! Cuplikan log terakhir:\n{sample_tail}")
+        logger.info(f"String '{expected_substring}' terbukti tercatat pada log SUT.")

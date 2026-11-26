@@ -196,10 +196,16 @@ Konfigurasi database memuat ketiga tingkat kunci rahasia sekaligus dengan nilai 
 Kunci tingkat satu appsid:sid bernilai Kunci A, tingkat dua bernilai Kunci B, dan default bernilai Kunci C
     Log    Hirarki tiga tingkat secret tervalidasi di memori Mock Server dan MySQL apps_config.
 
-Transaksi berhasil mendapatkan status akhir Delivered dari vendor Telkomsel
+Konfigurasi antrean SQL disiapkan mengalami penolakan pengiriman broker
     ${trx}=    Dapatkan ID Transaksi Scoped
     Set Identitas Transaksi Pengujian    ${trx}
-    Mongo Tanam Dokumen Dr Pull    provider_trxid=${trx}    appsid=${DEFAULT_APPSID}    sid=${DEFAULT_SID}    status=PUBLISHING    attempt=0
+    Mysql Update Lookup Value    activemq_dbexecutor    ID:fault-injection-closed-queue-999
+    Drpull App Restart Service
+
+Terdapat transaksi SMS berstatus PENDING siap diperiksa dengan hasil Delivered
+    ${trx}=    Dapatkan ID Transaksi Scoped
+    Set Identitas Transaksi Pengujian    ${trx}
+    Mongo Tanam Dokumen Dr Pull    provider_trxid=${trx}    appsid=${DEFAULT_APPSID}    sid=${DEFAULT_SID}    status=PENDING    attempt=0
 
 Terdapat tiga transaksi SMS sekaligus dalam satu siklus pemindaian berkala yang sama
     Mongo Bersihkan Dokumen Uji    SAMPLE-BATCH-OK1
@@ -343,11 +349,9 @@ Sistem memeriksa status dan gerbang jaringan Telkomsel mengembalikan respons 502
     ${trx}=    Dapatkan ID Transaksi Scoped
     Wait Until Keyword Succeeds    12s    500ms    Mongo Verifikasi Status Dokumen    provider_trxid=${trx}    expected_status=PENDING
 
-Penerbitan pesan laporan DR ke antrean pertama berhasil namun antrean database SQL mengalami gangguan
+Layanan DR Pull memproses pemeriksaan status transaksi tersebut
     ${trx}=    Dapatkan ID Transaksi Scoped
-    # Simulasi: Pesan DR terbit ke jns.dr.drrealhandler, SQL gagal, doc tertahan di PUBLISHING
-    Activemq Kirim Pesan Dr Handler    provider_trxid=${trx}    status=D
-    Log    Pesan DR berhasil diterbitkan ke antrean pertama, antrean kedua mengalami gangguan.
+    Wait Until Keyword Succeeds    12s    500ms    Mongo Verifikasi Status Dokumen    provider_trxid=${trx}    expected_status=PUBLISHING
 
 Sistem menjalankan pemindaian dan pemrosesan batch transaksi tersebut dalam satu siklus sweep
     Log    Menjalankan sweep batch transaksi...
@@ -637,26 +641,33 @@ Riwayat jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan 
     ${trx}=    Dapatkan ID Transaksi Scoped
     Wait Until Keyword Succeeds    12s    500ms    Mongo Verifikasi Attempt Dokumen    provider_trxid=${trx}    expected_attempt=1
 
-Dokumen transaksi tetap tertahan pada status PUBLISHING untuk investigasi manual operasional
+Pesan laporan DR berhasil dikirim tepat satu kali ke antrean jns.dr.drrealhandler
+    ${trx}=    Dapatkan ID Transaksi Scoped
+    Activemq Verifikasi Pesan Dr Handler Masuk    provider_trxid=${trx}    expected_status=D
+
+Pengiriman laporan ke antrean SQL gagal ditolak oleh broker
+    ${trx}=    Dapatkan ID Transaksi Scoped
+    Activemq Verifikasi Jumlah Pesan Db Executor Tepat    expected_count=0    provider_trxid=${trx}
+
+Layanan SUT mencatat kegagalan publikasi parsial dan perlunya investigasi manual pada log
+    ${trx}=    Dapatkan ID Transaksi Scoped
+    Drpull App Verifikasi Log Memuat String    [PullWorker] publish gagal trx=${trx}, doc tetap PUBLISHING (perlu investigasi manual)
+
+Status dokumen transaksi tertahan pada status PUBLISHING di database MongoDB
     ${trx}=    Dapatkan ID Transaksi Scoped
     Mongo Verifikasi Status Dokumen    provider_trxid=${trx}    expected_status=PUBLISHING
 
-Prosedur rekonsiliasi recovery membuktikan keberadaan pesan DR terlebih dahulu sebelum menerbitkan pesan SQL yang tertinggal
+Dokumen tidak diproses ulang pada siklus pemindaian berikutnya dan tidak terjadi duplikasi pesan
     ${trx}=    Dapatkan ID Transaksi Scoped
-    Activemq Verifikasi Pesan Dr Handler Masuk    provider_trxid=${trx}    expected_status=D
-    Activemq Kirim Pesan Db Executor    provider_trxid=${trx}    status=D
+    Sleep    3.0s
+    Mongo Verifikasi Status Dokumen    provider_trxid=${trx}    expected_status=PUBLISHING
+    Activemq Verifikasi Jumlah Pesan Dr Handler Tepat    expected_count=1    provider_trxid=${trx}
+    Activemq Verifikasi Jumlah Pesan Db Executor Tepat    expected_count=0    provider_trxid=${trx}
 
-Status akhir dokumen difinalisasi menjadi RESOLVED secara idempoten tanpa menduplikasi pesan DR jika rekonsiliasi dijalankan ulang
-    ${trx}=    Dapatkan ID Transaksi Scoped
-    Mongo Update Status Dokumen    provider_trxid=${trx}    new_status=RESOLVED    resolved_by=MANUAL_RECOVERY
-    # Re-run reconciliation procedure
-    ${doc}=    Mongo Ambil Dokumen Dr Pull    ${trx}
-    IF    '${doc['status']}' == 'RESOLVED'
-        Log    Idempotency check: Dokumen sudah RESOLVED, abort tanpa re-publishing.
-    ELSE
-        Fail    Dokumen belum RESOLVED!
-    END
-    Activemq Verifikasi Pesan Db Executor Masuk    provider_trxid=${trx}    expected_status=D
+Layanan SUT tetap berjalan normal tanpa mengalami crash
+    Drpull App Verifikasi Service Sedang Berjalan
+    Mysql Update Lookup Value    activemq_dbexecutor    jns.db.deliveryreport
+    Drpull App Restart Service
 
 Transaksi kedua dijadwalkan ulang sesuai aturan penanganan kesalahan sementara
     Wait Until Keyword Succeeds    36s    1s    Mongo Verifikasi Status Dokumen    provider_trxid=MOCK-TIMEOUT-BATCH    expected_status=PENDING

@@ -254,13 +254,17 @@ TC-030 — Penanganan Gangguan Gerbang Jaringan Vendor 502 Bad Gateway Sebagai K
     And Riwayat jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
     And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir
 
-TC-031 — Penanganan Kegagalan Parsial Antrean Hilir dan Prosedur Rekonsiliasi Recovery Idempoten
+TC-031 — Penanganan Kegagalan Parsial Antrean SQL dan Pencegahan Pengiriman Ulang Otomatis
     [Tags]    P1    TC-031    Pilar-4    resilience    downstream_failure_handling
-    Given Transaksi berhasil mendapatkan status akhir Delivered dari vendor Telkomsel
-    When Penerbitan pesan laporan DR ke antrean pertama berhasil namun antrean database SQL mengalami gangguan
-    Then Dokumen transaksi tetap tertahan pada status PUBLISHING untuk investigasi manual operasional
-    And Prosedur rekonsiliasi recovery membuktikan keberadaan pesan DR terlebih dahulu sebelum menerbitkan pesan SQL yang tertinggal
-    And Status akhir dokumen difinalisasi menjadi RESOLVED secara idempoten tanpa menduplikasi pesan DR jika rekonsiliasi dijalankan ulang
+    Given Konfigurasi antrean SQL disiapkan mengalami penolakan pengiriman broker
+    And Terdapat transaksi SMS berstatus PENDING siap diperiksa dengan hasil Delivered
+    When Layanan DR Pull memproses pemeriksaan status transaksi tersebut
+    Then Pesan laporan DR berhasil dikirim tepat satu kali ke antrean jns.dr.drrealhandler
+    And Pengiriman laporan ke antrean SQL gagal ditolak oleh broker
+    And Layanan SUT mencatat kegagalan publikasi parsial dan perlunya investigasi manual pada log
+    And Status dokumen transaksi tertahan pada status PUBLISHING di database MongoDB
+    And Dokumen tidak diproses ulang pada siklus pemindaian berikutnya dan tidak terjadi duplikasi pesan
+    And Layanan SUT tetap berjalan normal tanpa mengalami crash
 
 TC-032 — Isolasi Pemrosesan Transaksi dalam Satu Siklus Batch Pemindaian Bersama
     [Tags]    P1    TC-032    Pilar-4    resilience    batch_isolation

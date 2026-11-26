@@ -61,6 +61,7 @@ Bersihkan Konteks Pengujian
     END
     Mysql Set Konfigurasi Provider Status Url    ${MOCK_STATUS_URL}
     Mysql Set Konfigurasi Dr Pull Secret Dan Json    client_secret=${DEFAULT_CLIENT_SECRET}    client_secrets_json=${DEFAULT_CLIENT_SECRETS_JSON}
+    Mysql Update Lookup Value    activemq_dbexecutor    jns.db.deliveryreport
     Mock Telkomsel Reset Perekam Request
     Mock Telkomsel Set Secret    ${DEFAULT_CLIENT_SECRET}
     Mock Telkomsel Set Secret Map    ${DEFAULT_CLIENT_SECRETS_JSON}

@@ -238,6 +238,34 @@ class ActiveMqDrPullLibrary:
             self.messages_dr.append(({"destination": self.queue_dr}, body, str(provider_trxid)))
         logger.info(f"Manual recovery: pesan DR terkirim ke {self.queue_dr}: {body}")
 
+    @keyword("Activemq Verifikasi Jumlah Pesan Dr Handler Tepat")
+    def activemq_verifikasi_jumlah_pesan_dr_handler_tepat(self, expected_count, provider_trxid):
+        target_trx = str(provider_trxid).strip()
+        count = 0
+        with self.lock:
+            seen = set()
+            for h, body, trx in self.messages_dr:
+                if trx == target_trx or f"provider_trxid={target_trx}" in body:
+                    seen.add(body)
+            count = len(seen)
+        if count != int(expected_count):
+            raise AssertionError(f"Jumlah pesan DR handler untuk {target_trx} mismatch: expected {expected_count} tapi dapat {count}")
+        logger.info(f"Jumlah pesan DR handler terverifikasi tepat {expected_count} untuk {target_trx}.")
+
+    @keyword("Activemq Verifikasi Jumlah Pesan Db Executor Tepat")
+    def activemq_verifikasi_jumlah_pesan_db_executor_tepat(self, expected_count, provider_trxid):
+        target_trx = str(provider_trxid).strip()
+        count = 0
+        with self.lock:
+            seen = set()
+            for h, body, trx in self.messages_db:
+                if trx == target_trx or target_trx in body:
+                    seen.add(body)
+            count = len(seen)
+        if count != int(expected_count):
+            raise AssertionError(f"Jumlah pesan DB executor untuk {target_trx} mismatch: expected {expected_count} tapi dapat {count}")
+        logger.info(f"Jumlah pesan DB executor terverifikasi tepat {expected_count} untuk {target_trx}.")
+
     # Internal helper
     def store_message(self, destination, headers, body):
         trx_id = ""

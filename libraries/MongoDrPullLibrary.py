@@ -337,10 +337,24 @@ class MongoDrPullLibrary:
         dr_pub = doc.get("dr_published_at")
         if not dr_pub:
             raise AssertionError(f"Metadata dr_published_at kosong pada dokumen _id={doc_id}!")
+        if not isinstance(dr_pub, datetime):
+            raise AssertionError(f"dr_published_at bukan bertipe datetime valid: {type(dr_pub)}")
 
         sql_pub = doc.get("sql_published_at")
         if not sql_pub:
             raise AssertionError(f"Metadata sql_published_at kosong pada dokumen _id={doc_id}!")
+        if not isinstance(sql_pub, datetime):
+            raise AssertionError(f"sql_published_at bukan bertipe datetime valid: {type(sql_pub)}")
+
+        created_at = doc.get("created_at")
+        if isinstance(created_at, datetime):
+            dr_ts = dr_pub.timestamp()
+            sql_ts = sql_pub.timestamp()
+            created_ts = created_at.timestamp()
+            if dr_ts < (created_ts - 5.0):
+                raise AssertionError(f"dr_published_at ({dr_pub}) lebih awal dari created_at ({created_at})!")
+            if sql_ts < dr_ts:
+                raise AssertionError(f"sql_published_at ({sql_pub}) lebih awal dari dr_published_at ({dr_pub})!")
 
         logger.info(
             f"Dokumen _id={doc_id} terverifikasi 100% konsisten: trxid={actual_trxid}, provider_trxid={actual_prov}, "

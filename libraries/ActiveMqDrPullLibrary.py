@@ -63,10 +63,25 @@ class ActiveMqDrPullLibrary:
         self.conn.set_listener("drpull_listener", DrPullStompListener(self))
         self.conn.connect(self.user, self.password, wait=True)
 
-        # Subscribe to queues
-        self.conn.subscribe(destination=self.queue_dr, id="sub_dr", ack="auto")
-        self.conn.subscribe(destination=self.queue_db, id="sub_db", ack="auto")
-        self.conn.subscribe(destination=self.queue_ack, id="sub_ack", ack="auto")
+        # Subscribe to queues with high priority and prefetch to capture messages reliably
+        self.conn.subscribe(
+            destination=self.queue_dr,
+            id="sub_dr",
+            ack="auto",
+            headers={"activemq.priority": "127", "activemq.prefetchSize": "100"},
+        )
+        self.conn.subscribe(
+            destination=self.queue_db,
+            id="sub_db",
+            ack="auto",
+            headers={"activemq.priority": "127", "activemq.prefetchSize": "100"},
+        )
+        self.conn.subscribe(
+            destination=self.queue_ack,
+            id="sub_ack",
+            ack="auto",
+            headers={"activemq.priority": "127", "activemq.prefetchSize": "100"},
+        )
         logger.info(f"Berhasil terhubung ke ActiveMQ {self.host}:{self.port} dan subscribe ke {self.queue_dr}, {self.queue_db}, serta {self.queue_ack}.")
 
     @keyword("Activemq Putuskan Dari Broker")
@@ -111,31 +126,6 @@ class ActiveMqDrPullLibrary:
                         _log_chunked(f"Pesan DB Executor [{target_trx}]", body)
                         return body
             time.sleep(0.3)
-        # Fallback check on downstream DB table if SIT dbexecutor consumed it first from queue
-        try:
-            import pymysql
-            db_conn = pymysql.connect(
-                host=os.environ.get("MYSQL_CFG_HOST", "192.168.181.63"),
-                port=int(os.environ.get("MYSQL_CFG_PORT", 3306)),
-                user=os.environ.get("MYSQL_CFG_USER", "root"),
-                password=os.environ.get("MYSQL_CFG_PASS", "jatis123"),
-                database="broadcast",
-                cursorclass=pymysql.cursors.DictCursor
-            )
-            with db_conn.cursor() as cur:
-                cur.execute("SELECT * FROM delivery_reports_new WHERE provider_trxid = %s ORDER BY created DESC LIMIT 1", (target_trx,))
-                row = cur.fetchone()
-            db_conn.close()
-            if row:
-                sql_reconstructed = f"INSERT INTO delivery_reports_new(provider_trxid, channel_group_name, provider_status, provider_status_received, provider_err, created) VALUES('{row['provider_trxid']}','{row['channel_group_name']}','{row['provider_status']}','{row['provider_status_received']}','{row['provider_err']}',NOW());"
-                with self.lock:
-                    if not any(target_trx in b for h, b, t in self.messages_db):
-                        self.messages_db.append(({"source": "reconciled_mysql"}, sql_reconstructed, target_trx))
-                _log_chunked(f"Pesan DB Executor [Reconciled from DB] [{target_trx}]", sql_reconstructed)
-                return sql_reconstructed
-        except Exception as e:
-            logger.warn(f"Reconcile check on broadcast.delivery_reports_new failed: {e}")
-
         raise AssertionError(f"Pesan SQL untuk provider_trxid='{target_trx}' tidak ditemukan pada {self.queue_db} dalam {timeout_sec} detik.")
 
     @keyword("Activemq Verifikasi Pesan Dr Handler Masuk")
@@ -251,11 +241,9 @@ class ActiveMqDrPullLibrary:
         target_trx = str(provider_trxid).strip()
         count = 0
         with self.lock:
-            seen = set()
             for h, body, trx in self.messages_dr:
                 if trx == target_trx or f"provider_trxid={target_trx}" in body:
-                    seen.add(body)
-            count = len(seen)
+                    count += 1
         if count != int(expected_count):
             raise AssertionError(f"Jumlah pesan DR handler untuk {target_trx} mismatch: expected {expected_count} tapi dapat {count}")
         logger.info(f"Jumlah pesan DR handler terverifikasi tepat {expected_count} untuk {target_trx}.")
@@ -265,50 +253,31 @@ class ActiveMqDrPullLibrary:
         target_trx = str(provider_trxid).strip()
         count = 0
         with self.lock:
-            seen = set()
             for h, body, trx in self.messages_db:
                 if trx == target_trx or target_trx in body:
-                    seen.add(body)
-            count = len(seen)
-
-        if count == 0:
-            try:
-                import pymysql
-                db_conn = pymysql.connect(
-                    host=os.environ.get("MYSQL_CFG_HOST", "192.168.181.63"),
-                    port=int(os.environ.get("MYSQL_CFG_PORT", 3306)),
-                    user=os.environ.get("MYSQL_CFG_USER", "root"),
-                    password=os.environ.get("MYSQL_CFG_PASS", "jatis123"),
-                    database="broadcast",
-                    cursorclass=pymysql.cursors.DictCursor
-                )
-                with db_conn.cursor() as cur:
-                    cur.execute("SELECT COUNT(*) AS cnt FROM delivery_reports_new WHERE provider_trxid = %s", (target_trx,))
-                    row = cur.fetchone()
-                db_conn.close()
-                if row and row.get("cnt", 0) > 0:
-                    count = int(row["cnt"])
-            except Exception as e:
-                logger.warn(f"Reconcile count on broadcast.delivery_reports_new failed: {e}")
-
+                    count += 1
         if count != int(expected_count):
             raise AssertionError(f"Jumlah pesan DB executor untuk {target_trx} mismatch: expected {expected_count} tapi dapat {count}")
         logger.info(f"Jumlah pesan DB executor terverifikasi tepat {expected_count} untuk {target_trx}.")
 
     @keyword("Activemq Buat Message Id Integrasi Unik")
     def activemq_buat_message_id_integrasi_unik(self, prefix="itest-e2e"):
-        mid = f"{prefix}-{int(time.time() * 1000)}"
+        import random
+        rand_suffix = "".join(random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=6))
+        mid = f"{prefix}-{int(time.time() * 1000)}-{rand_suffix}"
         logger.info(f"Dibuat unique messageid integrasi: {mid}")
         return mid
 
     @keyword("Activemq Kirim Pesan Sms Mt Ke Transmitter")
-    def activemq_kirim_pesan_sms_mt_ke_transmitter(self, messageid, msisdn="6281102000319", text="Hello Integration"):
+    def activemq_kirim_pesan_sms_mt_ke_transmitter(
+        self, messageid, msisdn="6281102000319", text="Hello Integration", uid="INTEG_APP_035", senderid="INTEG_SID_035"
+    ):
         import base64
         import urllib.request
         mid = str(messageid).strip()
         body = (
             f"messageid={mid}&trxid=JOB-{mid}&msisdn={msisdn}&message={urllib.parse.quote_plus(text)}"
-            f"&senderid=QueueSenderID&uid=QueueUID&providerid=1&sender=MASK&servicetype=SMS"
+            f"&senderid={senderid}&uid={uid}&providerid=1&sender=MASK&servicetype=SMS"
             f"&smspartition=1&chargecode=FREE&clientid=1&divisionid=1&mask_id=1"
         )
         url = f"http://{self.host}:8161/api/message/jns.transmitter.telkomsel.reg.247?type=queue"
@@ -319,7 +288,7 @@ class ActiveMqDrPullLibrary:
         with urllib.request.urlopen(req, timeout=5) as r:
             pass
         _log_chunked("PAYLOAD SMS MT DIKIRIM KE TRANSMITTER", body)
-        logger.info(f"Pesan SMS MT terkirim ke jns.transmitter.telkomsel.reg.247 dengan messageid={mid}")
+        logger.info(f"Pesan SMS MT terkirim ke jns.transmitter.telkomsel.reg.247 dengan messageid={mid}, uid={uid}, senderid={senderid}")
 
     @keyword("Activemq Verifikasi Ack Transmitter Sukses")
     def activemq_verifikasi_ack_transmitter_sukses(self, messageid, timeout_sec=10):

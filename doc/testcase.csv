@@ -1174,25 +1174,25 @@ Mock Server Telkomsel V2 aktif dan siap melayani rute /bank/v2/pushbulk dan /ban
 6. DR Pull berhasil memeriksa status transaksi yang sama ke Mock Telkomsel dan memperoleh respons Delivered (D).
 7. DR Pull berhasil menerbitkan laporan DR ke jns.dr.drrealhandler dan perintah SQL ke jns.db.deliveryreport, masing-masing tepat satu kali membawa provider_trxid yang sesuai.
 8. Dokumen transaksi yang sama di MongoDB berhasil difinalisasi hingga berstatus RESOLVED.
-9. Tidak terdapat duplikasi laporan DR maupun perintah SQL untuk transaksi tersebut, dan seluruh layanan pada rantai integrasi tetap berjalan stabil tanpa crash.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 3.53s | [SUT LOG] files=2 lines=18 kw=0 errfile=0
+9. Tidak terdapat duplikasi laporan DR maupun perintah SQL untuk transaksi tersebut, dan seluruh layanan pada rantai integrasi tetap berjalan stabil tanpa crash.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 4.39s | [SUT LOG] files=2 lines=18 kw=0 errfile=0
 --- log/drpulltelkomsel.debug.log (9 baris) ---
-2026-11-27 01:07:03.536 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
-2026-11-27 01:07:03.591 c.j.d.scheduler.SweepTask State change: trxId=vme0UIgiU7GM3ftiahar, PENDING -> PULLING, leaseId=acfb1b03-2417-4b80-9d1f-48158ea43ecd
-2026-11-27 01:07:03.593 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=vme0UIgiU7GM3ftiahar appsid=QueueUID endpoint=http://localhost:8089/bank/v2/transaction-status
-2026-11-27 01:07:03.601 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=vme0UIgiU7GM3ftiahar httpStatus=200
-2026-11-27 01:07:03.641 c.j.d.mongo.MongoService State change: trxId=vme0UIgiU7GM3ftiahar, PULLING -> PUBLISHING
-2026-11-27 01:07:04.016 c.j.d.publish.ResultPublisher DR published, trxId=vme0UIgiU7GM3ftiahar, status=D
-2026-11-27 01:07:04.417 c.j.d.publish.ResultPublisher SQL insert published, trxId=vme0UIgiU7GM3ftiahar
-2026-11-27 01:07:04.476 c.j.d.mongo.MongoService State change: trxId=vme0UIgiU7GM3ftiahar, PUBLISHING -> RESOLVED
-2026-11-27 01:07:04.476 c.j.d.worker.PullWorker State change: trxId=vme0UIgiU7GM3ftiahar, PUBLISHING -> RESOLVED
+2026-11-27 06:55:33.414 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 1 trx due
+2026-11-27 06:55:33.507 c.j.d.scheduler.SweepTask State change: trxId=Pvgb1K12vIE36d6DKDtZ, PENDING -> PULLING, leaseId=33038bc6-5eb5-4b67-9827-b46a614bb3c3
+2026-11-27 06:55:33.560 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] request trx=Pvgb1K12vIE36d6DKDtZ appsid=INTEG_APP_035 endpoint=http://localhost:8089/bank/v2/transaction-status
+2026-11-27 06:55:33.657 c.j.d.http.TelkomselStatusClient [TelkomselStatusClient] response trx=Pvgb1K12vIE36d6DKDtZ httpStatus=200
+2026-11-27 06:55:33.755 c.j.d.mongo.MongoService State change: trxId=Pvgb1K12vIE36d6DKDtZ, PULLING -> PUBLISHING
+2026-11-27 06:55:34.374 c.j.d.publish.ResultPublisher DR published, trxId=Pvgb1K12vIE36d6DKDtZ, status=D
+2026-11-27 06:55:34.762 c.j.d.publish.ResultPublisher SQL insert published, trxId=Pvgb1K12vIE36d6DKDtZ
+2026-11-27 06:55:34.833 c.j.d.mongo.MongoService State change: trxId=Pvgb1K12vIE36d6DKDtZ, PUBLISHING -> RESOLVED
+2026-11-27 06:55:34.834 c.j.d.worker.PullWorker State change: trxId=Pvgb1K12vIE36d6DKDtZ, PUBLISHING -> RESOLVED
 --- out-drpulltelkomsel.log (9 baris) ---
-01:07:03.536 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
-01:07:03.591 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=vme0UIgiU7GM3ftiahar, PENDING -> PULLING, leaseId=acfb1b03-2417-4b80-9d1f-48158ea43ecd
-01:07:03.593 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=vme0UIgiU7GM3ftiahar appsid=QueueUID endpoint=http://localhost:8089/bank/v2/transaction-status
-01:07:03.601 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=vme0UIgiU7GM3ftiahar httpStatus=200
-01:07:03.641 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=vme0UIgiU7GM3ftiahar, PULLING -> PUBLISHING
-01:07:04.016 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=vme0UIgiU7GM3ftiahar, status=D
-01:07:04.417 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=vme0UIgiU7GM3ftiahar
-01:07:04.476 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=vme0UIgiU7GM3ftiahar, PUBLISHING -> RESOLVED
-01:07:04.476 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=vme0UIgiU7GM3ftiahar, PUBLISHING -> RESOLVED
-artifact=results/logs/20261127_005914/TC-035","Pilar-Integrasi, end_to_end, transmitter_to_drpull"
+06:55:33.414 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 1 trx due
+06:55:33.507 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - State change: trxId=Pvgb1K12vIE36d6DKDtZ, PENDING -> PULLING, leaseId=33038bc6-5eb5-4b67-9827-b46a614bb3c3
+06:55:33.560 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] request trx=Pvgb1K12vIE36d6DKDtZ appsid=INTEG_APP_035 endpoint=http://localhost:8089/bank/v2/transaction-status
+06:55:33.657 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=Pvgb1K12vIE36d6DKDtZ httpStatus=200
+06:55:33.755 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=Pvgb1K12vIE36d6DKDtZ, PULLING -> PUBLISHING
+06:55:34.374 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - DR published, trxId=Pvgb1K12vIE36d6DKDtZ, status=D
+06:55:34.762 [pool-1-thread-1] INFO  c.j.d.publish.ResultPublisher - SQL insert published, trxId=Pvgb1K12vIE36d6DKDtZ
+06:55:34.833 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=Pvgb1K12vIE36d6DKDtZ, PUBLISHING -> RESOLVED
+06:55:34.834 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=Pvgb1K12vIE36d6DKDtZ, PUBLISHING -> RESOLVED
+artifact=results/logs/20261127_065511/TC-035","Pilar-Integrasi, end_to_end, transmitter_to_drpull"

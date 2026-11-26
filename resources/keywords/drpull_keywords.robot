@@ -785,7 +785,7 @@ Seluruh komponen integrasi Transmitter Telkomsel V2 DBExecutorMongoDb dan DR Pul
     Mock Telkomsel Set Secret Map    ${DEFAULT_CLIENT_SECRETS_JSON}
 
 Pesan SMS MT dikirimkan ke antrean Transmitter Telkomsel V2
-    Activemq Kirim Pesan Sms Mt Ke Transmitter    messageid=${E2E_MESSAGE_ID}
+    Activemq Kirim Pesan Sms Mt Ke Transmitter    messageid=${E2E_MESSAGE_ID}    uid=${INTEG_APPSID}    senderid=${INTEG_SID}
 
 Layanan Transmitter berhasil meneruskan SMS ke vendor Telkomsel dan menghasilkan bukti ACK
     ${prov_trx}=    Wait Until Keyword Succeeds    15s    500ms    Activemq Verifikasi Ack Transmitter Sukses    messageid=${E2E_MESSAGE_ID}
@@ -798,8 +798,8 @@ Dokumen transaksi baru tersimpan di database MongoDB tanpa memuat kunci password
 
 Layanan DR Pull berhasil memproses transaksi tersebut dengan kunci rahasia dari konfigurasi database
     Mongo Percepat Waktu Next Pull Menjadi Jatuh Tempo    provider_trxid=${E2E_PROVIDER_TRXID}
-    Wait Until Keyword Succeeds    15s    500ms    Mock Telkomsel Verifikasi Request V2 Masuk    trx_id=${E2E_PROVIDER_TRXID}    expected_appsid=QueueUID    expected_sid=QueueSenderID
-    Mock Telkomsel Verifikasi Signature Menggunakan Secret Eksklusif    trx_id=${E2E_PROVIDER_TRXID}    expected_secret=${DEFAULT_CLIENT_SECRET}    rejected_secrets=INVALID_FALLBACK_SECRET,WRONG_SECRET_ABC
+    Wait Until Keyword Succeeds    15s    500ms    Mock Telkomsel Verifikasi Request V2 Masuk    trx_id=${E2E_PROVIDER_TRXID}    expected_appsid=${INTEG_APPSID}    expected_sid=${INTEG_SID}
+    Mock Telkomsel Verifikasi Signature Menggunakan Secret Eksklusif    trx_id=${E2E_PROVIDER_TRXID}    expected_secret=${INTEG_SECRET_UNIQUE}    rejected_secrets=${DEFAULT_CLIENT_SECRET},FALLBACK_SECRET_ABC
 
 Laporan pengiriman diteruskan ke antrean laporan DR tepat satu kali untuk transaksi tersebut
     Wait Until Keyword Succeeds    15s    500ms    Activemq Verifikasi Pesan Dr Handler Masuk    provider_trxid=${E2E_PROVIDER_TRXID}    expected_status=D

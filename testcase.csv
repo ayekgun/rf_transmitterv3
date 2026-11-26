@@ -23,13 +23,7 @@ Dependency Environment: MongoDB (smsCore.dr_pull_telkomsel), ActiveMQ (jns.dr.dr
 [U-09] Format Pengiriman Laporan ke Dua Antrean -> diuji oleh: TC-001, TC-002, TC-011, TC-031
 [U-10] Pemeriksaan Awal dan Isolasi Pemrosesan -> diuji oleh: TC-013, TC-025, TC-026, TC-032
 Pemetaan cakupan: 34 skenario uji telah memvalidasi seluruh 10 area pembaruan sistem (U-01 sampai U-10). Total: 34 skenario uji.",,META,,Dibuat: 2026-11-26 | Revisi: Hardening V2.2 (Final Review Findings Applied) | PIC: QA SDET Team | SUT: drpulltelkomsel v2.0.0
-TC-001,Memastikan DR Pull berhasil mengambil laporan status Delivered (D) dari Telkomsel dan meneruskannya ke antrean laporan DR serta antrean database.,TC-001 — Pengambilan Status SMS Berhasil (Delivered) dan Pengiriman Laporan ke Antrean,"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-And Konfigurasi akun mitra dan alamat Telkomsel V2 sudah benar
-When DR Pull memeriksa status pengiriman ke Telkomsel V2
-Then Telkomsel mengabarkan pesan berhasil diterima dengan status D
-And Status transaksi di database diperbarui menjadi RESOLVED
-And Tepat satu laporan pengiriman dikirim ke antrean laporan DR untuk transaksi tersebut
-And Tepat satu data simpan dikirim ke antrean database untuk transaksi tersebut",P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-D-001', appsid='cp_sample', sid='sender_sample' pada MongoDB dr_pull_telkomsel.
+TC-001,Memastikan DR Pull berhasil mengambil laporan status Delivered (D) dari Telkomsel dan meneruskannya ke antrean laporan DR serta antrean database.,TC-001 — Pengambilan Status SMS Berhasil (Delivered) dan Pengiriman Laporan ke Antrean,Memastikan DR Pull berhasil mengambil status Delivered dari Telkomsel dan mengirimkan laporannya ke antrean DR report serta database queue.,P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-D-001', appsid='cp_sample', sid='sender_sample' pada MongoDB dr_pull_telkomsel.
 2. Atur server uji Telkomsel agar membalas status Delivered: HTTP 200, deliveryStatus='D', errorCode='000'.
 3. Jalankan aplikasi drpulltelkomsel untuk memproses transaksi tersebut.
 4. Periksa dokumen di database MongoDB: pastikan status berubah menjadi 'RESOLVED', attempt tetap 0, dan waktu pengiriman dr_published_at serta sql_published_at terisi.
@@ -63,13 +57,7 @@ Respons Telkomsel: HTTP 200, deliveryStatus='D', errorCode='000'.","1. MongoDB: 
 14:04:46.014 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-D-001, PUBLISHING -> RESOLVED
 14:04:48.166 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_140423/TC-001","Pilar-1, e2e, happy_path"
-TC-002,Memastikan DR Pull berhasil mengambil status Not Delivered (ND) beserta kode alasan gagal dari Telkomsel dan meneruskannya ke antrean laporan DR serta antrean database.,TC-002 — Pengambilan Status SMS Gagal (Not Delivered) Beserta Kode Alasan dari Telkomsel,"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-And Konfigurasi akun mitra dan alamat Telkomsel V2 sudah benar
-When DR Pull memeriksa status pengiriman ke Telkomsel V2
-Then Telkomsel mengabarkan pesan gagal terkirim dengan status ND dan kode alasan 061
-And Status transaksi di database diperbarui menjadi RESOLVED
-And Laporan pengiriman dikirim ke antrean laporan DR dengan status ND dan kode 061
-And Data simpan dikirim ke antrean database dengan rincian kode alasan gagal",P0,"1. Siapkan dokumen PENDING dengan provider_trxid='MOCK-ND-002', appsid='cp_sample', sid='sender_sample' pada MongoDB.
+TC-002,Memastikan DR Pull berhasil mengambil status Not Delivered (ND) beserta kode alasan gagal dari Telkomsel dan meneruskannya ke antrean laporan DR serta antrean database.,TC-002 — Pengambilan Status SMS Gagal (Not Delivered) Beserta Kode Alasan dari Telkomsel,Memastikan DR Pull berhasil mengambil status Not Delivered beserta kode alasan gagal dari Telkomsel dan meneruskannya ke antrean DR report serta database queue.,P0,"1. Siapkan dokumen PENDING dengan provider_trxid='MOCK-ND-002', appsid='cp_sample', sid='sender_sample' pada MongoDB.
 2. Atur server uji Telkomsel agar membalas status gagal: HTTP 200, deliveryStatus='ND', errorCode='061'.
 3. Jalankan aplikasi drpulltelkomsel untuk memproses transaksi tersebut.
 4. Periksa dokumen di database MongoDB: pastikan status berubah menjadi 'RESOLVED' dan attempt=0.
@@ -103,12 +91,7 @@ Respons Telkomsel: HTTP 200, deliveryStatus='ND', errorCode='061'.","1. MongoDB:
 13:55:46.596 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=MOCK-ND-002, PUBLISHING -> RESOLVED
 13:55:48.811 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-002","Pilar-1, e2e, happy_path"
-TC-003,Memastikan DR Pull mengirim permintaan HTTP sesuai format Telkomsel V2 dan tanda tangan keamanan (HMAC-SHA256) berubah jika data permintaan diubah.,TC-003 — Format Permintaan HTTP Keluar dan Pengujian Sensitivitas Tanda Tangan Keamanan,"Given DR Pull siap melakukan pemeriksaan status ke Telkomsel
-And Transaksi memiliki nomor transaksi yang valid
-When Permintaan status dikirimkan oleh sistem ke Telkomsel
-Then Permintaan menggunakan metode POST ke alamat V2 tanpa parameter tambahan di URL
-And Permintaan menyertakan header Content-Type, appsid, sid, X-Timestamp, dan X-Signature yang sah
-And Tanda tangan terbukti berubah jika isi permintaan, alamat URL, waktu, atau kunci rahasia diubah",P0,"1. Hapus riwayat penerimaan pada server uji Telkomsel.
+TC-003,Memastikan DR Pull mengirim permintaan HTTP sesuai format Telkomsel V2 dan tanda tangan keamanan (HMAC-SHA256) berubah jika data permintaan diubah.,TC-003 — Format Permintaan HTTP Keluar dan Pengujian Sensitivitas Tanda Tangan Keamanan,Memastikan permintaan HTTP keluar menggunakan format Telkomsel V2 dan tanda tangan keamanan HMAC-SHA256 terbukti berubah jika data permintaan diubah.,P0,"1. Hapus riwayat penerimaan pada server uji Telkomsel.
 2. Siapkan dokumen PENDING dengan provider_trxid='MOCK-PROTO-003' pada MongoDB.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa data permintaan yang ditangkap oleh server uji: pastikan metode POST, alamat /bank/v2/transaction-status, dan header X-Signature terisi 64 karakter heksadesimal.
@@ -141,11 +124,7 @@ Dokumen MongoDB: provider_trxid='MOCK-PROTO-003', appsid='cp_sample', sid='sende
 13:55:53.954 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=MOCK-PROTO-003, PUBLISHING -> RESOLVED
 13:55:56.108 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-003","Pilar-2, security, protocol_conformance"
-TC-004,"Memastikan transaksi yang statusnya belum ada di Telkomsel (HTTP 404) dijadwalkan untuk diperiksa kembali 30 menit kemudian, bukan langsung digagalkan.",TC-004 — Penjadwalan Pemeriksaan Ulang Saat Data Transaksi Belum Ada di Telkomsel (HTTP 404),"Given Transaksi SMS berstatus PENDING siap diperiksa untuk pertama kali (attempt=0)
-When Telkomsel mengabarkan bahwa transaksi belum ditemukan dengan kode 404
-Then Status transaksi tetap PENDING dan tidak dihentikan
-And Jumlah percobaan bertambah menjadi 1 dan waktu pemeriksaan berikutnya dijadwalkan 30 menit kemudian
-And Tidak ada laporan pengiriman yang diteruskan ke antrean laporan DR maupun database",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-404-004', attempt=0 pada MongoDB.
+TC-004,"Memastikan transaksi yang statusnya belum ada di Telkomsel (HTTP 404) dijadwalkan untuk diperiksa kembali 30 menit kemudian, bukan langsung digagalkan.",TC-004 — Penjadwalan Pemeriksaan Ulang Saat Data Transaksi Belum Ada di Telkomsel (HTTP 404),Memastikan transaksi yang belum ditemukan di Telkomsel (HTTP 404) dijadwalkan untuk retry 30 menit kemudian dan tidak langsung digagalkan.,P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-404-004', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas kode HTTP 404 Not Found.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status tetap 'PENDING', attempt bertambah menjadi 1, dan waktu next_pull_at mundur sekitar 30 menit ke depan.
@@ -171,11 +150,7 @@ Respons Telkomsel: HTTP 404 Not Found.","1. MongoDB: status='PENDING', attempt=1
 13:56:00.452 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:56:02.512 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-004","Pilar-4, resilience, retry_backoff"
-TC-005,Memastikan transaksi yang tetap tidak ditemukan di Telkomsel setelah 5 kali mencoba (attempt=5) dihentikan dan ditandai gagal permanen (GIVE_UP).,TC-005 — Penghentian Transaksi Setelah Mencapai Batas Maksimal 5 Kali Percobaan (GIVE_UP),"Given Transaksi SMS telah gagal ditemukan sebanyak 4 kali sebelumnya (attempt=4)
-When Telkomsel kembali menjawab bahwa transaksi belum ditemukan (HTTP 404) pada percobaan ke-5
-Then Jumlah percobaan transaksi bertambah menjadi 5
-And Sistem menghentikan pemeriksaan transaksi dan memperbarui status menjadi GIVE_UP
-And Tidak ada laporan pengiriman yang diteruskan ke antrean laporan DR maupun database",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-MAX-005', attempt=4 pada MongoDB.
+TC-005,Memastikan transaksi yang tetap tidak ditemukan di Telkomsel setelah 5 kali mencoba (attempt=5) dihentikan dan ditandai gagal permanen (GIVE_UP).,TC-005 — Penghentian Transaksi Setelah Mencapai Batas Maksimal 5 Kali Percobaan (GIVE_UP),Memastikan transaksi yang tetap tidak ditemukan di Telkomsel setelah 5 kali retry dihentikan permanen dengan status GIVE_UP tanpa mengirim laporan ke antrean.,P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-MAX-005', attempt=4 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas HTTP 404 Not Found.
 3. Jalankan aplikasi drpulltelkomsel untuk memproses transaksi.
 4. Periksa dokumen di MongoDB: pastikan status berubah menjadi 'GIVE_UP', attempt menjadi 5, dan last_error mencatat pesan 404.
@@ -201,11 +176,7 @@ Respons Telkomsel: HTTP 404 Not Found.","1. MongoDB: status='GIVE_UP', attempt=5
 13:56:08.899 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:56:10.957 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-005","Pilar-4, resilience, max_attempt"
-TC-006,"Memastikan saat server Telkomsel mengalami gangguan (HTTP 500), DR Pull mencatatnya sebagai masalah sementara dan menjadwalkan pemeriksaan ulang.",TC-006 — Penanganan Gangguan Server Telkomsel (HTTP 500) Sebagai Masalah Sementara,"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-When Pemeriksaan dilakukan dan server Telkomsel mengalami gangguan internal dengan kode 500
-Then Transaksi tidak langsung digagalkan melainkan tetap berstatus PENDING
-And Jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
-And Tidak ada laporan pengiriman yang dikirim ke antrean hilir",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-500-006', attempt=0 pada MongoDB.
+TC-006,"Memastikan saat server Telkomsel mengalami gangguan (HTTP 500), DR Pull mencatatnya sebagai masalah sementara dan menjadwalkan pemeriksaan ulang.",TC-006 — Penanganan Gangguan Server Telkomsel (HTTP 500) Sebagai Masalah Sementara,Memastikan gangguan server Telkomsel (HTTP 500) ditangani sebagai masalah sementara dengan menjadwalkan retry dan menaikkan jumlah percobaan.,P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-500-006', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas HTTP 500 Internal Server Error.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status tetap 'PENDING', attempt bertambah menjadi 1, dan last_error mencatat kode 500.
@@ -233,11 +204,7 @@ Respons Telkomsel: HTTP 500 Internal Server Error.","1. MongoDB: status='PENDING
 13:56:17.380 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:56:19.436 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-006","Pilar-4, resilience, retry_backoff"
-TC-007,"Memastikan saat Telkomsel tidak merespons dalam 30 detik (timeout), DR Pull tidak langsung membatalkan transaksi melainkan mencoba kembali nanti.",TC-007 — Penanganan Batas Waktu Menunggu Respons Telkomsel 30 Detik (Read Timeout),"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-When Permintaan status dikirimkan tetapi Telkomsel tidak merespons hingga melewati batas 30 detik
-Then Sistem menangani terputusnya waktu tunggu sebagai masalah sementara
-And Status transaksi tetap PENDING dengan pertambahan jumlah percobaan dan penjadwalan ulang
-And Tidak ada laporan pengiriman yang dikirim ke antrean hilir",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-TIMEOUT-007', attempt=0 pada MongoDB.
+TC-007,"Memastikan saat Telkomsel tidak merespons dalam 30 detik (timeout), DR Pull tidak langsung membatalkan transaksi melainkan mencoba kembali nanti.",TC-007 — Penanganan Batas Waktu Menunggu Respons Telkomsel 30 Detik (Read Timeout),Memastikan transaksi yang mengalami batas waktu tunggu respons Telkomsel (read timeout 30 detik) dijadwalkan untuk retry dan tidak dibatalkan permanen.,P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-TIMEOUT-007', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk menunda jawaban selama 35 detik (melebihi batas timeout 30 detik aplikasi).
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status tetap 'PENDING', attempt bertambah menjadi 1, dan last_error mencatat kesalahan timeout.
@@ -259,11 +226,7 @@ Penundaan respons server uji: 35 detik (batas timeout SUT: 30 detik).","1. Mongo
 13:56:51.570 [pool-1-thread-1] WARN  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] timeout/IO error trx=MOCK-TIMEOUT-007: timeout
 13:56:51.628 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-TIMEOUT-007, PULLING -> PENDING (backoff, attempt=1)
 artifact=results/logs/20261126_135518/TC-007","Pilar-4, resilience, timeout_handling"
-TC-008,"Memastikan saat Telkomsel membalas dengan HTTP 200 tetapi isi datanya rusak atau kosong, DR Pull mencoba kembali nanti dan tidak meneruskan data yang salah.",TC-008 — Penanganan Isi Respons Telkomsel yang Rusak pada HTTP 200,"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-When Telkomsel merespons dengan kode 200 tetapi isi pesannya rusak atau bukan format JSON yang benar
-Then Sistem memperlakukan isi pesan yang rusak tersebut sebagai masalah sementara
-And Status transaksi tetap PENDING dengan penjadwalan ulang dan jumlah percobaan bertambah
-And Tidak ada laporan pengiriman yang dikirim ke antrean hilir",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-BADJSON-008', attempt=0 pada MongoDB.
+TC-008,"Memastikan saat Telkomsel membalas dengan HTTP 200 tetapi isi datanya rusak atau kosong, DR Pull mencoba kembali nanti dan tidak meneruskan data yang salah.",TC-008 — Penanganan Isi Respons Telkomsel yang Rusak pada HTTP 200,Memastikan respons HTTP 200 dengan isi data rusak atau bukan JSON ditangani sebagai masalah sementara dengan menjadwalkan retry.,P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-BADJSON-008', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas HTTP 200 dengan isi teks rusak bukan JSON: '<html>Bad Gateway</html>'.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status tetap 'PENDING', attempt bertambah menjadi 1, dan last_error mencatat kesalahan pembacaan data.
@@ -287,11 +250,7 @@ Respons Telkomsel: HTTP 200 dengan isi teks bukan JSON.","1. MongoDB: status='PE
 13:56:55.957 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-MALFORMED-008, PULLING -> PENDING (backoff, attempt=1)
 13:56:58.100 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-008","Pilar-4, resilience, data_sanitization"
-TC-009,Memastikan DR Pull menggunakan kunci rahasia milik akun mitra (appsid) ketika kunci khusus untuk sender (sid) tidak ditemukan.,TC-009 — Penggunaan Kunci Rahasia Berdasarkan Appsid Saat Kunci Khusus SID Tidak Ada,"Given Konfigurasi kunci khusus pasangan appsid dan sid tidak tersedia
-And Konfigurasi kunci umum untuk appsid tersedia secara valid
-When DR Pull memeriksa status pengiriman untuk transaksi akun tersebut
-Then Sistem berhasil membuat tanda tangan keamanan menggunakan kunci rahasia appsid
-And Permintaan diterima oleh Telkomsel dan transaksi diselesaikan menjadi RESOLVED",P1,"1. Siapkan konfigurasi kunci mitra di database: kunci appsid 'cp_apponly' terdaftar, tetapi pasangan khusus 'cp_apponly:sender_xyz' tidak didaftarkan.
+TC-009,Memastikan DR Pull menggunakan kunci rahasia milik akun mitra (appsid) ketika kunci khusus untuk sender (sid) tidak ditemukan.,TC-009 — Penggunaan Kunci Rahasia Berdasarkan Appsid Saat Kunci Khusus SID Tidak Ada,Memastikan DR Pull menggunakan client secret milik appsid ketika konfigurasi khusus pasangan appsid dan sid tidak ditemukan.,P1,"1. Siapkan konfigurasi kunci mitra di database: kunci appsid 'cp_apponly' terdaftar, tetapi pasangan khusus 'cp_apponly:sender_xyz' tidak didaftarkan.
 2. Siapkan dokumen PENDING dengan appsid='cp_apponly', sid='sender_xyz', provider_trxid='SAMPLE-APPID-009' pada MongoDB.
 3. Atur server uji Telkomsel dengan kunci rahasia milik appsid tersebut.
 4. Jalankan aplikasi drpulltelkomsel.
@@ -323,11 +282,7 @@ Dokumen MongoDB: appsid='cp_apponly', sid='sender_xyz', provider_trxid='SAMPLE-A
 13:57:04.622 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - Lease no longer valid, trxId=SAMPLE-TIER2-009, abandon
 13:57:04.623 [pool-1-thread-1] WARN  c.j.d.worker.PullWorker - Finalize failed after successful publish, trxId=SAMPLE-TIER2-009, requires manual investigation
 artifact=results/logs/20261126_135518/TC-009","Pilar-2, security, secret_resolution"
-TC-010,Memastikan DR Pull memakai kunci rahasia cadangan utama (client_secret) saat kunci khusus sid maupun appsid tidak terdaftar.,TC-010 — Penggunaan Kunci Cadangan Utama Saat Kunci Khusus Mitra Tidak Ditemukan,"Given Konfigurasi kunci khusus pasangan appsid:sid maupun kunci appsid tidak ditemukan
-And Konfigurasi kunci rahasia cadangan utama client_secret tersedia
-When DR Pull memeriksa status pengiriman untuk transaksi tersebut
-Then Sistem otomatis menggunakan kunci rahasia cadangan utama untuk membuat tanda tangan keamanan
-And Permintaan diterima oleh Telkomsel dan transaksi diselesaikan menjadi RESOLVED",P1,"1. Pastikan pasangan 'cp_unknown:sender_unknown' dan 'cp_unknown' tidak ada di daftar kunci mitra.
+TC-010,Memastikan DR Pull memakai kunci rahasia cadangan utama (client_secret) saat kunci khusus sid maupun appsid tidak terdaftar.,TC-010 — Penggunaan Kunci Cadangan Utama Saat Kunci Khusus Mitra Tidak Ditemukan,Memastikan DR Pull otomatis menggunakan client secret cadangan utama ketika konfigurasi khusus sid maupun appsid tidak terdaftar.,P1,"1. Pastikan pasangan 'cp_unknown:sender_unknown' dan 'cp_unknown' tidak ada di daftar kunci mitra.
 2. Siapkan dokumen PENDING dengan appsid='cp_unknown', sid='sender_unknown', provider_trxid='SAMPLE-FALLBACK-010' pada MongoDB.
 3. Atur server uji Telkomsel dengan kunci rahasia cadangan utama (client_secret).
 4. Jalankan aplikasi drpulltelkomsel.
@@ -362,10 +317,7 @@ Dokumen MongoDB: appsid='cp_unknown', sid='sender_unknown', provider_trxid='SAMP
 13:57:09.920 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:57:11.972 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-010","Pilar-2, security, secret_fallback"
-TC-011,Memastikan isi pesan laporan pengiriman yang dikirim ke antrean laporan DR lengkap dan sesuai format yang dibutuhkan sistem penerima.,TC-011 — Kelengkapan Isi dan Format Pesan Laporan Pengiriman ke Antrean DR,"Given Transaksi berhasil mendapatkan status pengiriman dari Telkomsel
-When Sistem meneruskan laporan ke antrean laporan DR (jns.dr.drrealhandler)
-Then Pesan laporan memuat seluruh data penting seperti nomor transaksi, status pengiriman, waktu, dan nomor tujuan
-And Format pesan dapat dibaca dengan baik oleh sistem penerima tanpa data yang hilang",P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-D-011' pada MongoDB.
+TC-011,Memastikan isi pesan laporan pengiriman yang dikirim ke antrean laporan DR lengkap dan sesuai format yang dibutuhkan sistem penerima.,TC-011 — Kelengkapan Isi dan Format Pesan Laporan Pengiriman ke Antrean DR,Memastikan pesan DR report yang dikirim ke antrean jns.dr.drrealhandler memuat seluruh data transaksi yang lengkap dan sesuai format sistem penerima.,P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-D-011' pada MongoDB.
 2. Jalankan aplikasi drpulltelkomsel hingga status menjadi 'RESOLVED'.
 3. Ambil pesan laporan yang masuk ke antrean ActiveMQ jns.dr.drrealhandler.
 4. Periksa isi pesan: pastikan parameter provider_trxid, sid, deliveryStatus, done_time, dan format teks sesuai spesifikasi.
@@ -398,11 +350,7 @@ Respons Telkomsel: HTTP 200 Delivered.","1. Antrean jns.dr.drrealhandler menerim
 13:57:17.163 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:57:19.221 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-011","Pilar-1, e2e, downstream_contract"
-TC-012,"Memastikan saat dua proses berebut mengambil transaksi yang sama, hanya satu proses yang berhasil mengambil sehingga transaksi tidak diproses dua kali.",TC-012 — Pencegahan Pemrosesan Ganda Saat Dua Proses Mengambil Transaksi yang Sama,"Given Terdapat satu dokumen transaksi PENDING di database
-When Dua proses aplikasi mencoba mengambil transaksi tersebut pada saat yang bersamaan
-Then Hanya satu proses pemenang yang berhasil mengunci dan mengambil transaksi
-And Proses yang kalah membatalkan pengambilan transaksi tersebut
-And Transaksi hanya diproses satu kali dan laporan hanya dikirim tepat satu kali ke antrean",P0,"1. Siapkan dokumen PENDING dengan provider_trxid='MOCK-FENCE-PULL-012' pada MongoDB dengan waktu next_pull_at di masa depan agar tidak diambil sebelum pengujian dimulai.
+TC-012,"Memastikan saat dua proses berebut mengambil transaksi yang sama, hanya satu proses yang berhasil mengambil sehingga transaksi tidak diproses dua kali.",TC-012 — Pencegahan Pemrosesan Ganda Saat Dua Proses Mengambil Transaksi yang Sama,Memastikan penguncian atomic saat pengambilan transaksi mencegah dua worker memproses transaksi yang sama secara bersamaan.,P0,"1. Siapkan dokumen PENDING dengan provider_trxid='MOCK-FENCE-PULL-012' pada MongoDB dengan waktu next_pull_at di masa depan agar tidak diambil sebelum pengujian dimulai.
 2. Jalankan dua proses simulasi secara bersamaan untuk mengunci transaksi tersebut (claimPulling).
 3. Buktikan hasil penguncian: tepat satu proses berhasil (pemenang) dan satu proses gagal (kalah).
 4. Proses pemenang melanjutkan pengiriman laporan ke kedua antrean hilir.
@@ -416,11 +364,7 @@ Dua proses simulasi dijalankan secara bersamaan.","1. Tepat satu proses memenang
 --- out-drpulltelkomsel.log (1 baris) ---
 13:57:21.275 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-012","Pilar-4, resilience, concurrency_fencing"
-TC-013,"Memastikan aplikasi berjalan pada versi 2.0.0, semua koneksi database dan antrean terhubung dengan baik, dan aplikasi siap bekerja.",TC-013 — Pengecekan Versi Aplikasi 2.0.0 dan Kesiapan Koneksi Sistem,"Given Aplikasi drpulltelkomsel versi 2.0.0 dijalankan
-When Sistem menyala dan membaca seluruh konfigurasi
-Then Aplikasi mencatat versi 2.0.0 pada catatan log
-And Koneksi ke database MongoDB, database MySQL, dan antrean ActiveMQ berhasil tersambung
-And Layanan siap memproses transaksi",P0,"1. Jalankan aplikasi drpulltelkomsel versi 2.0.0.
+TC-013,"Memastikan aplikasi berjalan pada versi 2.0.0, semua koneksi database dan antrean terhubung dengan baik, dan aplikasi siap bekerja.",TC-013 — Pengecekan Versi Aplikasi 2.0.0 dan Kesiapan Koneksi Sistem,Memastikan aplikasi berjalan pada versi 2.0.0 dengan seluruh koneksi database dan ActiveMQ terhubung serta siap memproses transaksi.,P0,"1. Jalankan aplikasi drpulltelkomsel versi 2.0.0.
 2. Periksa catatan log saat aplikasi pertama kali menyala.
 3. Pastikan log mencatat versi aplikasi 2.0.0.
 4. Pastikan koneksi ke MongoDB, MySQL, dan ActiveMQ berhasil tersambung tanpa pesan kesalahan.","Berkas aplikasi: bin/drpulltelkomsel-2.0.0.jar.
@@ -432,11 +376,7 @@ Konfigurasi koneksi database dan antrean pesan tersedia.","1. Log aplikasi menca
 --- out-drpulltelkomsel.log (1 baris) ---
 13:57:23.334 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-013","Pilar-1, architecture, artifact_verification"
-TC-014,"Memastikan saat Telkomsel menolak permintaan karena format data salah (HTTP 400), DR Pull langsung menghentikan transaksi (GIVE_UP) tanpa mencoba lagi.",TC-014 — Penghentian Transaksi Langsung Saat Format Permintaan Ditolak (HTTP 400),"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-When Telkomsel menolak permintaan dengan kode HTTP 400 Bad Request
-Then Sistem langsung menghentikan transaksi dan mengubah status menjadi GIVE_UP
-And Sistem tidak mencoba kembali pemeriksaan transaksi ini
-And Tidak ada laporan pengiriman yang diteruskan ke antrean hilir",P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-400-014', attempt=0 pada MongoDB.
+TC-014,"Memastikan saat Telkomsel menolak permintaan karena format data salah (HTTP 400), DR Pull langsung menghentikan transaksi (GIVE_UP) tanpa mencoba lagi.",TC-014 — Penghentian Transaksi Langsung Saat Format Permintaan Ditolak (HTTP 400),Memastikan penolakan format permintaan oleh Telkomsel (HTTP 400) langsung dihentikan permanen dengan status GIVE_UP tanpa retry.,P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-400-014', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas HTTP 400 Bad Request.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status langsung berubah menjadi 'GIVE_UP' dan attempt tetap 0.
@@ -464,11 +404,7 @@ Respons Telkomsel: HTTP 400 Bad Request.","1. MongoDB: status='GIVE_UP', attempt
 13:57:29.755 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:57:31.831 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-014","Pilar-3, negative, fail_fast"
-TC-015,"Memastikan saat Telkomsel menolak cara pengiriman permintaan (HTTP 405), DR Pull langsung menghentikan transaksi (GIVE_UP) tanpa mencoba lagi.",TC-015 — Penghentian Transaksi Langsung Saat Cara Pengiriman Ditolak (HTTP 405),"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-When Telkomsel menolak cara pengiriman dengan kode HTTP 405 Method Not Allowed
-Then Sistem langsung menghentikan transaksi dan mengubah status menjadi GIVE_UP
-And Sistem tidak mencoba kembali pemeriksaan transaksi ini
-And Tidak ada laporan pengiriman yang diteruskan ke antrean hilir",P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-405-015', attempt=0 pada MongoDB.
+TC-015,"Memastikan saat Telkomsel menolak cara pengiriman permintaan (HTTP 405), DR Pull langsung menghentikan transaksi (GIVE_UP) tanpa mencoba lagi.",TC-015 — Penghentian Transaksi Langsung Saat Cara Pengiriman Ditolak (HTTP 405),Memastikan penolakan metode HTTP oleh Telkomsel (HTTP 405) langsung dihentikan permanen dengan status GIVE_UP tanpa retry.,P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-405-015', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas HTTP 405 Method Not Allowed.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status langsung berubah menjadi 'GIVE_UP' dan attempt tetap 0.
@@ -494,11 +430,7 @@ Respons Telkomsel: HTTP 405 Method Not Allowed.","1. MongoDB: status='GIVE_UP', 
 13:57:36.179 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:57:38.238 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-015","Pilar-3, negative, fail_fast"
-TC-016,"Memastikan saat Telkomsel menolak akses karena kredensial salah (HTTP 401), DR Pull langsung menghentikan transaksi (GIVE_UP) tanpa mencoba lagi.",TC-016 — Penghentian Transaksi Langsung Saat Akses Ditolak Telkomsel (HTTP 401),"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-When Telkomsel menolak akses dengan kode HTTP 401 Unauthorized
-Then Sistem langsung menghentikan transaksi dan mengubah status menjadi GIVE_UP
-And Sistem tidak mencoba kembali pemeriksaan transaksi ini
-And Tidak ada laporan pengiriman yang diteruskan ke antrean hilir",P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-401-016', attempt=0 pada MongoDB.
+TC-016,"Memastikan saat Telkomsel menolak akses karena kredensial salah (HTTP 401), DR Pull langsung menghentikan transaksi (GIVE_UP) tanpa mencoba lagi.",TC-016 — Penghentian Transaksi Langsung Saat Akses Ditolak Telkomsel (HTTP 401),Memastikan penolakan autentikasi oleh Telkomsel (HTTP 401) langsung dihentikan permanen dengan status GIVE_UP tanpa retry.,P0,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-401-016', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas HTTP 401 Unauthorized.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status langsung berubah menjadi 'GIVE_UP' dan attempt tetap 0.
@@ -524,11 +456,7 @@ Respons Telkomsel: HTTP 401 Unauthorized.","1. MongoDB: status='GIVE_UP', attemp
 13:57:44.617 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:57:46.675 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-016","Pilar-3, negative, fail_fast"
-TC-017,Memastikan transaksi yang tidak memiliki nama akun mitra (appsid) langsung dihentikan (GIVE_UP) sebelum dikirim ke Telkomsel.,TC-017 — Penghentian Transaksi yang Tidak Memiliki Nama Akun Mitra (Appsid),"Given Terdapat transaksi pada database yang tidak memiliki nilai appsid
-When Sistem memeriksa kelengkapan data sebelum mengirim permintaan ke Telkomsel
-Then Sistem mendeteksi data appsid tidak ada dan langsung menghentikan transaksi menjadi GIVE_UP
-And Tidak ada permintaan HTTP yang dikirimkan ke server Telkomsel
-And Tidak ada laporan yang diteruskan ke antrean hilir",P0,"1. Hapus riwayat penerimaan pada server uji Telkomsel.
+TC-017,Memastikan transaksi yang tidak memiliki nama akun mitra (appsid) langsung dihentikan (GIVE_UP) sebelum dikirim ke Telkomsel.,TC-017 — Penghentian Transaksi yang Tidak Memiliki Nama Akun Mitra (Appsid),Memastikan transaksi tanpa data appsid langsung ditandai GIVE_UP sebelum menghubungi Telkomsel karena data tidak lengkap.,P0,"1. Hapus riwayat penerimaan pada server uji Telkomsel.
 2. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-NOAPP-017', tanpa field appsid pada MongoDB.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status langsung berubah menjadi 'GIVE_UP' dan last_error mencatat 'Missing appsid'.
@@ -549,11 +477,7 @@ And Tidak ada laporan yang diteruskan ke antrean hilir",P0,"1. Hapus riwayat pen
 13:57:50.972 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:57:53.025 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-017","Pilar-3, negative, zero_http_call"
-TC-018,Memastikan transaksi yang tidak memiliki ID pengirim (sid) langsung dihentikan (GIVE_UP) sebelum dikirim ke Telkomsel.,TC-018 — Penghentian Transaksi yang Tidak Memiliki ID Pengirim (SID),"Given Terdapat transaksi pada database yang tidak memiliki nilai sid
-When Sistem memeriksa kelengkapan data sebelum mengirim permintaan ke Telkomsel
-Then Sistem mendeteksi data sid tidak ada dan langsung menghentikan transaksi menjadi GIVE_UP
-And Tidak ada permintaan HTTP yang dikirimkan ke server Telkomsel
-And Tidak ada laporan yang diteruskan ke antrean hilir",P0,"1. Hapus riwayat penerimaan pada server uji Telkomsel.
+TC-018,Memastikan transaksi yang tidak memiliki ID pengirim (sid) langsung dihentikan (GIVE_UP) sebelum dikirim ke Telkomsel.,TC-018 — Penghentian Transaksi yang Tidak Memiliki ID Pengirim (SID),Memastikan transaksi tanpa data sid langsung ditandai GIVE_UP sebelum menghubungi Telkomsel karena data tidak lengkap.,P0,"1. Hapus riwayat penerimaan pada server uji Telkomsel.
 2. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-NOSID-018', appsid='cp_sample', tanpa field sid pada MongoDB.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status langsung berubah menjadi 'GIVE_UP' dan last_error mencatat 'Missing sid'.
@@ -574,10 +498,7 @@ And Tidak ada laporan yang diteruskan ke antrean hilir",P0,"1. Hapus riwayat pen
 13:57:57.356 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:57:59.420 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-018","Pilar-3, negative, zero_http_call"
-TC-019,Memastikan transaksi yang kunci rahasianya tidak ditemukan di daftar konfigurasi langsung dihentikan (GIVE_UP).,TC-019 — Penghentian Transaksi Saat Kunci Rahasia Mitra Tidak Ditemukan,"Given Kunci rahasia mitra tidak ditemukan baik untuk appsid:sid, appsid, maupun kunci cadangan
-When Sistem mencoba mencari kunci rahasia untuk membuat tanda tangan keamanan
-Then Sistem mendeteksi tidak ada kunci rahasia yang dapat digunakan
-And Status transaksi langsung dihentikan menjadi GIVE_UP tanpa menghubungi Telkomsel",P0,"1. Kosongkan nilai kunci cadangan client_secret pada konfigurasi dan mulai ulang aplikasi drpulltelkomsel.
+TC-019,Memastikan transaksi yang kunci rahasianya tidak ditemukan di daftar konfigurasi langsung dihentikan (GIVE_UP).,TC-019 — Penghentian Transaksi Saat Kunci Rahasia Mitra Tidak Ditemukan,Memastikan transaksi yang kunci rahasianya tidak ditemukan di seluruh tingkatan konfigurasi langsung dihentikan dengan status GIVE_UP.,P0,"1. Kosongkan nilai kunci cadangan client_secret pada konfigurasi dan mulai ulang aplikasi drpulltelkomsel.
 2. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-NOKEY-019', appsid='cp_notfound' pada MongoDB.
 3. Jalankan pemrosesan transaksi.
 4. Periksa dokumen di MongoDB: pastikan status langsung berubah menjadi 'GIVE_UP' dan last_error mencatat ketiadaan kunci.
@@ -659,11 +580,7 @@ Dokumen MongoDB: provider_trxid='SAMPLE-NOKEY-019', appsid='cp_notfound'.","1. M
 13:58:51.212 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:58:53.269 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-019","Pilar-3, negative, zero_http_call"
-TC-020,Memastikan catatan log aplikasi tidak memuat isi kunci rahasia atau tanda tangan keamanan agar data rahasia tetap aman.,TC-020 — Pemeriksaan Keamanan Log Aplikasi Agar Tidak Membocorkan Kunci Rahasia,"Given Transaksi berhasil diproses oleh sistem hingga selesai
-When Seluruh catatan log aplikasi diperiksa
-Then Catatan log tidak memuat nilai kunci rahasia yang digunakan
-And Catatan log tidak memuat nilai lengkap tanda tangan keamanan
-And Keamanan data rahasia mitra terbukti terlindungi",P0,"1. Jalankan pemrosesan transaksi sukses (TC-001) yang menggunakan kunci rahasia dan tanda tangan keamanan.
+TC-020,Memastikan catatan log aplikasi tidak memuat isi kunci rahasia atau tanda tangan keamanan agar data rahasia tetap aman.,TC-020 — Pemeriksaan Keamanan Log Aplikasi Agar Tidak Membocorkan Kunci Rahasia,Memastikan berkas log aplikasi terbebas dari kebocoran nilai client secret maupun nilai lengkap tanda tangan keamanan X-Signature.,P0,"1. Jalankan pemrosesan transaksi sukses (TC-001) yang menggunakan kunci rahasia dan tanda tangan keamanan.
 2. Baca seluruh isi catatan log aplikasi (out-drpulltelkomsel.log dan info.log).
 3. Pastikan tidak ada nilai teks kunci rahasia (client_secret) yang tercatat di dalam log.
 4. Pastikan tidak ada nilai lengkap 64 karakter tanda tangan keamanan (X-Signature) yang tercatat di dalam log.","Berkas log aplikasi: logs/out-drpulltelkomsel.log dan logs/info.log.
@@ -677,10 +594,7 @@ Kunci rahasia yang diuji: '7s5tLvM1'.","1. Berkas log tidak memuat kata kunci ra
 13:58:55.331 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:58:57.383 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-020","Pilar-2, security, credential_audit"
-TC-021,"Memastikan database transaksi tidak menyimpan kunci rahasia, baik untuk data transaksi baru maupun data transaksi lama.",TC-021 — Pemeriksaan Database Transaksi Agar Tidak Menyimpan Kunci Rahasia,"Given Transaksi baru diproses hingga status RESOLVED
-When Dokumen transaksi pada koleksi database MongoDB diperiksa
-Then Dokumen transaksi baru tidak menyimpan field kunci rahasia (client_secret atau pwd)
-And Dokumen transaksi lama yang memiliki field pwd tidak pernah diubah nilainya",P0,"1. Periksa dokumen transaksi baru hasil pemrosesan pada database MongoDB dr_pull_telkomsel.
+TC-021,"Memastikan database transaksi tidak menyimpan kunci rahasia, baik untuk data transaksi baru maupun data transaksi lama.",TC-021 — Pemeriksaan Database Transaksi Agar Tidak Menyimpan Kunci Rahasia,Memastikan penyimpanan dokumen MongoDB tidak memuat field rahasia client secret maupun password pada transaksi baru.,P0,"1. Periksa dokumen transaksi baru hasil pemrosesan pada database MongoDB dr_pull_telkomsel.
 2. Pastikan dokumen baru tidak memuat field 'pwd' maupun field 'client_secret'.
 3. Periksa dokumen transaksi lama: pastikan nilai field pwd lama tidak disalin ke transaksi baru.",Koleksi MongoDB: dr_pull_telkomsel.,"1. Dokumen MongoDB baru tidak memiliki field 'pwd' atau 'client_secret'.
 2. [LOG CONTRACT]: Log SUT tidak mencatat penyimpanan kunci rahasia ke MongoDB.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 9.69s | [SUT LOG] files=2 lines=24 kw=0 errfile=0
@@ -711,10 +625,7 @@ And Dokumen transaksi lama yang memiliki field pwd tidak pernah diubah nilainya"
 13:59:07.029 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 13:59:09.090 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-021","Pilar-2, security, storage_audit"
-TC-022,Memastikan data transaksi format lama masih bisa diproses dan diselesaikan dengan lancar oleh aplikasi versi baru.,TC-022 — Pemrosesan Transaksi Format Lama oleh Aplikasi Versi Baru,"Given Terdapat transaksi format lama yang masih memiliki field pwd di database
-When Aplikasi versi baru memproses transaksi format lama tersebut
-Then Aplikasi mengabaikan field pwd di dokumen dan mencari kunci rahasia dari konfigurasi
-And Transaksi berhasil diselesaikan hingga status RESOLVED tanpa kendala",P1,"1. Siapkan dokumen PENDING dengan format lama yang memuat field pwd='dummy_v1_pwd', provider_trxid='SAMPLE-LEGACY-022' pada MongoDB.
+TC-022,Memastikan data transaksi format lama masih bisa diproses dan diselesaikan dengan lancar oleh aplikasi versi baru.,TC-022 — Pemrosesan Transaksi Format Lama oleh Aplikasi Versi Baru,Memastikan transaksi format lama yang memuat field pwd tetap dapat diproses dan diselesaikan hingga RESOLVED oleh aplikasi versi baru.,P1,"1. Siapkan dokumen PENDING dengan format lama yang memuat field pwd='dummy_v1_pwd', provider_trxid='SAMPLE-LEGACY-022' pada MongoDB.
 2. Jalankan aplikasi drpulltelkomsel versi 2.0.0.
 3. Periksa status dokumen di MongoDB: pastikan status berubah menjadi 'RESOLVED'.
 4. Periksa kedua antrean hilir: pastikan laporan pengiriman dan perintah simpan database diterima dengan benar.
@@ -746,10 +657,7 @@ And Transaksi berhasil diselesaikan hingga status RESOLVED tanpa kendala",P1,"1.
 13:59:14.240 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-LEGACY-022, PUBLISHING -> RESOLVED
 13:59:16.394 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-022","Pilar-2, compatibility, legacy_handling"
-TC-023,[Pemeriksaan Mock] Memastikan server uji Telkomsel dengan benar menolak permintaan yang tanda tangan keamanannya tidak cocok (HTTP 401).,TC-023 — [Pemeriksaan Mock] Penolakan Permintaan dengan Tanda Tangan Keamanan yang Salah,"Given Server uji Telkomsel siap menerima permintaan
-When Permintaan dikirimkan dengan header tanda tangan keamanan yang sengaja dibuat salah
-Then Server uji menolak permintaan tersebut dengan kode respons HTTP 401 Unauthorized
-And Penolakan ini membuktikan bahwa validasi keamanan pada server uji bekerja dengan benar",P2,"1. Kirim permintaan HTTP POST langsung ke server uji Telkomsel dengan header X-Signature yang salah: '0000000000000000000000000000000000000000000000000000000000000000'.
+TC-023,[Pemeriksaan Mock] Memastikan server uji Telkomsel dengan benar menolak permintaan yang tanda tangan keamanannya tidak cocok (HTTP 401).,TC-023 — [Pemeriksaan Mock] Penolakan Permintaan dengan Tanda Tangan Keamanan yang Salah,Memastikan server uji Telkomsel dengan benar menolak permintaan yang tanda tangan keamanan HMAC-SHA256 miliknya tidak valid dengan respons HTTP 401.,P2,"1. Kirim permintaan HTTP POST langsung ke server uji Telkomsel dengan header X-Signature yang salah: '0000000000000000000000000000000000000000000000000000000000000000'.
 2. Periksa kode balasan dari server uji: pastikan menerima HTTP 401 Unauthorized.
 3. Pastikan isi respons memuat keterangan tanda tangan tidak valid: 'Invalid Signature'.",Server uji Telkomsel V2 aktif pada port yang ditentukan.,"1. Server uji mengembalikan kode HTTP 401 Unauthorized dengan pesan 'Invalid Signature'.
 2. [LOG CONTRACT]: Log server uji mencatat penolakan tanda tangan tidak cocok.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 0.63s | [SUT LOG] files=2 lines=2 kw=0 errfile=0
@@ -758,10 +666,7 @@ And Penolakan ini membuktikan bahwa validasi keamanan pada server uji bekerja de
 --- out-drpulltelkomsel.log (1 baris) ---
 13:59:18.451 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-023","Pilar-2, mock_validation, protocol_guard"
-TC-024,[Pemeriksaan Mock] Memastikan server uji Telkomsel dengan benar menolak permintaan yang masih memakai alamat URL versi lama (HTTP 404).,TC-024 — [Pemeriksaan Mock] Penolakan Permintaan yang Menggunakan Alamat URL Versi Lama,"Given Server uji Telkomsel V2 hanya melayani alamat versi baru
-When Permintaan dikirimkan ke alamat URL versi lama (/bank/transaction-status)
-Then Server uji menolak permintaan dengan kode respons HTTP 404 Not Found
-And Penolakan ini membuktikan bahwa alamat URL versi lama sudah tidak dilayani",P2,"1. Kirim permintaan HTTP ke server uji menggunakan alamat lama: GET /bank/transaction-status?trxid=123.
+TC-024,[Pemeriksaan Mock] Memastikan server uji Telkomsel dengan benar menolak permintaan yang masih memakai alamat URL versi lama (HTTP 404).,TC-024 — [Pemeriksaan Mock] Penolakan Permintaan yang Menggunakan Alamat URL Versi Lama,Memastikan server uji Telkomsel dengan benar menolak permintaan yang masih menggunakan alamat URL versi lama dengan respons HTTP 404.,P2,"1. Kirim permintaan HTTP ke server uji menggunakan alamat lama: GET /bank/transaction-status?trxid=123.
 2. Periksa kode balasan dari server uji: pastikan menerima HTTP 404 Not Found.
 3. Pastikan isi respons memuat keterangan alamat lama sudah usang.",Server uji Telkomsel V2 aktif.,"1. Server uji mengembalikan kode HTTP 404 Not Found.
 2. [LOG CONTRACT]: Log server uji mencatat penolakan alamat lama.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 0.64s | [SUT LOG] files=2 lines=2 kw=0 errfile=0
@@ -770,10 +675,7 @@ And Penolakan ini membuktikan bahwa alamat URL versi lama sudah tidak dilayani",
 --- out-drpulltelkomsel.log (1 baris) ---
 13:59:20.583 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-024","Pilar-2, mock_validation, protocol_guard"
-TC-025,"Memastikan jika alamat URL Telkomsel salah ditulis pada konfigurasi, aplikasi tetap aman tidak mati mendadak dan mencoba kembali nanti.",TC-025 — Penanganan Kesalahan Penulisan Alamat URL Telkomsel pada Konfigurasi,"Given Alamat URL Telkomsel pada konfigurasi tidak sengaja ditulis salah
-When Aplikasi mencoba memeriksa status transaksi
-Then Aplikasi menangani kesalahan koneksi tersebut sebagai masalah sementara dan tidak mati mendadak
-And Status transaksi tetap PENDING dengan pertambahan jumlah percobaan dan penjadwalan ulang",P2,"1. Ubah alamat URL Telkomsel pada konfigurasi menjadi alamat yang salah: 'http://invalid-host-telkomsel:9999/v2'.
+TC-025,"Memastikan jika alamat URL Telkomsel salah ditulis pada konfigurasi, aplikasi tetap aman tidak mati mendadak dan mencoba kembali nanti.",TC-025 — Penanganan Kesalahan Penulisan Alamat URL Telkomsel pada Konfigurasi,Memastikan kesalahan penulisan alamat URL Telkomsel pada konfigurasi ditangani sebagai masalah sementara tanpa menyebabkan aplikasi crash.,P2,"1. Ubah alamat URL Telkomsel pada konfigurasi menjadi alamat yang salah: 'http://invalid-host-telkomsel:9999/v2'.
 2. Mulai ulang aplikasi drpulltelkomsel agar membaca konfigurasi baru.
 3. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-BADURL-025' pada MongoDB.
 4. Jalankan aplikasi untuk memproses transaksi.
@@ -855,10 +757,7 @@ And Status transaksi tetap PENDING dengan pertambahan jumlah percobaan dan penja
 14:00:09.131 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 14:00:11.208 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-025","Pilar-4, resilience, configuration_safety"
-TC-026,Memastikan aplikasi tetap menyala dengan normal meskipun daftar kunci mitra di database belum diisi atau masih kosong.,TC-026 — Penanganan Operasional Saat Tabel Kunci Mitra di Database Masih Kosong,"Given Daftar kunci rahasia mitra pada database sengaja dikosongkan
-When Aplikasi drpulltelkomsel dijalankan
-Then Aplikasi berhasil menyala dengan normal tanpa mati mendadak
-And Aplikasi tetap menggunakan kunci rahasia cadangan utama yang tersedia",P2,"1. Kosongkan data tabel kunci mitra pada database konfigurasi MySQL.
+TC-026,Memastikan aplikasi tetap menyala dengan normal meskipun daftar kunci mitra di database belum diisi atau masih kosong.,TC-026 — Penanganan Operasional Saat Tabel Kunci Mitra di Database Masih Kosong,Memastikan aplikasi tetap dapat menyala dan berjalan normal menggunakan client secret cadangan saat tabel kunci mitra di database kosong.,P2,"1. Kosongkan data tabel kunci mitra pada database konfigurasi MySQL.
 2. Mulai ulang aplikasi drpulltelkomsel.
 3. Periksa catatan log saat aplikasi menyala: pastikan aplikasi berhasil hidup dengan aman.
 4. Kembalikan data tabel kunci mitra ke kondisi semula dan mulai ulang aplikasi.",Tabel konfigurasi kunci mitra di MySQL dikosongkan sementara.,"1. Aplikasi berhasil menyala normal tanpa error fatal saat startup.
@@ -933,10 +832,7 @@ And Aplikasi tetap menggunakan kunci rahasia cadangan utama yang tersedia",P2,"1
 14:00:58.921 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 14:01:01.503 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-026","Pilar-3, negative, configuration_safety"
-TC-027,Memastikan permintaan dengan selisih waktu tepat 5 menit (+300 atau -300 detik) masih diterima dengan baik oleh Telkomsel.,TC-027 — Pengujian Batas Waktu Permintaan Tepat 5 Menit (±300 Detik),"Given Sistem mengirimkan permintaan dengan selisih waktu pengiriman tepat 300 detik
-When Telkomsel memeriksa selisih waktu permintaan tersebut
-Then Telkomsel menerima permintaan karena masih berada di dalam batas toleransi 5 menit
-And Transaksi berhasil diselesaikan menjadi RESOLVED",P1,"1. Atur server uji Telkomsel dengan selisih waktu tepat +300 detik.
+TC-027,Memastikan permintaan dengan selisih waktu tepat 5 menit (+300 atau -300 detik) masih diterima dengan baik oleh Telkomsel.,TC-027 — Pengujian Batas Waktu Permintaan Tepat 5 Menit (±300 Detik),Memastikan permintaan dengan selisih waktu tanda tangan tepat pada batas toleransi 5 menit (±300 detik) berhasil diterima oleh Telkomsel.,P1,"1. Atur server uji Telkomsel dengan selisih waktu tepat +300 detik.
 2. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-TSBOUND-POS27' pada MongoDB.
 3. Jalankan aplikasi drpulltelkomsel dan pastikan transaksi berhasil menjadi 'RESOLVED'.
 4. Ulangi pengujian dengan selisih waktu tepat -300 detik menggunakan provider_trxid='SAMPLE-TSBOUND-NEG27'.
@@ -984,10 +880,7 @@ Dokumen MongoDB: SAMPLE-TSBOUND-POS27 dan SAMPLE-TSBOUND-NEG27.","1. Server uji 
 14:01:15.423 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PUBLISHING -> RESOLVED
 14:01:15.424 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-TSBOUND-POS27-NEG, PUBLISHING -> RESOLVED
 artifact=results/logs/20261126_135518/TC-027","Pilar-2, security, timestamp_boundary"
-TC-028,Memastikan permintaan dengan selisih waktu lebih dari 5 menit (±301 detik) ditolak oleh Telkomsel karena kedaluwarsa (HTTP 401).,TC-028 — Penolakan Permintaan Saat Selisih Waktu Lebih dari 5 Menit (±301 Detik),"Given Sistem mengirimkan permintaan dengan selisih waktu lebih dari 300 detik
-When Telkomsel memeriksa selisih waktu permintaan tersebut
-Then Telkomsel menolak permintaan dengan kode HTTP 401 Unauthorized karena waktu kedaluwarsa
-And Transaksi langsung dihentikan secara permanen menjadi GIVE_UP",P1,"1. Atur server uji Telkomsel dengan selisih waktu +301 detik (melebihi batas 300 detik).
+TC-028,Memastikan permintaan dengan selisih waktu lebih dari 5 menit (±301 detik) ditolak oleh Telkomsel karena kedaluwarsa (HTTP 401).,TC-028 — Penolakan Permintaan Saat Selisih Waktu Lebih dari 5 Menit (±301 Detik),Memastikan permintaan dengan selisih waktu tanda tangan melebihi batas toleransi 5 menit (±301 detik) ditolak kedaluwarsa oleh Telkomsel dengan HTTP 401.,P1,"1. Atur server uji Telkomsel dengan selisih waktu +301 detik (melebihi batas 300 detik).
 2. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-TSEXP-POS28' pada MongoDB.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status langsung berubah menjadi 'GIVE_UP'.
@@ -1009,10 +902,7 @@ Dokumen MongoDB: SAMPLE-TSEXP-POS28 dan SAMPLE-TSEXP-NEG28.","1. Server uji meno
 14:01:19.701 [pool-1-thread-1] INFO  c.j.d.http.TelkomselStatusClient - [TelkomselStatusClient] response trx=SAMPLE-TSEXP-POS28 httpStatus=401
 14:01:19.764 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-TSEXP-POS28, PULLING -> GIVE_UP, reason=credential wrong, give up (telkomsel 401)
 artifact=results/logs/20261126_135518/TC-028","Pilar-2, security, timestamp_boundary"
-TC-029,"Memastikan jika kunci pasangan mitra dan sender (appsid:sid), kunci mitra (appsid), dan kunci umum terdaftar bersamaan, DR Pull mendahulukan kunci pasangan mitra dan sender.",TC-029 — Pengujian Urutan Prioritas Kunci Rahasia Mitra Khusus (Appsid dan SID),"Given Ketiga tingkatan kunci rahasia (appsid:sid, appsid, dan kunci umum) sama-sama terdaftar dengan nilai berbeda
-When Sistem mencari kunci rahasia yang paling sesuai untuk transaksi tersebut
-Then Sistem memilih kunci rahasia pasangan appsid:sid sebagai prioritas utama
-And Permintaan berhasil diterima oleh Telkomsel dan transaksi diselesaikan menjadi RESOLVED",P0,"1. Daftarkan tiga tingkatan kunci rahasia sekaligus di database konfigurasi dengan nilai berbeda:
+TC-029,"Memastikan jika kunci pasangan mitra dan sender (appsid:sid), kunci mitra (appsid), dan kunci umum terdaftar bersamaan, DR Pull mendahulukan kunci pasangan mitra dan sender.",TC-029 — Pengujian Urutan Prioritas Kunci Rahasia Mitra Khusus (Appsid dan SID),Memastikan DR Pull memprioritaskan kunci rahasia khusus pasangan appsid:sid ketika ketiga tingkatan konfigurasi sama-sama terdaftar.,P0,"1. Daftarkan tiga tingkatan kunci rahasia sekaligus di database konfigurasi dengan nilai berbeda:
    - Kunci pasangan khusus 'cp_prio:sender_prio' = 'SecretA'
    - Kunci appsid 'cp_prio' = 'SecretB'
    - Kunci umum client_secret = 'SecretC'
@@ -1047,11 +937,7 @@ Dokumen MongoDB: appsid='cp_prio', sid='sender_prio', provider_trxid='SAMPLE-PRI
 14:01:27.422 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=SAMPLE-PRIO1-029, PUBLISHING -> RESOLVED
 14:01:27.423 [pool-1-thread-1] INFO  c.j.d.worker.PullWorker - State change: trxId=SAMPLE-PRIO1-029, PUBLISHING -> RESOLVED
 artifact=results/logs/20261126_135518/TC-029","Pilar-2, security, secret_hierarchy"
-TC-030,"Memastikan saat Telkomsel membalas dengan gangguan gerbang jaringan (HTTP 502), DR Pull mencatatnya sebagai masalah sementara dan mencoba kembali nanti.",TC-030 — Penanganan Gangguan Gerbang Jaringan Telkomsel (HTTP 502) Sebagai Masalah Sementara,"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-When Telkomsel merespons dengan kode gangguan gerbang jaringan HTTP 502 Bad Gateway
-Then Transaksi tidak langsung digagalkan melainkan tetap berstatus PENDING
-And Jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
-And Tidak ada laporan pengiriman yang diteruskan ke antrean hilir",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='MOCK-502-030', attempt=0 pada MongoDB.
+TC-030,"Memastikan saat Telkomsel membalas dengan gangguan gerbang jaringan (HTTP 502), DR Pull mencatatnya sebagai masalah sementara dan mencoba kembali nanti.",TC-030 — Penanganan Gangguan Gerbang Jaringan Telkomsel (HTTP 502) Sebagai Masalah Sementara,Memastikan respons gangguan gerbang jaringan dari Telkomsel (HTTP 502) ditangani sebagai masalah sementara dengan menjadwalkan retry.,P1,"1. Siapkan dokumen PENDING dengan provider_trxid='MOCK-502-030', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas HTTP 502 Bad Gateway.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status tetap 'PENDING', attempt bertambah menjadi 1, dan last_error mencatat kode 502.
@@ -1077,11 +963,7 @@ Respons Telkomsel: HTTP 502 Bad Gateway.","1. MongoDB: status='PENDING' (bukan G
 14:01:31.861 [pool-1-thread-1] INFO  c.j.d.mongo.MongoService - State change: trxId=MOCK-502-030, PULLING -> PENDING (backoff, attempt=1)
 14:01:34.017 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-030","Pilar-4, resilience, retry_backoff"
-TC-031,Memastikan DR Pull tetap aman ketika pengiriman laporan ke salah satu antrean gagal.,TC-031 — Penanganan Pengiriman Laporan Saat Salah Satu Antrean Mengalami Gangguan,"Given Transaksi berhasil mendapatkan status akhir Delivered dari Telkomsel
-When Pengiriman laporan ke antrean pertama berhasil tetapi pengiriman ke antrean kedua gagal
-Then Transaksi ditahan pada status PUBLISHING agar tim operasional dapat memeriksa
-And Sistem memeriksa keberadaan laporan sebelum melanjutkan pengiriman yang tertinggal
-And Pengiriman lanjutan diselesaikan menjadi RESOLVED tanpa mengirim ulang laporan yang sudah terkirim",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-QERR-031' pada MongoDB.
+TC-031,Memastikan DR Pull tetap aman ketika pengiriman laporan ke salah satu antrean gagal.,TC-031 — Penanganan Pengiriman Laporan Saat Salah Satu Antrean Mengalami Gangguan,"Memastikan DR Pull dapat melanjutkan pengiriman ke database queue setelah kegagalan, tanpa mengirim ulang DR report yang sudah berhasil dikirim.",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='SAMPLE-QERR-031' pada MongoDB.
 2. Simulasikan pengiriman laporan berhasil ke antrean laporan DR (jns.dr.drrealhandler), tetapi gagal saat mengirim ke antrean database (jns.db.deliveryreport).
 3. Periksa status dokumen di MongoDB: pastikan tertahan pada status 'PUBLISHING' dan field dr_published_at sudah terisi timestamp.
 4. Jalankan prosedur pengiriman lanjutan: sistem memastikan laporan DR sudah pernah dikirim sehingga tidak dikirim ulang, dan hanya mengirimkan pesan ke antrean database.
@@ -1097,11 +979,7 @@ Kondisi pengujian: simulasi gangguan pada pengiriman ke antrean jns.db.deliveryr
 --- out-drpulltelkomsel.log (1 baris) ---
 14:01:38.141 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-031","Pilar-4, resilience, downstream_failure_handling"
-TC-032,"Memastikan saat beberapa transaksi diproses bersamaan, satu transaksi yang lambat atau gagal tidak mengganggu transaksi lain yang normal.",TC-032 — Pemrosesan Beberapa Transaksi Bersamaan Tanpa Saling Mengganggu,"Given Terdapat tiga transaksi SMS sekaligus yang diproses dalam waktu yang bersamaan
-And Transaksi kedua mengalami kehabisan batas waktu (timeout) sedangkan transaksi pertama dan ketiga normal
-When Sistem menjalankan pemrosesan bersamaan untuk ketiga transaksi tersebut
-Then Transaksi kedua dijadwalkan ulang sesuai aturan penanganan masalah sementara
-And Transaksi pertama dan transaksi ketiga berhasil diselesaikan hingga status RESOLVED tanpa terganggu",P1,"1. Siapkan 3 dokumen PENDING sekaligus pada MongoDB dengan waktu next_pull_at yang sama:
+TC-032,"Memastikan saat beberapa transaksi diproses bersamaan, satu transaksi yang lambat atau gagal tidak mengganggu transaksi lain yang normal.",TC-032 — Pemrosesan Beberapa Transaksi Bersamaan Tanpa Saling Mengganggu,Memastikan transaksi yang mengalami timeout dalam satu siklus batch sweep tidak mengganggu penyelesaian transaksi normal lainnya.,P1,"1. Siapkan 3 dokumen PENDING sekaligus pada MongoDB dengan waktu next_pull_at yang sama:
    - Dokumen 1: provider_trxid='SAMPLE-BATCH-OK1' (normal)
    - Dokumen 2: provider_trxid='MOCK-TIMEOUT-BATCH' (dibuat timeout 35 detik)
    - Dokumen 3: provider_trxid='SAMPLE-BATCH-OK2' (normal)
@@ -1169,12 +1047,7 @@ And Transaksi pertama dan transaksi ketiga berhasil diselesaikan hingga status R
 14:02:38.924 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 14:02:40.985 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-032","Pilar-4, resilience, batch_isolation"
-TC-033,"Memastikan saat dua aplikasi DR Pull mencoba mengirim laporan untuk transaksi yang sama, hanya satu aplikasi yang mengirim sehingga laporan tidak terkirim dua kali.",TC-033 — Pencegahan Pengiriman Laporan Ganda Saat Dua Aplikasi Bekerja Bersamaan,"Given Terdapat transaksi di database yang status akhirnya sudah didapatkan dari Telkomsel
-When Dua aplikasi DR Pull yang terpisah mencoba mengirimkan laporan secara bersamaan untuk transaksi tersebut
-Then Hanya satu aplikasi pemenang yang berhasil mengunci transaksi untuk mengirim laporan
-And Aplikasi pemenang mengirim laporan secara lengkap ke antrean laporan DR dan antrean database
-And Aplikasi kedua membatalkan pengiriman sehingga tidak mengirim pesan apa pun
-And Masing-masing antrean hilir terbukti hanya menerima tepat satu pesan",P0,"1. Siapkan dokumen pada MongoDB dengan status='PULLING', provider_trxid='MOCK-FENCE-PUB-033', lease_id='initial-lease-033'.
+TC-033,"Memastikan saat dua aplikasi DR Pull mencoba mengirim laporan untuk transaksi yang sama, hanya satu aplikasi yang mengirim sehingga laporan tidak terkirim dua kali.",TC-033 — Pencegahan Pengiriman Laporan Ganda Saat Dua Aplikasi Bekerja Bersamaan,Memastikan penguncian atomic saat pengiriman laporan mencegah dua instance aplikasi mengirimkan laporan ganda untuk transaksi yang sama.,P0,"1. Siapkan dokumen pada MongoDB dengan status='PULLING', provider_trxid='MOCK-FENCE-PUB-033', lease_id='initial-lease-033'.
 2. Jalankan dua aplikasi simulasi secara bersamaan (Aplikasi A dan Aplikasi B) untuk mengunci tahap pengiriman laporan (claimPublishing).
 3. Buktikan hasil penguncian: Aplikasi A berhasil mengunci (matchedCount=1), mengubah status menjadi PUBLISHING, dan mengirimkan laporan ke kedua antrean hilir hingga status menjadi RESOLVED.
 4. Buktikan aplikasi yang kalah (Aplikasi B): gagal mengunci (matchedCount=0), membatalkan pengiriman, dan mencatat log pembatalan.
@@ -1192,11 +1065,7 @@ Dokumen MongoDB: provider_trxid='MOCK-FENCE-PUB-033', status='PULLING'.","1. Apl
 14:02:43.036 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 14:02:45.100 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
 artifact=results/logs/20261126_135518/TC-033","Pilar-4, resilience, concurrency_fencing"
-TC-034,"Memastikan saat layanan Telkomsel sedang tidak dapat melayani (HTTP 503), DR Pull mencatatnya sebagai masalah sementara dan mencoba kembali nanti.",TC-034 — Penanganan Gangguan Layanan Telkomsel (HTTP 503) Sebagai Masalah Sementara,"Given Transaksi SMS berstatus PENDING siap diperiksa statusnya
-When Pemeriksaan dilakukan dan layanan Telkomsel sedang tidak dapat melayani dengan kode 503 Service Unavailable
-Then Transaksi tidak langsung digagalkan melainkan tetap berstatus PENDING
-And Riwayat jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
-And Tidak ada laporan pengiriman yang diteruskan ke antrean hilir",P1,"1. Siapkan dokumen PENDING dengan provider_trxid='MOCK-503-034', attempt=0 pada MongoDB.
+TC-034,"Memastikan saat layanan Telkomsel sedang tidak dapat melayani (HTTP 503), DR Pull mencatatnya sebagai masalah sementara dan mencoba kembali nanti.",TC-034 — Penanganan Gangguan Layanan Telkomsel (HTTP 503) Sebagai Masalah Sementara,Memastikan respons gangguan layanan dari Telkomsel (HTTP 503) ditangani sebagai masalah sementara dengan menjadwalkan retry.,P1,"1. Siapkan dokumen PENDING dengan provider_trxid='MOCK-503-034', attempt=0 pada MongoDB.
 2. Atur server uji Telkomsel untuk membalas HTTP 503 Service Unavailable.
 3. Jalankan aplikasi drpulltelkomsel.
 4. Periksa dokumen di MongoDB: pastikan status tetap 'PENDING', attempt bertambah menjadi 1, dan last_error mencatat kode 503.

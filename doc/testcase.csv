@@ -1,5 +1,5 @@
 "Test Case ID","Description","Test Case","Test Scenario","Priority","Test Steps","Test Data/Precondition","Expected Result","Actual Output","Status","Log","Note/Description"
-"META-SUT","SUT Version & Update Traceability Matrix (V2.3 Final Pre-Automation Baseline)","drpulltelkomsel v2.0.0 (prev: v1.2.0)","Baseline: v1.2.0 | Target: v2.0.0 | Ticket: PB172645152602YA","META","[U-01] Migrasi Endpoint Get Delivery Status ke Telkomsel API V2: Perubahan endpoint dari GET /bank/transaction-status (query string) menjadi POST /bank/v2/transaction-status dengan body JSON {""transaction_id"":""...""} sesuai IFA SMS Bulk Premium v5.0 Section E.iv & E.vi.
+"META-SUT","SUT Version & Update Traceability Matrix (V2.4 Deterministic Virtual Clock Baseline)","drpulltelkomsel v2.0.0 (prev: v1.2.0)","Baseline: v1.2.0 | Target: v2.0.0 | Ticket: PB172645152602YA","META","[U-01] Migrasi Endpoint Get Delivery Status ke Telkomsel API V2: Perubahan endpoint dari GET /bank/transaction-status (query string) menjadi POST /bank/v2/transaction-status dengan body JSON {""transaction_id"":""...""} sesuai IFA SMS Bulk Premium v5.0 Section E.iv & E.vi.
 [U-02] Autentikasi HMAC-SHA256 & Signature Header: Implementasi HmacSignerUtil untuk menghitung X-Signature hex lowercase atas canonical string (POST\n<path>\n<appsid>\n<sid>\n<timestamp>\n<rawRequestBody>) dengan batas toleransi waktu X-Timestamp +-300 detik epoch detik.
 [U-03] Resolusi Hirarki 3 Tingkat Client Secret: Penghapusan penyimpanan secret dari dokumen MongoDB; resolusi dinamis dari apps_config dengan urutan prioritas: 1) appsid:sid -> 2) appsid -> 3) client_secret fallback tunggal.
 [U-04] Pemetaan Error Fail-Fast (Permanent Error): HTTP 400/2400 dan 405/2405 kini langsung transisi ke GIVE_UP permanen tanpa retry/backoff; 401/2401 tetap langsung GIVE_UP.
@@ -22,7 +22,7 @@ Dependency Environment: MongoDB (smsCore.dr_pull_telkomsel), ActiveMQ (jns.dr.dr
 [U-08] Concurrency Fencing & Zero Double Publish -> diuji oleh: TC-012, TC-031, TC-033
 [U-09] Kompatibilitas Kontrak Hilir Ganda -> diuji oleh: TC-001, TC-002, TC-011, TC-031
 [U-10] Validasi Startup, Sanitasi Konfigurasi & Batch Isolation -> diuji oleh: TC-013, TC-025, TC-026, TC-032
-Coverage mapping: 34 testcase telah dipetakan terhadap 10 area perubahan aplikasi (U-01 sampai U-10). Seluruh batas toleransi waktu integer epoch, multi-instance concurrency fencing, dan prosedur idempotent recovery telah tervalidasi.
+Coverage mapping: 34 testcase telah dipetakan terhadap 10 area perubahan aplikasi (U-01 sampai U-10). Seluruh batas toleransi waktu deterministik (request-anchored virtual clock tanpa race detik fisik), multi-instance concurrency fencing, dan prosedur idempotent recovery telah tervalidasi.
 Distribusi Pilar: Pilar 1 (4 TC), Pilar 2 (11 TC), Pilar 3 (7 TC), Pilar 4 (12 TC). Total: 34 TC.","","META","","Dibuat: 2026-11-26 | Revisi: Hardening V2.2 (Final Review Findings Applied) | PIC: QA SDET Team | SUT: drpulltelkomsel v2.0.0"
 "TC-001","Memastikan laporan status Delivered (D) dari Telkomsel berhasil diambil dan diteruskan ke kedua antrean hilir menggunakan identifikasi korelasi transaksi yang unik.","TC-001 — Pengambilan Status SMS Berhasil (Delivered) dan Penerusan Laporan Hilir","Given Terdapat transaksi SMS berstatus PENDING yang menunggu pemeriksaan status
 And Konfigurasi kredensial mitra dan alamat endpoint Telkomsel V2 tersedia secara valid
@@ -397,29 +397,30 @@ And Transaksi yang diperiksa diubah statusnya menjadi GIVE_UP karena ketiadaan k
 Dokumen MongoDB: provider_trxid='SAMPLE-NOKEYS-026'","1. SUT menyala normal tanpa crash fatal.
 2. MongoDB: status='GIVE_UP', last_error='client_secret not found'.
 3. [LOG CONTRACT]: Log SUT mencatat ketiadaan secret.","","","","Pilar-3, negative, configuration_safety"
-"TC-027","Memastikan penanda waktu permintaan (X-Timestamp) yang berada tepat pada batas toleransi plus 300 detik dan minus 300 detik berhasil diterima menggunakan presisi perbandingan integer epoch detik yang deterministik.","TC-027 — Validasi Batas Toleransi Waktu Tanda Tangan Tepat Plus Minus Tiga Ratus Detik Berhasil","Given Transaksi SMS siap dilakukan pemeriksaan status
+"TC-027","Memastikan penanda waktu permintaan (X-Timestamp) yang berada tepat pada batas toleransi plus 300 detik dan minus 300 detik berhasil diterima menggunakan mekanisme jam virtual Mock Server yang di-anchor pada epoch referensi request (100% bebas dari race condition pergantian detik fisik).","TC-027 — Validasi Batas Toleransi Waktu Tanda Tangan Tepat Plus Minus Tiga Ratus Detik Berhasil","Given Transaksi SMS siap dilakukan pemeriksaan status
 When Permintaan dikirimkan dan dievaluasi terhadap jam server simulasi yang diselisihkan tepat tiga ratus detik
 Then Server vendor Telkomsel menerima permintaan dan memvalidasi tanda tangan dengan sukses pada kedua arah batas
-And Transaksi berhasil diselesaikan dan statusnya diperbarui menjadi RESOLVED","P1","1. Presisi Waktu Mock Server: Rumus evaluasi skew pada Mock Server dikunci pada presisi bilangan bulat epoch detik: skew = abs(int(time.time() + mock_clock_offset) - int(timestamp)), mengeliminasi pecahan float agar deterministik.
-2. Pengujian Batas Atas (+300s): Jalankan Mock Server dengan simulasi clock skew offset -300 detik integer. Tanam dokumen PENDING 'SAMPLE-TSBOUND-POS27', jalankan worker, dan verifikasi Mock menerima request dengan HTTP 200 (karena skew == 300 <= 300).
-3. Pengujian Batas Bawah (-300s): Jalankan Mock Server dengan simulasi clock skew offset +300 detik integer. Tanam dokumen PENDING 'SAMPLE-TSBOUND-NEG27', jalankan worker, dan verifikasi Mock menerima request dengan HTTP 200 (karena skew == 300 <= 300).
-4. Verifikasi kedua dokumen pada MongoDB bertransisi ke 'RESOLVED'.
-5. Teardown: Hapus kedua dokumen uji dari MongoDB.","Mekanisme Waktu: Mock Server V2 virtual integer clock offset deterministik: skew = abs(int(time.time() + offset) - int(timestamp))
-Batas yang diuji: offset = -300 detik (skew = 300s) dan offset = +300 detik (skew = 300s)
-Dokumen MongoDB: provider_trxid='SAMPLE-TSBOUND-POS27' dan 'SAMPLE-TSBOUND-NEG27'","1. Mock Server menerima kedua request pada batas presisi integer +300s dan -300s (HTTP 200, bukan 401).
-2. MongoDB: kedua dokumen bertransisi ke status='RESOLVED'.
-3. [LOG CONTRACT]: Log SUT mencatat keberhasilan publikasi DR.","","","","Pilar-2, security, timestamp_boundary"
-"TC-028","Memastikan penanda waktu permintaan (X-Timestamp) yang melampaui batas toleransi (selisih plus 301 detik dan minus 301 detik) ditolak sebagai kegagalan autentikasi 401 dan transaksi langsung dihentikan GIVE_UP menggunakan presisi integer epoch detik.","TC-028 — Penolakan Transaksi Saat Penanda Waktu Melampaui Batas Toleransi Tiga Ratus Satu Detik","Given Transaksi SMS siap dilakukan pemeriksaan status
+And Transaksi berhasil diselesaikan dan statusnya diperbarui menjadi RESOLVED","P1","1. Mekanisme Jam Virtual Anchored: Untuk mengeliminasi race condition 1 detik akibat delay transit jaringan atau pergantian detik fisik antara SUT dan Mock, Mock Server mengaktifkan mode evaluasi ter-anchor: waktu_evaluasi_mock = int(timestamp_request) + delta_detik, sehingga skew dihitung deterministik: skew = abs(waktu_evaluasi_mock - int(timestamp_request)) = abs(delta_detik).
+2. Pengujian Batas Atas (+300s): Konfigurasikan Mock Server dengan parameter virtual clock delta = +300 detik (mensimulasikan jam vendor berada tepat 300 detik di depan timestamp SUT). Tanam dokumen PENDING 'SAMPLE-TSBOUND-POS27', jalankan worker, dan verifikasi Mock memvalidasi signature serta menerima request dengan HTTP 200 (karena skew == 300 <= 300).
+3. Pengujian Batas Bawah (-300s): Konfigurasikan Mock Server dengan parameter virtual clock delta = -300 detik (mensimulasikan jam vendor berada tepat 300 detik di belakang timestamp SUT). Tanam dokumen PENDING 'SAMPLE-TSBOUND-NEG27', jalankan worker, dan verifikasi Mock memvalidasi signature serta menerima request dengan HTTP 200 (karena skew == 300 <= 300).
+4. Verifikasi kedua dokumen pada MongoDB bertransisi ke status 'RESOLVED'.
+5. Teardown: Hapus kedua dokumen uji dari MongoDB.","Mekanisme Waktu: Mock Server Request-Anchored Virtual Clock: waktu_mock = int(timestamp) + delta_detik
+Batas yang diuji: delta = +300 detik (skew eksak 300s) dan delta = -300 detik (skew eksak 300s) tanpa terpengaruh wall-clock drift
+Dokumen MongoDB: provider_trxid='SAMPLE-TSBOUND-POS27' dan 'SAMPLE-TSBOUND-NEG27'","1. Mock Server menerima kedua request pada batas deterministik +300s dan -300s (HTTP 200, bukan 401).
+2. Nilai X-Signature terbukti valid dan cocok dengan HMAC atas canonical string yang memuat timestamp tersebut.
+3. MongoDB: kedua dokumen bertransisi ke status='RESOLVED'.
+4. [LOG CONTRACT]: Log SUT mencatat keberhasilan publikasi DR.","","","","Pilar-2, security, timestamp_boundary"
+"TC-028","Memastikan penanda waktu permintaan (X-Timestamp) yang melampaui batas toleransi (selisih plus 301 detik dan minus 301 detik) ditolak sebagai kegagalan autentikasi 401 dan transaksi langsung dihentikan GIVE_UP menggunakan mekanisme jam virtual ter-anchor.","TC-028 — Penolakan Transaksi Saat Penanda Waktu Melampaui Batas Toleransi Tiga Ratus Satu Detik","Given Transaksi SMS siap dilakukan pemeriksaan status
 When Permintaan dikirimkan dan dievaluasi terhadap jam server simulasi yang melampaui batas toleransi selisih tiga ratus satu detik
 Then Server vendor menolak permintaan dengan kode kesalahan 401 karena penanda waktu kedaluwarsa
-And Transaksi seketika diubah statusnya menjadi GIVE_UP secara permanen tanpa dicoba ulang","P1","1. Presisi Waktu Mock Server: Evaluasi skew menggunakan presisi integer epoch detik: skew = abs(int(time.time() + mock_clock_offset) - int(timestamp)).
-2. Pengujian Lewat Batas Atas (+301s): Jalankan Mock Server dengan simulasi clock skew offset -301 detik integer. Tanam dokumen PENDING 'SAMPLE-TSEXP-POS28', jalankan worker, dan verifikasi Mock menolak dengan HTTP 401 (karena skew == 301 > 300).
-3. Pengujian Lewat Batas Bawah (-301s): Jalankan Mock Server dengan simulasi clock skew offset +301 detik integer. Tanam dokumen PENDING 'SAMPLE-TSEXP-NEG28', jalankan worker, dan verifikasi Mock menolak dengan HTTP 401 (karena skew == 301 > 300).
-4. Verifikasi kedua dokumen pada MongoDB seketika bertransisi ke 'GIVE_UP' permanen tanpa retry.
-5. Teardown: Hapus kedua dokumen uji dari MongoDB.","Mekanisme Waktu: Mock Server V2 virtual integer clock offset deterministik: skew = abs(int(time.time() + offset) - int(timestamp))
-Batas yang diuji: offset = -301 detik (skew = 301s) dan offset = +301 detik (skew = 301s)
+And Transaksi seketika diubah statusnya menjadi GIVE_UP secara permanen tanpa dicoba ulang","P1","1. Mekanisme Jam Virtual Anchored: Evaluasi selisih waktu pada Mock Server dihitung menggunakan jam virtual ter-anchor: waktu_evaluasi_mock = int(timestamp_request) + delta_detik, sehingga skew = abs(delta_detik) secara deterministik.
+2. Pengujian Lewat Batas Atas (+301s): Konfigurasikan Mock Server dengan parameter virtual clock delta = +301 detik. Tanam dokumen PENDING 'SAMPLE-TSEXP-POS28', jalankan worker, dan verifikasi Mock menolak request dengan HTTP 401 Authentication Error (karena skew == 301 > 300).
+3. Pengujian Lewat Batas Bawah (-301s): Konfigurasikan Mock Server dengan parameter virtual clock delta = -301 detik. Tanam dokumen PENDING 'SAMPLE-TSEXP-NEG28', jalankan worker, dan verifikasi Mock menolak request dengan HTTP 401 (karena skew == 301 > 300).
+4. Verifikasi kedua dokumen pada MongoDB seketika bertransisi ke status 'GIVE_UP' permanen tanpa retry.
+5. Teardown: Hapus kedua dokumen uji dari MongoDB.","Mekanisme Waktu: Mock Server Request-Anchored Virtual Clock: waktu_mock = int(timestamp) + delta_detik
+Batas yang diuji: delta = +301 detik (skew eksak 301s) dan delta = -301 detik (skew eksak 301s)
 Dokumen MongoDB: provider_trxid='SAMPLE-TSEXP-POS28' dan 'SAMPLE-TSEXP-NEG28'","1. Mock Server menolak kedua request dengan HTTP 401 (Authentication Error).
-2. MongoDB: kedua dokumen bertransisi ke status='GIVE_UP' permanen tanpa retry.
+2. MongoDB: kedua dokumen seketika bertransisi ke status='GIVE_UP' permanen tanpa retry (last_error mencatat telkomsel 401).
 3. [LOG CONTRACT]: Log SUT mencatat AUTH_ERROR dan transisi ke GIVE_UP.","","","","Pilar-2, security, timestamp_boundary"
 "TC-029","Memastikan prioritas tertinggi pencarian kunci rahasia berdasarkan pasangan lengkap appsid:sid bekerja dengan benar saat ketiga tingkat kunci terkonfigurasi bersamaan.","TC-029 — Penegakan Prioritas Tertinggi Kunci Rahasia Pasangan Lengkap Appsid dan SID","Given Konfigurasi database memuat ketiga tingkat kunci rahasia sekaligus dengan nilai yang berbeda
 And Kunci tingkat satu appsid:sid bernilai Kunci A, tingkat dua bernilai Kunci B, dan default bernilai Kunci C

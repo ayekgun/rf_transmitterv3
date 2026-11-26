@@ -237,7 +237,7 @@ class MongoDrPullLibrary:
         return results
 
     @keyword("Mongo Verifikasi Dokumen Terdaftar Tanpa Password")
-    def mongo_verifikasi_dokumen_terdaftar_tanpa_password(self, messageid, timeout_sec=15):
+    def mongo_verifikasi_dokumen_terdaftar_tanpa_password(self, messageid, expected_provider_trxid=None, timeout_sec=15):
         if self.collection is None:
             self.mongo_hubungkan_ke_database_dr_pull()
 
@@ -280,8 +280,73 @@ class MongoDrPullLibrary:
         if not provider_trxid:
             raise AssertionError("Field provider_trxid pada dokumen kosong!")
 
-        logger.info(f"Dokumen MongoDB terbukti valid tanpa password: trxid={mid}, provider_trxid={provider_trxid}, status=PENDING, zero pwd")
-        return provider_trxid
+        if expected_provider_trxid and str(provider_trxid).strip() != str(expected_provider_trxid).strip():
+            raise AssertionError(
+                f"Korelasi gagal! provider_trxid di MongoDB '{provider_trxid}' tidak cocok dengan ACK Transmitter '{expected_provider_trxid}'"
+            )
+
+        doc_id = str(doc["_id"])
+        logger.info(
+            f"Dokumen MongoDB terbukti valid tanpa password: _id={doc_id}, trxid={mid}, provider_trxid={provider_trxid}, status=PENDING, zero pwd"
+        )
+        return doc_id
+
+    @keyword("Mongo Verifikasi Dokumen Resolved Sesuai Id Dan Metadata")
+    def mongo_verifikasi_dokumen_resolved_sesuai_id_dan_metadata(
+        self, doc_id, expected_trxid, expected_provider_trxid, expected_status="RESOLVED", timeout_sec=15
+    ):
+        if self.collection is None:
+            self.mongo_hubungkan_ke_database_dr_pull()
+
+        oid = ObjectId(str(doc_id).strip())
+        target_trx = str(expected_trxid).strip()
+        target_prov = str(expected_provider_trxid).strip()
+        end_time = time.time() + float(timeout_sec)
+        doc = None
+        while time.time() < end_time:
+            doc = self.collection.find_one({"_id": oid})
+            if doc and doc.get("status") == str(expected_status):
+                break
+            time.sleep(0.3)
+
+        if not doc:
+            raise AssertionError(f"Dokumen _id={doc_id} TIDAK DITEMUKAN pada MongoDB dr_pull_telkomsel!")
+
+        # Anti-truncation log chunked
+        doc_copy = dict(doc)
+        doc_copy["_id"] = str(doc_copy["_id"])
+        _log_chunked(f"Dokumen MongoDB RESOLVED Sesuai _id [{doc_id}]", json.dumps(doc_copy, default=str, indent=2))
+
+        # Strict Assertions
+        actual_status = doc.get("status")
+        if actual_status != str(expected_status):
+            raise AssertionError(f"Status mismatch untuk _id={doc_id}: expected '{expected_status}' but got '{actual_status}'")
+
+        actual_trxid = str(doc.get("trxid", ""))
+        if actual_trxid != target_trx:
+            raise AssertionError(f"trxid korelasi mismatch untuk _id={doc_id}: expected '{target_trx}' but got '{actual_trxid}'")
+
+        actual_prov = str(doc.get("provider_trxid", ""))
+        if actual_prov != target_prov:
+            raise AssertionError(f"provider_trxid korelasi mismatch untuk _id={doc_id}: expected '{target_prov}' but got '{actual_prov}'")
+
+        resolved_by = doc.get("resolved_by")
+        if resolved_by != "pull":
+            raise AssertionError(f"resolved_by mismatch untuk _id={doc_id}: expected 'pull' but got '{resolved_by}'")
+
+        dr_pub = doc.get("dr_published_at")
+        if not dr_pub:
+            raise AssertionError(f"Metadata dr_published_at kosong pada dokumen _id={doc_id}!")
+
+        sql_pub = doc.get("sql_published_at")
+        if not sql_pub:
+            raise AssertionError(f"Metadata sql_published_at kosong pada dokumen _id={doc_id}!")
+
+        logger.info(
+            f"Dokumen _id={doc_id} terverifikasi 100% konsisten: trxid={actual_trxid}, provider_trxid={actual_prov}, "
+            f"status={actual_status}, resolved_by={resolved_by}, dr_published_at={dr_pub}, sql_published_at={sql_pub}"
+        )
+        return doc_copy
 
     @keyword("Mongo Percepat Waktu Next Pull Menjadi Jatuh Tempo")
     def mongo_percepat_waktu_next_pull_menjadi_jatuh_tempo(self, provider_trxid):

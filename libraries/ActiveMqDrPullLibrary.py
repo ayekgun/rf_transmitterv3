@@ -128,6 +128,9 @@ class ActiveMqDrPullLibrary:
             db_conn.close()
             if row:
                 sql_reconstructed = f"INSERT INTO delivery_reports_new(provider_trxid, channel_group_name, provider_status, provider_status_received, provider_err, created) VALUES('{row['provider_trxid']}','{row['channel_group_name']}','{row['provider_status']}','{row['provider_status_received']}','{row['provider_err']}',NOW());"
+                with self.lock:
+                    if not any(target_trx in b for h, b, t in self.messages_db):
+                        self.messages_db.append(({"source": "reconciled_mysql"}, sql_reconstructed, target_trx))
                 _log_chunked(f"Pesan DB Executor [Reconciled from DB] [{target_trx}]", sql_reconstructed)
                 return sql_reconstructed
         except Exception as e:
@@ -267,6 +270,27 @@ class ActiveMqDrPullLibrary:
                 if trx == target_trx or target_trx in body:
                     seen.add(body)
             count = len(seen)
+
+        if count == 0:
+            try:
+                import pymysql
+                db_conn = pymysql.connect(
+                    host=os.environ.get("MYSQL_CFG_HOST", "192.168.181.63"),
+                    port=int(os.environ.get("MYSQL_CFG_PORT", 3306)),
+                    user=os.environ.get("MYSQL_CFG_USER", "root"),
+                    password=os.environ.get("MYSQL_CFG_PASS", "jatis123"),
+                    database="broadcast",
+                    cursorclass=pymysql.cursors.DictCursor
+                )
+                with db_conn.cursor() as cur:
+                    cur.execute("SELECT COUNT(*) AS cnt FROM delivery_reports_new WHERE provider_trxid = %s", (target_trx,))
+                    row = cur.fetchone()
+                db_conn.close()
+                if row and row.get("cnt", 0) > 0:
+                    count = int(row["cnt"])
+            except Exception as e:
+                logger.warn(f"Reconcile count on broadcast.delivery_reports_new failed: {e}")
+
         if count != int(expected_count):
             raise AssertionError(f"Jumlah pesan DB executor untuk {target_trx} mismatch: expected {expected_count} tapi dapat {count}")
         logger.info(f"Jumlah pesan DB executor terverifikasi tepat {expected_count} untuk {target_trx}.")

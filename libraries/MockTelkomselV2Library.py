@@ -289,7 +289,7 @@ class MockTelkomselV2Library:
             return self.captured_requests.get(str(trx_id), {})
 
     @keyword("Mock Telkomsel Verifikasi Request V2 Masuk")
-    def mock_telkomsel_verifikasi_request_v2_masuk(self, trx_id):
+    def mock_telkomsel_verifikasi_request_v2_masuk(self, trx_id, expected_appsid=None, expected_sid=None):
         req = self.mock_telkomsel_ambil_request_terakhir(trx_id)
         if not req:
             raise AssertionError(f"Mock Telkomsel V2 tidak menerima request untuk trx_id: {trx_id}")
@@ -298,7 +298,11 @@ class MockTelkomselV2Library:
         assert req["path"] == EXPECTED_PATH, f"Expected {EXPECTED_PATH} but got {req['path']}"
         assert len(req["signature"]) == 64, f"Invalid signature length: {req['signature']}"
         assert req["transaction_id"] == trx_id, f"Expected trx_id {trx_id} but got {req['transaction_id']}"
-        logger.info(f"Mock Telkomsel V2 berhasil memverifikasi request untuk {trx_id}: signature={req['signature']}")
+        if expected_appsid:
+            assert req["appsid"] == str(expected_appsid), f"Expected appsid {expected_appsid} but got {req['appsid']}"
+        if expected_sid:
+            assert req["sid"] == str(expected_sid), f"Expected sid {expected_sid} but got {req['sid']}"
+        logger.info(f"Mock Telkomsel V2 berhasil memverifikasi request untuk {trx_id}: appsid={req['appsid']}, sid={req['sid']}, signature={req['signature']}")
         return req
 
     @keyword("Mock Telkomsel Verifikasi Signature Menggunakan Secret Eksklusif")

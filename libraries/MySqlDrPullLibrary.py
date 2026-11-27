@@ -6,7 +6,17 @@ Supports isolated backup & restore, dynamic secret configuration, and provider_s
 """
 
 import os
-import pymysql
+try:
+    import pymysql
+    import pymysql.cursors
+    USE_PYMYSQL = True
+except ImportError:
+    try:
+        import mysql.connector
+        USE_PYMYSQL = False
+    except ImportError:
+        raise ImportError("Neither 'pymysql' nor 'mysql.connector' is installed.")
+
 from robot.api import logger
 from robot.api.deco import keyword
 
@@ -23,21 +33,16 @@ class MySqlDrPullLibrary:
         self.database = os.environ.get("MYSQL_CFG_DB", "apps_config")
         self.backup_rows = []
 
+    def _is_connected(self):
+        if self.conn is None:
+            return False
+        if USE_PYMYSQL:
+            return bool(getattr(self.conn, "open", False))
+        return bool(self.conn.is_connected())
+
     def _get_connection(self):
-        if self.conn is None or not self.conn.open:
-            self.conn = pymysql.connect(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                database=self.database,
-                autocommit=True,
-                cursorclass=pymysql.cursors.DictCursor,
-            )
-        else:
-            try:
-                self.conn.ping(reconnect=True)
-            except Exception:
+        if not self._is_connected():
+            if USE_PYMYSQL:
                 self.conn = pymysql.connect(
                     host=self.host,
                     port=self.port,
@@ -47,7 +52,22 @@ class MySqlDrPullLibrary:
                     autocommit=True,
                     cursorclass=pymysql.cursors.DictCursor,
                 )
+            else:
+                self.conn = mysql.connector.connect(
+                    host=self.host,
+                    port=self.port,
+                    user=self.user,
+                    password=self.password,
+                    database=self.database,
+                    autocommit=True,
+                )
         return self.conn
+
+    def _cursor(self):
+        conn = self._get_connection()
+        if USE_PYMYSQL:
+            return conn.cursor()
+        return conn.cursor(dictionary=True)
 
     @keyword("Mysql Hubungkan Ke Database Apps Config")
     def mysql_hubungkan_ke_database_apps_config(self, host=None, port=None, user=None, password=None, database=None):
@@ -57,19 +77,19 @@ class MySqlDrPullLibrary:
         self.password = str(password or self.password)
         self.database = str(database or self.database)
         conn = self._get_connection()
-        logger.info(f"Berhasil terhubung ke MySQL apps_config pada {self.host}:{self.port}")
+        driver_name = "pymysql" if USE_PYMYSQL else "mysql.connector"
+        logger.info(f"Berhasil terhubung ke MySQL apps_config ({driver_name}) pada {self.host}:{self.port}")
 
     @keyword("Mysql Putuskan Dari Database Apps Config")
     def mysql_putuskan_dari_database_apps_config(self):
-        if self.conn is not None and self.conn.open:
+        if self._is_connected():
             self.conn.close()
             self.conn = None
             logger.info("Koneksi MySQL apps_config berhasil diputuskan.")
 
     @keyword("Mysql Backup Konfigurasi Dr Pull")
     def mysql_backup_konfigurasi_dr_pull(self):
-        conn = self._get_connection()
-        with conn.cursor() as cur:
+        with self._cursor() as cur:
             cur.execute("SELECT * FROM jns_config WHERE lookup_type = 'drpulltelkomsel'")
             self.backup_rows = cur.fetchall()
         logger.info(f"Berhasil mem-backup {len(self.backup_rows)} baris konfigurasi drpulltelkomsel.")
@@ -81,8 +101,7 @@ class MySqlDrPullLibrary:
             logger.warn("Tidak ada data backup konfigurasi untuk di-restore.")
             return
 
-        conn = self._get_connection()
-        with conn.cursor() as cur:
+        with self._cursor() as cur:
             cur.execute("DELETE FROM jns_config WHERE lookup_type = 'drpulltelkomsel'")
             for r in self.backup_rows:
                 cols = ", ".join(r.keys())
@@ -93,11 +112,11 @@ class MySqlDrPullLibrary:
 
     @keyword("Mysql Update Lookup Value")
     def mysql_update_lookup_value(self, lookup_name, lookup_value):
-        conn = self._get_connection()
-        with conn.cursor() as cur:
+        with self._cursor() as cur:
             # Check if exists
             cur.execute("SELECT COUNT(*) AS cnt FROM jns_config WHERE lookup_type = 'drpulltelkomsel' AND lookup_name = %s", (lookup_name,))
-            cnt = cur.fetchone()["cnt"]
+            row = cur.fetchone()
+            cnt = row["cnt"] if isinstance(row, dict) else row[0]
             if cnt > 0:
                 cur.execute(
                     "UPDATE jns_config SET lookup_value = %s WHERE lookup_type = 'drpulltelkomsel' AND lookup_name = %s",
@@ -124,8 +143,7 @@ class MySqlDrPullLibrary:
 
     @keyword("Mysql Hapus Seluruh Secret Dr Pull")
     def mysql_hapus_seluruh_secret_dr_pull(self):
-        conn = self._get_connection()
-        with conn.cursor() as cur:
+        with self._cursor() as cur:
             cur.execute(
                 "DELETE FROM jns_config WHERE lookup_type = 'drpulltelkomsel' AND lookup_name IN ('client_secret', 'client_secrets_json')"
             )
@@ -133,13 +151,12 @@ class MySqlDrPullLibrary:
 
     @keyword("Mysql Verifikasi Key Konfigurasi Ada")
     def mysql_verifikasi_key_konfigurasi_ada(self, *expected_keys):
-        conn = self._get_connection()
-        with conn.cursor() as cur:
+        with self._cursor() as cur:
             cur.execute(
                 "SELECT lookup_name FROM jns_config WHERE lookup_type = 'drpulltelkomsel' AND lookup_name IN %s",
                 (expected_keys,),
             )
-            found = {row["lookup_name"] for row in cur.fetchall()}
+            found = {row["lookup_name"] if isinstance(row, dict) else row[0] for row in cur.fetchall()}
         missing = set(expected_keys) - found
         if missing:
             raise AssertionError(f"Key konfigurasi drpulltelkomsel tidak ditemukan di apps_config: {missing}")

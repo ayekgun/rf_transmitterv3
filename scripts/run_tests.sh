@@ -5,6 +5,9 @@
 # ==============================================================================
 set -e
 
+export PYTHONUNBUFFERED=1
+export PATH="$HOME/.local/bin:$PATH"
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )"
 cd "$DIR"
 
@@ -13,6 +16,7 @@ if [ -d "$DIR/../bin" ]; then
 else
     DEFAULT_LOG_DIR="$DIR/logs"
 fi
+mkdir -p "$DEFAULT_LOG_DIR"
 
 export SUT_LOG_DIR="${SUT_LOG_DIR:-$DEFAULT_LOG_DIR}"
 export SUT_LOG_PROFILE="${SUT_LOG_PROFILE:-$DIR/libraries/sut_profile.yaml}"

@@ -1,6 +1,6 @@
 *** Variables ***
-${MOCK_HOST}                        %{MOCK_HOST=127.0.0.1}
-${MOCK_PORT}                        8089
+${MOCK_HOST}                        %{MOCK_HOST=192.168.181.51}
+${MOCK_PORT}                        %{MOCK_PORT=8095}
 ${MOCK_STATUS_URL}                  http://${MOCK_HOST}:${MOCK_PORT}/bank/v2/transaction-status
 ${DEFAULT_CLIENT_SECRET}            7s5tLvM1
 ${INTEG_APPSID}                     INTEG_APP_035

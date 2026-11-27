@@ -352,4 +352,13 @@ Mock Server Telkomsel V2 aktif dan siap melayani rute /bank/v2/pushbulk dan /ban
 6. DR Pull berhasil memeriksa status transaksi yang sama ke Mock Telkomsel dan memperoleh respons Delivered (D).
 7. DR Pull berhasil menerbitkan laporan DR ke jns.dr.drrealhandler dan perintah SQL ke jns.db.deliveryreport, masing-masing tepat satu kali membawa provider_trxid yang sesuai.
 8. Dokumen transaksi yang sama di MongoDB berhasil difinalisasi hingga berstatus RESOLVED.
-9. Tidak terdapat duplikasi laporan DR maupun perintah SQL untuk transaksi tersebut, dan seluruh layanan pada rantai integrasi tetap berjalan stabil tanpa crash.",SUT Log: files=0 (tidak ada log baru),PASS,[PASS] Elapsed: 0.17s | [SUT LOG] files=0 (tidak ada log baru),"Pilar-Integrasi, end_to_end, transmitter_to_drpull"
+9. Tidak terdapat duplikasi laporan DR maupun perintah SQL untuk transaksi tersebut, dan seluruh layanan pada rantai integrasi tetap berjalan stabil tanpa crash.","SUT Log: 2 file bertambah (log/drpulltelkomsel.debug.log, out-drpulltelkomsel.log)",PASS,"[PASS] Elapsed: 4.74s | [SUT LOG] files=2 lines=6 kw=0 errfile=0
+--- log/drpulltelkomsel.debug.log (3 baris) ---
+2026-11-27 09:49:15.939 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-27 09:49:18.003 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+2026-11-27 09:49:20.060 c.j.d.scheduler.SweepTask [SweepTask] sweep menemukan 0 trx due
+--- out-drpulltelkomsel.log (3 baris) ---
+09:49:15.939 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+09:49:18.003 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+09:49:20.060 [pool-1-thread-1] INFO  c.j.d.scheduler.SweepTask - [SweepTask] sweep menemukan 0 trx due
+artifact=results/logs/20261127_094856/TC-035","Pilar-Integrasi, end_to_end, transmitter_to_drpull"

@@ -8,9 +8,13 @@ Thread-safe HTTPServer with Request-Anchored Virtual Clock & mock_events_queue i
 import hmac
 import hashlib
 import json
+import os
 import socket
 import threading
 import time
+import urllib.request
+import urllib.parse
+import urllib.error
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from urllib.parse import urlparse
@@ -206,23 +210,77 @@ class MockTelkomselV2Library:
     def __init__(self):
         self.server = None
         self.server_thread = None
-        self.port = 8089
+        self.host = os.environ.get("MOCK_HOST", "192.168.181.51")
+        self.port = int(os.environ.get("MOCK_PORT", 8095))
         self.lock = threading.Lock()
         self.hit_counter = 0
-        self.secret = "test-secret-123"
+        self.secret = "7s5tLvM1"
         self.secrets_map = {}
         self.virtual_clock_delta = None
         self.captured_requests = {}
         self.custom_rules = {}
+        self.is_remote = False
+        self.control_url = f"http://{self.host}:{self.port}"
+
+    def _remote_get(self, path):
+        url = f"{self.control_url}{path}"
+        req = urllib.request.Request(url, method="GET")
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except Exception as e:
+            logger.warn(f"Failed remote GET {url}: {e}")
+            return {}
+
+    def _remote_post(self, path, payload=None):
+        url = f"{self.control_url}{path}"
+        data = json.dumps(payload or {}).encode("utf-8")
+        req = urllib.request.Request(
+            url, data=data, headers={"Content-Type": "application/json"}, method="POST"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except Exception as e:
+            logger.warn(f"Failed remote POST {url}: {e}")
+            return {}
+
+    def _sync_remote_events(self):
+        if not self.is_remote:
+            return
+        res = self._remote_get("/mock-ctrl/events?drain=1")
+        events = res.get("events", [])
+        for ev in events:
+            event_type = ev.get("event", "UNKNOWN")
+            kwargs = {k: v for k, v in ev.items() if k not in ("ts", "event")}
+            record_mock_event(event_type, **kwargs)
 
     @keyword("Mock Telkomsel Mulai Server")
-    def mock_telkomsel_mulai_server(self, port=8089, secret="test-secret-123"):
+    def mock_telkomsel_mulai_server(self, port=None, secret="7s5tLvM1"):
+        if port is not None:
+            self.port = int(port)
+            self.control_url = f"http://{self.host}:{self.port}"
+        if secret:
+            self.secret = str(secret).strip()
+
+        # Check if remote mock server is active (e.g. on Server 51)
+        try:
+            res = self._remote_get("/mock-ctrl/health")
+            if res.get("status") == "ok":
+                self.is_remote = True
+                self._remote_post("/mock-ctrl/reset")
+                self._remote_post("/mock-ctrl/set-secret", {"secret": self.secret})
+                clear_mock_events()
+                logger.info(f"Connected to remote Mock Telkomsel V2 Server at {self.control_url}")
+                return
+        except Exception:
+            pass
+
+        self.is_remote = False
         if self.server is not None:
-            logger.info("Mock Telkomsel V2 Server sudah aktif.")
+            logger.info("Local Mock Telkomsel V2 Server sudah aktif.")
             return
 
-        self.port = int(port)
-        self.secret = str(secret)
         self.virtual_clock_delta = None
         with self.lock:
             self.hit_counter = 0
@@ -236,7 +294,7 @@ class MockTelkomselV2Library:
 
         self.server_thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.server_thread.start()
-        logger.info(f"Mock Telkomsel V2 Server berhasil berjalan pada port {self.port} dengan secret default '{self.secret}'.")
+        logger.info(f"Local Mock Telkomsel V2 Server berhasil berjalan pada port {self.port} dengan secret default '{self.secret}'.")
 
     @keyword("Mock Telkomsel Hentikan Server")
     def mock_telkomsel_hentikan_server(self):
@@ -245,10 +303,15 @@ class MockTelkomselV2Library:
             self.server.server_close()
             self.server = None
             self.server_thread = None
-            logger.info("Mock Telkomsel V2 Server berhasil dihentikan.")
+            logger.info("Local Mock Telkomsel V2 Server berhasil dihentikan.")
+        elif self.is_remote:
+            logger.info(f"Remote Mock Telkomsel V2 Server at {self.control_url} tetap berjalan sebagai daemon.")
 
     @keyword("Mock Telkomsel Reset Perekam Request")
     def mock_telkomsel_reset_perekam_request(self):
+        if self.is_remote:
+            self._remote_post("/mock-ctrl/reset")
+            self._remote_post("/mock-ctrl/set-secret", {"secret": self.secret})
         with self.lock:
             self.hit_counter = 0
             self.captured_requests.clear()
@@ -259,32 +322,47 @@ class MockTelkomselV2Library:
 
     @keyword("Mock Telkomsel Set Secret")
     def mock_telkomsel_set_secret(self, secret):
+        self.secret = str(secret).strip()
+        if self.is_remote:
+            self._remote_post("/mock-ctrl/set-secret", {"secret": self.secret})
         with self.lock:
-            self.secret = str(secret).strip()
+            pass
         logger.info(f"Mock Telkomsel secret diset ke: {self.secret}")
 
     @keyword("Mock Telkomsel Set Virtual Clock Delta")
     def mock_telkomsel_set_virtual_clock_delta(self, delta_seconds):
-        with self.lock:
-            self.virtual_clock_delta = int(delta_seconds) if delta_seconds is not None else None
+        self.virtual_clock_delta = int(delta_seconds) if delta_seconds is not None else None
+        if self.is_remote:
+            self._remote_post("/mock-ctrl/set-skew", {"skew_seconds": self.virtual_clock_delta})
         logger.info(f"Mock Telkomsel Request-Anchored Virtual Clock Delta diset ke: {self.virtual_clock_delta} detik.")
 
     @keyword("Mock Telkomsel Set Aturan Respons Kustom")
     def mock_telkomsel_set_aturan_respons_kustom(self, trx_id, status_code=200, body=None):
+        status = int(status_code)
+        b = body if body is not None else {}
+        if self.is_remote:
+            self._remote_post("/mock-ctrl/set-rule", {"trx_id": str(trx_id), "status_code": status, "body": b})
         with self.lock:
             self.custom_rules[str(trx_id)] = {
-                "status_code": int(status_code),
-                "body": body if body is not None else {},
+                "status_code": status,
+                "body": b,
             }
         logger.info(f"Aturan respons kustom untuk trx {trx_id} diset: HTTP {status_code}")
 
     @keyword("Mock Telkomsel Ambil Jumlah Hit")
     def mock_telkomsel_ambil_jumlah_hit(self):
+        if self.is_remote:
+            stats = self._remote_get("/mock-ctrl/stats")
+            return stats.get("hit_counter", 0)
         with self.lock:
             return self.hit_counter
 
     @keyword("Mock Telkomsel Ambil Request Terakhir")
     def mock_telkomsel_ambil_request_terakhir(self, trx_id):
+        self._sync_remote_events()
+        if self.is_remote:
+            res = self._remote_get(f"/mock-ctrl/captured?trx_id={trx_id}")
+            return res.get("data") or {}
         with self.lock:
             return self.captured_requests.get(str(trx_id), {})
 
@@ -350,21 +428,23 @@ class MockTelkomselV2Library:
 
     @keyword("Mock Telkomsel Set Secret Map")
     def mock_telkomsel_set_secret_map(self, secrets_json):
-        with self.lock:
-            if isinstance(secrets_json, str):
-                try:
-                    self.secrets_map = json.loads(secrets_json)
-                except Exception:
-                    self.secrets_map = {}
-            elif isinstance(secrets_json, dict):
-                self.secrets_map = dict(secrets_json)
+        if isinstance(secrets_json, str):
+            try:
+                self.secrets_map = json.loads(secrets_json)
+            except Exception:
+                self.secrets_map = {}
+        elif isinstance(secrets_json, dict):
+            self.secrets_map = dict(secrets_json)
+        if self.is_remote:
+            self._remote_post("/mock-ctrl/set-secret-map", {"secrets_map": self.secrets_map})
         logger.info(f"Mock Telkomsel secret map diset: {list(self.secrets_map.keys())}")
 
     @keyword("Mock Telkomsel Kirim Direct Http")
     def mock_telkomsel_kirim_direct_http(self, method="GET", path_with_query="/bank/v2/transaction-status", headers=None, body=None):
         import urllib.request
         import urllib.error
-        url = f"http://127.0.0.1:{self.port}{path_with_query}"
+        base_url = self.control_url if self.is_remote else f"http://127.0.0.1:{self.port}"
+        url = f"{base_url}{path_with_query}"
         req_headers = headers or {}
         req_data = body.encode("utf-8") if isinstance(body, str) else body
         req = urllib.request.Request(url, data=req_data, headers=req_headers, method=method)

@@ -46,8 +46,8 @@ fi
 
 # Auto-detect runner IP for remote SUT (Jenkins CI / Server mode)
 if [ -z "${MOCK_HOST:-}" ]; then
-    if [ -n "${JENKINS_HOME:-}" ] || [ "${ENV:-}" = "server" ]; then
-        DETECTED_IP=$("${RUNNER[0]}" -c "import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(('192.168.181.63', 3306)); print(s.getsockname()[0]); s.close()" 2>/dev/null || echo "127.0.0.1")
+    if [ -n "${JENKINS_HOME:-}" ] || [ -n "${BUILD_NUMBER:-}" ] || [ -n "${WORKSPACE:-}" ] || [ "${ENV:-}" = "server" ]; then
+        DETECTED_IP=$("${RUNNER[0]}" -c "import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(('192.168.181.63', 3306)); print(s.getsockname()[0]); s.close()" 2>/dev/null || echo "192.168.181.119")
         export MOCK_HOST="$DETECTED_IP"
     else
         export MOCK_HOST="127.0.0.1"

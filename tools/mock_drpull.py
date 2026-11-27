@@ -116,6 +116,9 @@ class MockHandler(BaseHTTPRequestHandler):
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
+            if status >= 400:
+                self.send_header("Connection", "close")
+                self.close_connection = True
             self.end_headers()
             self.wfile.write(body)
         except (BrokenPipeError, ConnectionResetError, OSError):
@@ -169,9 +172,13 @@ class MockHandler(BaseHTTPRequestHandler):
         path = parsed.path
         query = parsed.query
 
+        # Always read the full request body first to drain the HTTP/1.1 socket stream
+        length = int(self.headers.get("Content-Length", 0))
+        raw_body = self.rfile.read(length).decode("utf-8") if length > 0 else ""
+
         # Control API routes
         if path.startswith("/mock-ctrl/"):
-            self._handle_control_post(path)
+            self._handle_control_post(path, raw_body)
             return
 
         # Telkomsel V2 Status Check endpoint
@@ -217,11 +224,7 @@ class MockHandler(BaseHTTPRequestHandler):
             self._send_error(401, 2401, "Authentication Error: timestamp skew exceeded")
             return
 
-        # 5. Read body
-        length = int(self.headers.get("Content-Length", 0))
-        raw_body = self.rfile.read(length).decode("utf-8") if length > 0 else ""
-
-        # 6. Verify HMAC Signature
+        # 5. Verify HMAC Signature (body already read)
         canonical = f"POST\n{path}\n{appsid}\n{sid}\n{timestamp}\n{raw_body}"
         expected_secret = state.resolve_expected_secret(appsid, sid)
 
@@ -233,7 +236,7 @@ class MockHandler(BaseHTTPRequestHandler):
                 self._send_error(401, 2401, "Authentication Error: signature mismatch")
                 return
 
-        # 7. Parse JSON body
+        # 6. Parse JSON body
         try:
             body_json = json.loads(raw_body)
             trx_id = str(body_json.get("transaction_id", ""))
@@ -304,9 +307,10 @@ class MockHandler(BaseHTTPRequestHandler):
         }
         self._send_json(200, payload)
 
-    def _handle_control_post(self, path):
-        length = int(self.headers.get("Content-Length", 0))
-        raw_body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+    def _handle_control_post(self, path, raw_body=""):
+        if not raw_body:
+            length = int(self.headers.get("Content-Length", 0))
+            raw_body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
         try:
             body = json.loads(raw_body)
         except Exception:

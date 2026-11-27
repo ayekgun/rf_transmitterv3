@@ -1,92 +1,141 @@
-# TransmitterV3
+# Suite Otomasi Robot Framework — drpulltelkomsel v2.0.0
+Proyek: **PB172645142601YA**  
+Aplikasi Target (SUT): `drpulltelkomsel-2.0.0.jar` (Get Delivery Status Telkomsel V2)
 
+---
 
+## 1. Prasyarat Lingkungan (Prerequisites)
 
-## Getting started
+Sebelum menjalankan pengujian, pastikan:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+1. **Koneksi Jaringan / VPN Aktif**:
+   Akses ke subnet SIT `192.168.181.x` harus aktif:
+   - `192.168.181.51` (ActiveMQ broker, Transmitter Telkomsel V2, DBExecutorMongoDb)
+   - `192.168.181.63` (MySQL `apps_config`, MongoDB `dr_pull_telkomsel`)
+   - `192.168.181.52` (Mock Telkomsel MT V2)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+   Verifikasi konektivitas:
+   ```bash
+   ping -c 2 192.168.181.51
+   ping -c 2 192.168.181.63
+   ```
 
-## Add your files
+2. **Layanan Pendukung Aktif**:
+   - **ActiveMQ Broker** di `192.168.181.51:61616` (OpenWire), `61613` (STOMP), `8161` (REST/Web Console).
+   - **Transmitter Telkomsel V2** di `192.168.181.51` (mengonsumsi `jns.transmitter.telkomsel.reg.247`).
+   - **DBExecutorMongoDb** di `192.168.181.51` (mengonsumsi `jns.db.mongodbv2` $\rightarrow$ insert ke MongoDB).
+   - **MySQL apps_config** di `192.168.181.63:3306` (database `apps_config`, tabel `jns_config`).
+   - **MongoDB** di `192.168.181.63:27017` (database `jnsCore`, koleksi `dr_pull_telkomsel`).
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+3. **Python Environment**:
+   Python 3.10+ dengan dependensi:
+   - `robotframework`
+   - `stomp.py`
+   - `pymongo`
+   - `pymysql`
+   - `requests`
+   - `python-docx`, `openpyxl` (untuk generate laporan)
 
+---
+
+## 2. Cara Menjalankan Pengujian Manual
+
+Masuk ke direktori suite Robot Framework:
+```bash
+cd /home/gunawan/Jamob/2026/PB172645142601YA/drpulltelkomsel/rf_drpulltelkomsel
 ```
-cd existing_repo
-git remote add origin https://git-rbi.jatismobile.com/sqa_automation/integrationtest/jns/transmitter/transmitterv3.git
-git branch -M main
-git push -uf origin main
+
+### A. Menjalankan Khusus TC-035 (Integrasi Transmitter ke DR Pull)
+Untuk menguji aliran end-to-end lengkap dari SMS MT Transmitter hingga status DR Pull RESOLVED:
+```bash
+./scripts/run_tests.sh --test "*TC-035*"
 ```
 
-## Integrate with your tools
+### B. Menjalankan Seluruh Test Suite (TC-001 s/d TC-035)
+Untuk mengeksekusi seluruh 35 skenario pengujian:
+```bash
+./scripts/run_tests.sh
+```
 
-- [ ] [Set up project integrations](https://git-rbi.jatismobile.com/sqa_automation/integrationtest/jns/transmitter/transmitterv3/-/settings/integrations)
+### C. Menjalankan Test Case Spesifik Tertentu
+Gunakan opsi `--test` dengan pola nama test:
+```bash
+# Menjalankan TC-001 (Happy path Delivered)
+./scripts/run_tests.sh --test "*TC-001*"
 
-## Collaborate with your team
+# Menjalankan TC-031 (Fault injection ActiveMQ queue error)
+./scripts/run_tests.sh --test "*TC-031*"
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+# Menjalankan TC-033 (Multi-instance publishing fence)
+./scripts/run_tests.sh --test "*TC-033*"
+```
 
-## Test and Deploy
+### D. Menjalankan Berdasarkan Tag Kategori
+Gunakan opsi `--include`:
+```bash
+# Menjalankan hanya kategori P0
+./scripts/run_tests.sh --include P0
 
-Use the built-in continuous integration in GitLab.
+# Menjalankan kategori end-to-end
+./scripts/run_tests.sh --include end_to_end
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+---
 
-***
+## 3. Skrip Validasi & Audit Kepatuhan (Quality Gates)
 
-# Editing this README
+Suite ini dilengkapi skrip verifikasi otomatis untuk memastikan standar Clean BDD dan integritas keyword:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```bash
+# Cek duplikasi keyword antar berkas .robot
+./scripts/check_duplicate_keywords.sh
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# Cek potensi tabrakan / rekursi keyword
+./scripts/check_keyword_collision.sh
 
-## Name
-Choose a self-explaining name for your project.
+# Cek apakah seluruh keyword di test case ter-resolve
+./scripts/check_missing_keywords.sh
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+---
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## 4. Menghasilkan Laporan Executive Summary (Word & Excel)
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Setelah pengujian dijalankan, Anda dapat membuat ulang laporan ringkasan eksekutif secara otomatis:
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```bash
+# Generate laporan Excel
+python3 scripts/generate_summary_xlsx.py
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+# Generate laporan Word
+python3 scripts/generate_summary_docx.py
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Laporan akan diperbarui pada direktori `docs/`:
+- `docs/Summary_Hasil_Testing_PB172645152602YA_drpulltelkomsel.xlsx`
+- `docs/Summary_Hasil_Testing_drpulltelkomsel_v2.0.0.docx`
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+---
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## 5. Lokasi Berkas Hasil & Log Pengujian
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+| Berkas | Keterangan |
+| :--- | :--- |
+| `results/log.html` | Log interaktif Robot Framework (lengkap dengan payload dump chunked) |
+| `results/report.html` | Ringkasan visual eksekusi pengujian |
+| `results/output.xml` | XML log mesin Robot Framework untuk integrasi CI/CD |
+| `testcase.csv` | Tabel 12 kolom resmi hasil pengujian (Status, Actual Result, Artifact log) |
+| `doc/testcase.csv` | Salinan terarsip dari `testcase.csv` |
+| `bin/log/` | Log aplikasi Java SUT (`drpulltelkomsel.debug.log`, `out-drpulltelkomsel.log`) |
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+---
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## 6. Detail Validasi TC-035 (End-to-End Integration)
 
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+TC-035 membuktikan 6 kriteria penerimaan tanpa asumsi dan tanpa celah *false positive*:
+1. **Identitas Konsisten**: `messageid` unik $\rightarrow$ ACK Transmitter $\rightarrow$ MongoDB `_id` & `provider_trxid` $\rightarrow$ Mock Telkomsel $\rightarrow$ Queue DR $\rightarrow$ Queue SQL $\rightarrow$ MongoDB RESOLVED.
+2. **Secret Eksklusif MySQL**: Menggunakan pasangan `INTEG_APP_035:INTEG_SID_035` dengan secret khusus `SECRET_TC035_UNIQUE` di `apps_config.jns_config`. Signature dibuktikan lolos terhadap secret khusus dan gagal terhadap secret fallback/default.
+3. **Penguncian Dokumen `_id`**: Dokumen awal dikunci melalui `_id` (ObjectId) saat PENDING dan dibuktikan berubah menjadi `RESOLVED` pada `_id` yang sama.
+4. **Pesan Aktual ActiveMQ**: Pesan DR (`status=D`) dan SQL INSERT tertangkap langsung dari antrean ActiveMQ, masing-masing tepat 1 kali tanpa duplikasi.
+5. **Metadata MongoDB Valid**: Dokumen final memuat `resolved_by = "pull"`, serta timestamp `dr_published_at` dan `sql_published_at` bertipe datetime valid pasca-publikasi.
+6. **Isolasi Pengujian**: Data transaksi diisolasi menggunakan ID unik dan dibersihkan saat teardown.

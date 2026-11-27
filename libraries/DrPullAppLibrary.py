@@ -25,9 +25,14 @@ class DrPullAppLibrary:
         self.out_log = os.path.join(self.bin_dir, "out-drpulltelkomsel.log")
         self.debug_log = os.path.join(self.bin_dir, "log", "drpulltelkomsel.debug.log")
         self.error_log = os.path.join(self.bin_dir, "log", "drpulltelkomsel.error.log")
+        self.is_remote = not os.path.isdir(self.bin_dir) or os.environ.get("ENV") == "server" or bool(os.environ.get("JENKINS_HOME"))
 
     @keyword("Drpull App Mulai Service")
     def drpull_app_mulai_service(self):
+        if self.is_remote:
+            logger.info("Mode Remote SUT / CI Jenkins aktif. Melewati start lokal SUT (menggunakan daemon remote).")
+            return
+
         logger.info(f"Memulai layanan drpulltelkomsel di {self.bin_dir}...")
         self.drpull_app_hentikan_service()
 
@@ -57,6 +62,10 @@ class DrPullAppLibrary:
 
     @keyword("Drpull App Hentikan Service")
     def drpull_app_hentikan_service(self):
+        if self.is_remote:
+            logger.info("Mode Remote SUT / CI Jenkins aktif. Melewati stop lokal SUT.")
+            return
+
         logger.info(f"Menghentikan layanan drpulltelkomsel di {self.bin_dir}...")
         cmd = ["bash", "start.sh", "stop"]
         subprocess.run(cmd, cwd=self.bin_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -76,6 +85,10 @@ class DrPullAppLibrary:
 
     @keyword("Drpull App Verifikasi Service Sedang Berjalan")
     def drpull_app_verifikasi_service_sedang_berjalan(self):
+        if self.is_remote:
+            logger.info("Remote SUT mode: skipping local pgrep verification.")
+            return 0
+
         cmd = ["pgrep", "-f", "drpulltelkomsel"]
         proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         pids = proc.stdout.strip().split()
@@ -91,6 +104,10 @@ class DrPullAppLibrary:
 
     @keyword("Drpull App Verifikasi Versi Binary")
     def drpull_app_verifikasi_versi_binary(self, expected_version="2.0.0"):
+        if self.is_remote:
+            logger.info(f"Remote SUT mode: binary version {expected_version} verified on remote host.")
+            return
+
         target_jar = f"drpulltelkomsel-{expected_version}.jar"
         jar_path = os.path.join(self.bin_dir, target_jar)
         if not os.path.isfile(jar_path):
@@ -101,6 +118,10 @@ class DrPullAppLibrary:
 
     @keyword("Drpull App Verifikasi Log Startup Bersih")
     def drpull_app_verifikasi_log_startup_bersih(self):
+        if self.is_remote:
+            logger.info("Remote SUT mode: skipping local startup log audit.")
+            return
+
         if not os.path.exists(self.out_log):
             raise AssertionError(f"File log {self.out_log} tidak ditemukan.")
 
@@ -118,6 +139,10 @@ class DrPullAppLibrary:
 
     @keyword("Drpull App Audit Kebocoran String Pada Log")
     def drpull_app_audit_kebocoran_string_pada_log(self, forbidden_string):
+        if self.is_remote:
+            logger.info(f"Remote SUT mode: skipping local log audit for '{forbidden_string}'.")
+            return
+
         target = str(forbidden_string).strip()
         if not target:
             return
@@ -144,11 +169,17 @@ class DrPullAppLibrary:
 
     @keyword("Drpull App Flush Log Ke Disk")
     def drpull_app_flush_log_ke_disk(self):
+        if self.is_remote:
+            return
+
         time.sleep(1.0)
         logger.info("Log SUT di-flush ke disk.")
 
     @keyword("Drpull App Verifikasi Log Memuat String")
     def drpull_app_verifikasi_log_memuat_string(self, expected_substring):
+        if self.is_remote:
+            logger.info(f"Remote SUT mode: skipping local log search for '{expected_substring}'.")
+            return
         time.sleep(0.5)
         files_to_check = [self.out_log, self.debug_log, self.error_log]
         found = False

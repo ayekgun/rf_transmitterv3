@@ -12,6 +12,7 @@ import hmac
 import json
 import os
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -346,6 +347,21 @@ class MockHandler(BaseHTTPRequestHandler):
                 self._send_json(200, {"status": "ok", "trx_id": trx_id})
             else:
                 self._send_error(400, 400, "Missing trx_id")
+            return
+
+        if path == "/mock-ctrl/sut/restart":
+            start_script = "/var/opt/JNS6.5/DrPullTelkomsel/start.sh"
+            cwd_dir = "/var/opt/JNS6.5/DrPullTelkomsel"
+            cmd_stop = ["bash", start_script, "stop"]
+            cmd_start = ["bash", start_script, "start"]
+            try:
+                subprocess.run(cmd_stop, cwd=cwd_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
+                time.sleep(2)
+                proc = subprocess.run(cmd_start, cwd=cwd_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
+                time.sleep(6)
+                self._send_json(200, {"status": "ok", "message": "SUT restarted successfully"})
+            except Exception as e:
+                self._send_error(500, 500, f"Failed to restart SUT: {e}")
             return
 
         self._send_error(404, 404, "Unknown control path")

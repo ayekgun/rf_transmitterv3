@@ -66,3 +66,8 @@ Bersihkan Konteks Pengujian
     Mock Telkomsel Set Secret    ${DEFAULT_CLIENT_SECRET}
     Mock Telkomsel Set Secret Map    ${DEFAULT_CLIENT_SECRETS_JSON}
     Mock Telkomsel Set Virtual Clock Delta    ${None}
+
+Bersihkan Dan Pulihkan Konfigurasi Mutasi SUT
+    [Documentation]    Teardown khusus untuk test case mutasi konfigurasi: pulihkan MySQL dan trigger restart SUT agar normal kembali.
+    Bersihkan Konteks Pengujian
+    Drpull App Restart Service

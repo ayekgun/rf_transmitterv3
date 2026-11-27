@@ -162,15 +162,6 @@ TC-018 — Penghentian Transaksi Tanpa Identitas SID Tanpa Melakukan Panggilan J
     And Catatan kesalahan menyebutkan kredensial tidak ditemukan pada dokumen
     And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor
 
-TC-019 — Penghentian Transaksi Tanpa Kunci Rahasia Terdaftar Tanpa Melakukan Panggilan Jaringan
-    [Tags]    P0    TC-019    Pilar-3    negative    zero_http_call
-    Given Transaksi memiliki appsid dan sid lengkap namun tidak terdaftar pada konfigurasi kunci rahasia
-    And Konfigurasi kunci rahasia cadangan default dalam kondisi kosong
-    When Sistem mencoba memproses transaksi tersebut
-    Then Transaksi seketika diubah statusnya menjadi GIVE_UP
-    And Catatan kesalahan menyebutkan kunci rahasia klien tidak ditemukan
-    And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor
-
 TC-020 — Audit Kerahasiaan Kredensial Sensitif pada Seluruh Berkas Log Sistem
     [Tags]    P0    TC-020    Pilar-2    security    credential_audit
     Given Seluruh rangkaian pengujian penarikan status telah selesai dijalankan
@@ -208,22 +199,6 @@ TC-024 — [Mock Contract Guard] Penegakan Aturan Mock Server Menolak Parameter 
     Then Server simulasi menolak permintaan tersebut dengan status kode HTTP 400 Bad Request
     And Isi balasan memuat kode kesalahan 2400 sesuai spesifikasi baku
 
-TC-025 — Ketahanan Sistem Terhadap Kesalahan Penulisan Alamat URL Vendor
-    [Tags]    P2    TC-025    Pilar-4    resilience    configuration_safety
-    Given Alamat endpoint vendor pada konfigurasi database dituliskan dengan format rusak tanpa skema protokol
-    And Terdapat transaksi SMS berstatus PENDING pada database
-    When Sistem memproses transaksi menggunakan alamat endpoint yang rusak tersebut
-    Then Transaksi dijadwalkan ulang dengan status PENDING dan catatan kesalahan tercatat di log
-    And Aplikasi tetap berjalan lancar dan proses pemeriksaan transaksi lainnya tidak terhenti
-
-TC-026 — Penanganan Operasional Aman Saat Konfigurasi Kunci Rahasia Kosong Total
-    [Tags]    P2    TC-026    Pilar-3    negative    configuration_safety
-    Given Basis data konfigurasi tidak memiliki rekaman kunci rahasia sama sekali
-    And Terdapat transaksi SMS berstatus PENDING pada database
-    When Layanan DR Pull dijalankan dan memproses transaksi tersebut
-    Then Inisialisasi layanan berhasil berjalan lancar tanpa mengalami kegagalan fatal
-    And Transaksi yang diperiksa diubah statusnya menjadi GIVE_UP karena ketiadaan kunci rahasia
-
 TC-027 — Validasi Batas Toleransi Waktu Tanda Tangan Tepat Plus Minus Tiga Ratus Detik Berhasil
     [Tags]    P1    TC-027    Pilar-2    security    timestamp_boundary
     Given Transaksi SMS siap dilakukan pemeriksaan status
@@ -253,18 +228,6 @@ TC-030 — Penanganan Gangguan Gerbang Jaringan Vendor 502 Bad Gateway Sebagai K
     Then Transaksi tidak dinyatakan gagal permanen melainkan tetap berstatus PENDING
     And Riwayat jumlah percobaan bertambah dan waktu pemeriksaan berikutnya dijadwalkan ulang
     And Tidak ada pesan laporan pengiriman yang diteruskan ke sistem hilir
-
-TC-031 — Penanganan Kegagalan Parsial Antrean SQL dan Pencegahan Pengiriman Ulang Otomatis
-    [Tags]    P1    TC-031    Pilar-4    resilience    downstream_failure_handling
-    Given Konfigurasi antrean SQL disiapkan mengalami penolakan pengiriman broker
-    And Terdapat transaksi SMS berstatus PENDING siap diperiksa dengan hasil Delivered
-    When Layanan DR Pull memproses pemeriksaan status transaksi tersebut
-    Then Pesan laporan DR berhasil dikirim tepat satu kali ke antrean jns.dr.drrealhandler
-    And Pengiriman laporan ke antrean SQL gagal ditolak oleh broker
-    And Layanan SUT mencatat kegagalan publikasi parsial dan perlunya investigasi manual pada log
-    And Status dokumen transaksi tertahan pada status PUBLISHING di database MongoDB
-    And Dokumen tidak diproses ulang pada siklus pemindaian berikutnya dan tidak terjadi duplikasi pesan
-    And Layanan SUT tetap berjalan normal tanpa mengalami crash
 
 TC-032 — Isolasi Pemrosesan Transaksi dalam Satu Siklus Batch Pemindaian Bersama
     [Tags]    P1    TC-032    Pilar-4    resilience    batch_isolation
@@ -302,3 +265,44 @@ TC-035 — Integrasi Pengiriman SMS Transmitter Telkomsel V2 Hingga Penyelesaian
     And Perintah pembaruan basis data SQL diteruskan ke antrean database tepat satu kali untuk transaksi tersebut
     And Status akhir dokumen transaksi pada MongoDB diperbarui menjadi RESOLVED
     And Seluruh layanan integrasi tetap berjalan normal tanpa mengalami crash maupun duplikasi laporan
+
+TC-019 — Penghentian Transaksi Tanpa Kunci Rahasia Terdaftar Tanpa Melakukan Panggilan Jaringan
+    [Tags]    P0    TC-019    Pilar-3    negative    zero_http_call    config_mutation
+    [Teardown]    Bersihkan Dan Pulihkan Konfigurasi Mutasi SUT
+    Given Transaksi memiliki appsid dan sid lengkap namun tidak terdaftar pada konfigurasi kunci rahasia
+    And Konfigurasi kunci rahasia cadangan default dalam kondisi kosong
+    When Sistem mencoba memproses transaksi tersebut
+    Then Transaksi seketika diubah statusnya menjadi GIVE_UP
+    And Catatan kesalahan menyebutkan kunci rahasia klien tidak ditemukan
+    And Terbukti sistem sama sekali tidak mengirimkan permintaan HTTP keluar ke server vendor
+
+TC-025 — Ketahanan Sistem Terhadap Kesalahan Penulisan Alamat URL Vendor
+    [Tags]    P2    TC-025    Pilar-4    resilience    configuration_safety    config_mutation
+    [Teardown]    Bersihkan Dan Pulihkan Konfigurasi Mutasi SUT
+    Given Alamat endpoint vendor pada konfigurasi database dituliskan dengan format rusak tanpa skema protokol
+    And Terdapat transaksi SMS berstatus PENDING pada database
+    When Sistem memproses transaksi menggunakan alamat endpoint yang rusak tersebut
+    Then Transaksi dijadwalkan ulang dengan status PENDING dan catatan kesalahan tercatat di log
+    And Aplikasi tetap berjalan lancar dan proses pemeriksaan transaksi lainnya tidak terhenti
+
+TC-026 — Penanganan Operasional Aman Saat Konfigurasi Kunci Rahasia Kosong Total
+    [Tags]    P2    TC-026    Pilar-3    negative    configuration_safety    config_mutation
+    [Teardown]    Bersihkan Dan Pulihkan Konfigurasi Mutasi SUT
+    Given Basis data konfigurasi tidak memiliki rekaman kunci rahasia sama sekali
+    And Terdapat transaksi SMS berstatus PENDING pada database
+    When Layanan DR Pull dijalankan dan memproses transaksi tersebut
+    Then Inisialisasi layanan berhasil berjalan lancar tanpa mengalami kegagalan fatal
+    And Transaksi yang diperiksa diubah statusnya menjadi GIVE_UP karena ketiadaan kunci rahasia
+
+TC-031 — Penanganan Kegagalan Parsial Antrean SQL dan Pencegahan Pengiriman Ulang Otomatis
+    [Tags]    P1    TC-031    Pilar-4    resilience    downstream_failure_handling    config_mutation
+    [Teardown]    Bersihkan Dan Pulihkan Konfigurasi Mutasi SUT
+    Given Konfigurasi antrean SQL disiapkan mengalami penolakan pengiriman broker
+    And Terdapat transaksi SMS berstatus PENDING siap diperiksa dengan hasil Delivered
+    When Layanan DR Pull memproses pemeriksaan status transaksi tersebut
+    Then Pesan laporan DR berhasil dikirim tepat satu kali ke antrean jns.dr.drrealhandler
+    And Pengiriman laporan ke antrean SQL gagal ditolak oleh broker
+    And Layanan SUT mencatat kegagalan publikasi parsial dan perlunya investigasi manual pada log
+    And Status dokumen transaksi tertahan pada status PUBLISHING di database MongoDB
+    And Dokumen tidak diproses ulang pada siklus pemindaian berikutnya dan tidak terjadi duplikasi pesan
+    And Layanan SUT tetap berjalan normal tanpa mengalami crash

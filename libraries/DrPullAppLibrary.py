@@ -6,10 +6,12 @@ Manages starting, stopping, verifying PID, artifact version, startup logs,
 and auditing log files for credential leakage.
 """
 
+import json
 import os
 import re
 import subprocess
 import time
+import urllib.request
 from robot.api import logger
 from robot.api.deco import keyword
 from LogHelper import _log_chunked
@@ -25,7 +27,8 @@ class DrPullAppLibrary:
         self.out_log = os.path.join(self.bin_dir, "out-drpulltelkomsel.log")
         self.debug_log = os.path.join(self.bin_dir, "log", "drpulltelkomsel.debug.log")
         self.error_log = os.path.join(self.bin_dir, "log", "drpulltelkomsel.error.log")
-        self.is_remote = not os.path.isdir(self.bin_dir) or os.environ.get("ENV") == "server" or bool(os.environ.get("JENKINS_HOME"))
+        mock_host = os.environ.get("MOCK_HOST", "192.168.181.51")
+        self.is_remote = mock_host not in ("127.0.0.1", "localhost") or not os.path.isdir(self.bin_dir) or os.environ.get("ENV") == "server" or bool(os.environ.get("JENKINS_HOME")) or bool(os.environ.get("BUILD_NUMBER"))
 
     @keyword("Drpull App Mulai Service")
     def drpull_app_mulai_service(self):
@@ -79,6 +82,22 @@ class DrPullAppLibrary:
     @keyword("Drpull App Restart Service")
     def drpull_app_restart_service(self):
         logger.info("Melakukan restart layanan drpulltelkomsel...")
+        if self.is_remote:
+            mock_host = os.environ.get("MOCK_HOST", "192.168.181.51")
+            mock_port = int(os.environ.get("MOCK_PORT", 8095))
+            url = f"http://{mock_host}:{mock_port}/mock-ctrl/sut/restart"
+            try:
+                req = urllib.request.Request(url, data=b"{}", headers={"Content-Type": "application/json"}, method="POST")
+                with urllib.request.urlopen(req, timeout=25) as resp:
+                    res = json.loads(resp.read().decode("utf-8"))
+                    logger.info(f"Remote SUT restart result: {res}")
+                time.sleep(2.0)
+                logger.info("Restart layanan remote drpulltelkomsel selesai.")
+                return
+            except Exception as e:
+                logger.warn(f"Gagal memicu restart remote SUT via mock control: {e}")
+                return
+
         self.drpull_app_hentikan_service()
         self.drpull_app_mulai_service()
         logger.info("Restart layanan drpulltelkomsel selesai.")
